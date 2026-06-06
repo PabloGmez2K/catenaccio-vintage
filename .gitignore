@@ -1,0 +1,50 @@
+# Lafabrica project .gitignore
+
+# Secrets / env
+.env
+.env.*
+*.env
+*.key
+*.pem
+*.secret
+secrets/
+credentials/
+
+# Agent / IDE state
+.claude/
+.cursor/
+.vscode/
+
+# Node / web
+node_modules/
+.next/
+dist/
+build/
+.cache/
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Data (only .gitignore + .md tracked)
+data/*
+!data/.gitignore
+!data/*.md
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.swp
+
+# Sueltos en raíz: imágenes deben vivir en public/ o docs/assets/
+/*.png
+/*.jpg
+/*.jpeg
+/*.gif
+/*.webp
+
+# internal-suite extras
+exports/
+private/

@@ -1,0 +1,33 @@
+# data/ — archivos de datos del proyecto
+# Esta carpeta contiene datos locales que NO van al repo.
+
+# Ignorar todo por defecto
+*
+
+# Excepciones — trackear solo lo que tenga sentido versionar
+!.gitignore
+!*.md
+
+# Datos sensibles (nunca al repo)
+*.env
+*.key
+*.pem
+*.secret
+secrets/
+credentials/
+
+# Datos crudos / grandes
+*.csv
+*.json
+*.jsonl
+*.parquet
+*.pickle
+*.pkl
+raw/
+cache/
+tmp/
+
+# Backups
+*.bak
+*.backup
+backup/
