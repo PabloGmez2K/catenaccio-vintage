@@ -20,6 +20,7 @@ Actualizar al cierre de cada sesión. Los ítems completados se mueven a DONE o 
 
 ## NEXT — Próximo mes
 
+- [ ] **SERVER_ACCESS_SAFE_SETUP / SERVER_CONTEXT_CHECK_READONLY** — Diseñar acceso seguro read-only al servidor para verificar estado actual del sitio: versiones reales de plugins, estado post-Elementor Pro, configuración LiteSpeed, salud general. No conectar hasta tener el diseño de acceso aprobado. Pendiente de sesión dedicada.
 - [ ] Sintetizar AS-IS.
 - [ ] Validar AS-IS.
 - [ ] Preparar TARGET_OPTIONS comparando, como mínimo:
@@ -40,7 +41,6 @@ Actualizar al cierre de cada sesión. Los ítems completados se mueven a DONE o 
 ## BLOCKED — No avanzar hasta que...
 
 - [ ] Implementación técnica de nueva arquitectura bloqueada hasta AS-IS validado y TARGET aprobado.
-- [ ] Producción/deploy/WordPress/credenciales bloqueados por SEC-001/SEC-002 pendientes y falta de autorización explícita.
 
 ---
 
@@ -49,3 +49,5 @@ Actualizar al cierre de cada sesión. Los ítems completados se mueven a DONE o 
 | Ítem | Fecha | Sesión |
 |------|-------|--------|
 | Init desde lafabrica-template | 2026-06-06 | Sesión 0 |
+| SEC-001 resuelto — OAuth Google / Nextend Social Login rotado por operador | 2026-06-06 | Sesión 002 |
+| SEC-002 resuelto — WP secret keys rotadas en servidor por operador | 2026-06-06 | Sesión 002 |

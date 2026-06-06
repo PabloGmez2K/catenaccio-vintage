@@ -73,6 +73,28 @@ Registro append-only de todas las validaciones humanas realizadas durante el Dis
 
 ---
 
+### VAL-003 — Resolución manual de SEC-001 y SEC-002 confirmada por operador
+
+**Fecha:** 2026-06-06  
+**Fase del discovery:** Pre-target (SECURITY_CHECK — cierre)  
+**Qué se validó:** Confirmación manual del operador de que SEC-001 y SEC-002 han sido resueltos fuera del repositorio, sin copiar secretos al chat ni al repo.  
+**Documentos actualizados:** `docs/discovery/SECURITY_REVIEW.md` (SEC-001 y SEC-002 → RESUELTO), `docs/discovery/AS_IS_UNDERSTANDING.md` (PROB-01, PROB-02 actualizados), `BACKLOG.md` (bloqueante SEC eliminado)
+
+**Resultado:** RESUELTO — confirmación humana directa
+
+**Confirmación del operador:**
+- SEC-001: Google OAuth / Nextend Social Login fue rotado. El login con Google funciona. El secret antiguo fue retirado o queda fuera de uso. No se copiaron secretos al chat ni al repo.
+- SEC-002: Las WP secret keys de wp-config.php fueron rotadas manualmente en el servidor. WordPress sigue funcionando. El operador puede iniciar sesión. No se copiaron claves al chat ni al repo.
+
+**Notas del agente:**
+- Ningún secreto ni credencial fue solicitado, leído ni copiado durante esta sesión.
+- La confirmación es de responsabilidad del operador — el agente no verificó la rotación técnicamente ni accedió al servidor ni a Google Cloud Console.
+- La dependencia de seguridad que bloqueaba el avance a TARGET_OPTIONS queda eliminada.
+
+**Estado del workflow tras esta validación:** DISCOVERY_ABIERTO — bloqueos de seguridad resueltos; AS-IS pendiente de validación humana completa antes de TARGET_OPTIONS
+
+---
+
 ## Checklist de cierre del discovery
 
 El discovery puede cerrarse cuando todos los ítems siguientes están marcados:

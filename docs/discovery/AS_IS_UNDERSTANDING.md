@@ -16,8 +16,11 @@ Comprensión documentada del estado actual del proyecto, construida a partir de 
 
 - Catenaccio Vintage es una tienda WooCommerce de camisetas vintage de fútbol, accesible en `catenacciovintage.com`, operada por Pablo. — fuente: SRC-02
 - La tienda está **activa y en producción** con pagos live habilitados desde el 21/02/2026. — fuente: SRC-02
-- Stack técnico: WordPress 6.x + WooCommerce + Elementor Pro + tema hello-elementor-child, sobre hosting Raiola Networks (LiteSpeed, PHP 8.3, MySQL ~104.8 MB). — fuente: SRC-02
+- Stack técnico: WordPress 7.0 + WooCommerce 10.8.1 + Elementor Pro + tema hello-elementor-child, sobre hosting Raiola Networks (LiteSpeed, PHP 8.3, MariaDB 11.4.10-cll-lve). — fuente: SRC-02; versiones confirmadas por operador 2026-06-06
+- Servidor: Raiola Networks Inicio SSD 2.0, com1014, cPanel 134.0 build 35, Apache 2.4.67, PHP 8.3, Linux x86_64, IP compartida 178.211.133.29. — fuente: confirmado por operador 2026-06-06
 - CDN: QUIC.cloud activo desde 15/02/2026 (DNS migrado a nameservers QUIC.cloud). — fuente: SRC-02
+- Elementor Pro sigue activo en producción, pero la suscripción caduca en unas semanas. Objetivo declarado por el operador: reducir la dependencia de Elementor Pro. — fuente: confirmado por operador 2026-06-06
+- LiteSpeed Cache está activo, pero el operador considera que ralentiza significativamente la web. Objetivo: reconfigurarlo o retirarlo. — fuente: confirmado por operador 2026-06-06
 - Hay ~28 productos publicados a fecha 15/03/2026 (última actualización del CONTEXTO). El objetivo declarado es 100+ productos. — fuente: SRC-02
 - Pasarelas de pago operativas: WooPayments (tarjeta, Google Pay, Apple Pay, Bancontact, iDEAL, Multibanco) + PayPal Business. Pedido real #1556 procesado. — fuente: SRC-02
 - Checkout migrado de Elementor a Checkout Blocks (Gutenberg) el 20-21/02/2026. — fuente: SRC-02
@@ -42,7 +45,7 @@ Comprensión documentada del estado actual del proyecto, construida a partir de 
 - **Elementor Pro cancelado — impacto en el sitio pendiente de verificar**: Elementor Pro era parte del stack AS-IS (page builder, diseño frontend, widgets Pro, templates). La suscripción ha sido cancelada (2026-06-06). El impacto en la web actual —posible degradación de widgets Pro, popups, plantillas premium, capacidades del builder— no está confirmado. No asumir rotura inmediata del sitio: la versión gratuita puede mantener parte de la funcionalidad. Sí considerarlo como driver de arquitectura y factor de coste/fricción a futuro en TARGET_OPTIONS. — **pendiente de validar**
 
 - **La tienda ha tenido actividad después del 15/03/2026**: STOCK.xlsx y varias carpetas de productos en Stock/Original tienen fecha de modificación 19/04/2026. Es probable que se hayan publicado más productos o actualizado el stock entre marzo y abril. — **pendiente de validar**
-- **El "bloqueo anterior" no fue técnico sino de workflow**: la tienda funciona y tiene ventas reales. El bloqueo fue de gestión del contexto: todo el conocimiento disperso en archivos locales y chats sin persistencia entre sesiones, dificultando escalar el proyecto. — **pendiente de validar**
+- **El "bloqueo anterior" no fue técnico sino de workflow**: la tienda funciona y tiene ventas reales. El bloqueo fue principalmente operativo/workflow: Elementor resultaba lento, frágil y lleno de fricción; publicar productos era tedioso; Rank Math no simplificaba suficientemente el SEO. El objetivo actual es migrar Catenaccio hacia un workflow AI-first con Company Brain y lafabrica. — **VALIDADO por operador 2026-06-06**
 - **Migrar de WordPress/WooCommerce puede no ser la decisión correcta**: la inversión en plugins custom, configuración de pagos, SEO activo, 28+ productos publicados y experiencia de usuario validada hace que la migración tenga un coste alto. Requiere evaluación objetiva en TARGET_OPTIONS. — **pendiente de validar**
 - **El inventario físico supera los productos publicados**: hay 30 carpetas en Stock/Original pero solo ~28 productos publicados a 15/03/2026. Probablemente hay stock físico pendiente de publicar. — **pendiente de validar**
 - **La cuenta de Vinted es activa y complementaria**: en CONTEXTO se menciona "4.9★ / 130+ opiniones en Vinted" (tarea #9 del backlog). Vinted parece ser un canal de venta paralelo con tracción. — **pendiente de validar**
@@ -58,6 +61,8 @@ Comprensión documentada del estado actual del proyecto, construida a partir de 
 - **Archivos referenciados en CONTEXTO sección 19 no encontrados en la carpeta legacy**: `_htaccess.md`, `filtro-camisetas.md`, `catenaccio-offcanvas-menu.md`, `resumen-operativo-catenaccio.docx`, `PROMPT_AUDITORIA_WORDPRESS.md`, `PREFERENCIAS_TRABAJO_PABLO.md`, `css-carrito-v6-completo.css`, `snippet-carrito-v2.3.php`. Pueden estar en otra ubicación, haberse eliminado o no haberse guardado en la carpeta legacy. Ver CONF-001. — impacto: bajo (el código real está en el servidor)
 - **Presencia real en Vinted**: número exacto de reseñas actuales, URL del perfil, stock activo en Vinted. — impacto: medio (afecta decisión sobre integración Vinted↔web)
 - **Estado del buscador AJAX móvil**: estaba "en desarrollo" según CONTEXTO sección 13 con pendientes no resueltos (breadcrumbs, estado recientes). No se sabe si fue completado. — impacto: bajo
+
+**Bloque 3 — estado 2026-06-06 (validado por operador):** Las incógnitas anteriores no bloquean la validación del AS-IS. El operador confirma que el AS-IS es suficiente para avanzar. Para cerrar las incógnitas sobre estado real del servidor (versiones efectivas, plugins activos, configuración LiteSpeed, impacto post-Elementor Pro), se planifica una sesión dedicada: `SERVER_CONTEXT_CHECK_READONLY`. Ver tarea en BACKLOG.md.
 
 ---
 
@@ -97,15 +102,15 @@ Comprensión documentada del estado actual del proyecto, construida a partir de 
 
 | Herramienta / sistema | Para qué se usa | Integrado con | Problemas conocidos |
 |----------------------|-----------------|---------------|---------------------|
-| WordPress 6.x | CMS base | WooCommerce, Elementor Pro | — |
-| WooCommerce | Tienda online, catálogo, pedidos | WooPayments, PayPal, LiteSpeed, RankMath | Incompatibilidad con "Objetos caché" (experimental) — no activar |
-| Elementor Pro | Page builder, diseño frontend | WooCommerce, Hello Elementor Child | `woocommerce_product_query` NO intercepta queries de Elementor Loop; usar `pre_get_posts` |
+| WordPress 7.0 | CMS base | WooCommerce, Elementor Pro | — |
+| WooCommerce 10.8.1 | Tienda online, catálogo, pedidos | WooPayments, PayPal, LiteSpeed, RankMath | Incompatibilidad con "Objetos caché" (experimental) — no activar |
+| Elementor Pro | Page builder, diseño frontend | WooCommerce, Hello Elementor Child | Suscripción caduca en semanas; objetivo: reducir dependencia. `woocommerce_product_query` NO intercepta queries de Elementor Loop; usar `pre_get_posts` |
 | Hello Elementor Child | Tema hijo custom | Elementor Pro | functions.php de 62KB con lógica crítica |
-| LiteSpeed Cache | Caché y rendimiento | QUIC.cloud CDN, WooCommerce | UCSS/CSS asíncrono desactivado (pendiente exclusiones) |
+| LiteSpeed Cache | Caché y rendimiento | QUIC.cloud CDN, WooCommerce | Operador considera que ralentiza significativamente la web; objetivo: reconfigurar o retirar. UCSS/CSS asíncrono desactivado (pendiente exclusiones) |
 | QUIC.cloud CDN | CDN y DNS | LiteSpeed | Enable QUIC Backend debe permanecer OFF (causa error 520) |
 | WooPayments | Pagos principales (tarjeta, GPay, APay) | WooCommerce, Stripe | reCAPTCHA v3+v2 configurado |
 | PayPal Business | Pagos secundarios | WooCommerce | "Paga más tarde" desactivado |
-| Raiola Networks | Hosting (LiteSpeed, cPanel, PHP 8.3) | JetBackup 5, Imunify360 | Handler PHP = ea-php81 (ea-php83 da error 403 — NO cambiar) |
+| Raiola Networks Inicio SSD 2.0 | Hosting (LiteSpeed, cPanel 134.0, Apache 2.4.67, PHP 8.3, MariaDB 11.4.10-cll-lve, IP 178.211.133.29) | JetBackup 5, Imunify360 | Handler PHP = ea-php81 (ea-php83 da error 403 — NO cambiar) |
 | APCu (via plugin Pierre Lannoy) | Object cache | WordPress | Redis no disponible en Raiola |
 | RankMath | SEO | WordPress, Google Analytics | — |
 | Google Analytics + Search Console | Métricas y indexación | WordPress, Complianz (GDPR) | GTM gestionado por Complianz — no modificar carga independiente |
@@ -122,10 +127,10 @@ Comprensión documentada del estado actual del proyecto, construida a partir de 
 
 | ID | Problema | Impacto | Fuente | Prioridad |
 |----|---------|---------|--------|-----------|
-| PROB-01 | WP secret keys de wp-config.php expuestas en chat de sesión el 15/03/2026 — pendiente confirmar si fueron renovadas | Seguridad: riesgo si las claves siguen activas | SRC-02 | Alta |
-| PROB-02 | Credenciales OAuth de Google (client ID + secret) en archivo de texto plano: `Plugins/Nextend Social Login/usuario y clave secreta google.txt` | Seguridad: riesgo si el OAuth sigue activo | SRC-01 | Alta |
+| PROB-01 | WP secret keys de wp-config.php expuestas en chat de sesión el 15/03/2026 | Seguridad: **RESUELTO** — rotadas manualmente por operador el 2026-06-06 (SEC-002) | SRC-02 | ~~Alta~~ Cerrado |
+| PROB-02 | Credenciales OAuth de Google (client ID + secret) en archivo de texto plano: `Plugins/Nextend Social Login/usuario y clave secreta google.txt` | Seguridad: **RESUELTO** — OAuth rotado por operador el 2026-06-06 (SEC-001) | SRC-01 | ~~Alta~~ Cerrado |
 
-**PROB-01 y PROB-02 tienen plan de acción detallado en `docs/discovery/SECURITY_REVIEW.md` (SEC-002 y SEC-001 respectivamente). El discovery no debe avanzar a TARGET_OPTIONS hasta resolver ambos riesgos o documentar el riesgo residual aceptado.**
+**PROB-01 y PROB-02 resueltos. Ver `docs/discovery/SECURITY_REVIEW.md` y `docs/discovery/VALIDATION_RECORD.md` (VAL-003) para detalle. El bloqueo a TARGET_OPTIONS por seguridad queda eliminado.**
 | PROB-03 | Páginas legales pendientes de revisión y creación (política de devoluciones, condiciones generales, aviso legal, privacidad) — obligatorio UE | Legal/compliance | SRC-02 | Alta |
 | PROB-04 | Stock publicado (~28 productos) muy por debajo del objetivo declarado (100+) — el crecimiento del catálogo es el principal bloqueante de escala | Negocio | SRC-02 | Alta |
 | PROB-05 | Crawler de Facebook puede saturar el servidor con peticiones masivas a URLs de filtros (ocurrió 15/03/2026, causó 2h downtime) | Rendimiento/disponibilidad | SRC-02 | Media |
@@ -156,7 +161,7 @@ Comprensión documentada del estado actual del proyecto, construida a partir de 
 - **No asumir que la tienda está inactiva o sin ventas** — está live, con pedidos reales procesados y pagos activados desde febrero 2026.
 - **No asumir que migrar de WordPress es la decisión correcta** — hay inversión significativa en plugins custom, configuración de pagos, SEO activo y 28+ productos publicados. La migración tendría coste real. Evaluar en TARGET_OPTIONS con evidencia.
 - **No asumir que el estado del CONTEXTO (15/03/2026) refleja el estado actual** — hay ~3 meses sin documentar. Pueden existir cambios en productos, configuración o incidentes.
-- **No asumir que las WP secret keys fueron renovadas** — estaban pendientes según CONTEXTO tarea #42.
+- **No asumir que las WP secret keys siguen comprometidas** — el operador confirmó el 2026-06-06 que fueron rotadas manualmente en el servidor (SEC-002 resuelto). La tarea #42 del CONTEXTO quedó cerrada.
 - **No asumir que los archivos listados en CONTEXTO sección 19 están presentes en la carpeta legacy** — varios no se encontraron. El código real está en el servidor, no en la carpeta local.
 - **No asumir que Vinted es un canal menor** — 4.9★ con 130+ reseñas indica actividad real y reputación construida.
 

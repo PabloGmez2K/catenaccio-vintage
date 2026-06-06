@@ -4,7 +4,7 @@ Revisión de riesgos de seguridad detectados durante el Discovery Intake. Este d
 
 **Proyecto:** Catenaccio Vintage  
 **Fecha:** 2026-06-06  
-**Estado:** PENDIENTE DE ACCIÓN — riesgos documentados, resolución no confirmada  
+**Estado:** RIESGOS RESUELTOS — SEC-001 y SEC-002 confirmados como resueltos por el operador el 2026-06-06  
 **Relacionado con:** `AS_IS_UNDERSTANDING.md` (PROB-01, PROB-02), `SOURCE_REGISTRY.md` (SRC-BLK-01)
 
 ---
@@ -13,9 +13,10 @@ Revisión de riesgos de seguridad detectados durante el Discovery Intake. Este d
 
 ### SEC-001 — Credenciales OAuth de Google (Nextend Social Login) en archivo de texto plano
 
-**Estado:** PENDIENTE DE ACCIÓN  
+**Estado:** RESUELTO — 2026-06-06  
 **Severidad:** Alta  
-**Detectado:** 2026-06-06 (discovery inicial, VAL-001)
+**Detectado:** 2026-06-06 (discovery inicial, VAL-001)  
+**Resuelto:** 2026-06-06, confirmación manual del operador. Google OAuth / Nextend Social Login fue rotado. El login con Google funciona. El secret antiguo fue retirado o queda fuera de uso. No se copiaron secretos al chat ni al repo.
 
 #### Qué se sabe
 
@@ -72,9 +73,10 @@ Ejecutar los siguientes pasos en este orden:
 
 ### SEC-002 — WP secret keys de wp-config.php posiblemente expuestas
 
-**Estado:** PENDIENTE DE ACCIÓN  
+**Estado:** RESUELTO — 2026-06-06  
 **Severidad:** Alta  
-**Detectado:** 2026-06-06 (discovery inicial, VAL-001; referenciado en tarea #42 del backlog)
+**Detectado:** 2026-06-06 (discovery inicial, VAL-001; referenciado en tarea #42 del backlog)  
+**Resuelto:** 2026-06-06, confirmación manual del operador. Las WP secret keys de wp-config.php fueron rotadas manualmente en el servidor. WordPress sigue funcionando. El operador puede iniciar sesión. No se copiaron claves al chat ni al repo.
 
 #### Qué se sabe
 
@@ -133,8 +135,8 @@ Ejecutar los siguientes pasos:
 
 | ID | Riesgo | Severidad | Estado | Acción requerida |
 |----|--------|-----------|--------|-----------------|
-| SEC-001 | Credenciales OAuth Google (Nextend Social Login) en texto plano | Alta | PENDIENTE | Revocar en Google Cloud Console + eliminar archivo local |
-| SEC-002 | WP secret keys de wp-config.php posiblemente expuestas desde 15/03/2026 | Alta | PENDIENTE | Generar nuevas claves en api.wordpress.org y actualizar wp-config.php en servidor |
+| SEC-001 | Credenciales OAuth Google (Nextend Social Login) en texto plano | Alta | **RESUELTO** — 2026-06-06 | OAuth rotado por operador; login con Google funciona; secret antiguo fuera de uso. |
+| SEC-002 | WP secret keys de wp-config.php posiblemente expuestas desde 15/03/2026 | Alta | **RESUELTO** — 2026-06-06 | Keys rotadas en servidor por operador; WordPress y login de administrador funcionan correctamente. |
 
 ---
 
@@ -152,3 +154,5 @@ Ejecutar los siguientes pasos:
 | Fecha | Acción | Por |
 |-------|--------|-----|
 | 2026-06-06 | Documento creado — riesgos SEC-001 y SEC-002 documentados a partir del discovery inicial | Claude Code (discovery) |
+| 2026-06-06 | SEC-001 marcado RESUELTO — confirmación manual del operador: OAuth Google / Nextend Social Login rotado, login con Google funciona, secret antiguo fuera de uso | Operador (manual) |
+| 2026-06-06 | SEC-002 marcado RESUELTO — confirmación manual del operador: WP secret keys rotadas en servidor, WordPress y acceso de administrador funcionan correctamente | Operador (manual) |
