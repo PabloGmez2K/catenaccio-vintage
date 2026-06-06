@@ -1,3 +1,12 @@
+> **SUPERSEDIDO — 2026-06-06**
+> Este documento ha sido reemplazado por:
+> - `orchestrator/CHATGPT_PROJECT_INSTRUCTIONS.md` — instrucciones del ChatGPT Project (campo Instructions, formato compacto con GitHub obligatorio)
+> - `orchestrator/CHATGPT_PROJECT_FIRST_MESSAGE.md` — primer mensaje de activación
+>
+> No eliminar este archivo. Conservado como historial de la versión anterior del orquestador.
+
+---
+
 # Orquestador operativo — Catenaccio Vintage
 ## Mensaje inicial del ChatGPT Project
 
