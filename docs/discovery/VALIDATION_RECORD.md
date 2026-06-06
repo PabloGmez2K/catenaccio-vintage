@@ -50,6 +50,29 @@ Registro append-only de todas las validaciones humanas realizadas durante el Dis
 
 ---
 
+### VAL-002 — Revisión de seguridad pre-target ejecutada
+
+**Fecha:** 2026-06-06  
+**Fase del discovery:** Pre-target (SECURITY_CHECK)  
+**Qué se validó:** Análisis de los dos riesgos de seguridad detectados durante VAL-001. Creación de `SECURITY_REVIEW.md` con plan de acción manual para la persona usuaria.  
+**Documento generado:** `docs/discovery/SECURITY_REVIEW.md` — estado: PENDIENTE DE ACCIÓN  
+**Fuentes consultadas:** SOURCE_REGISTRY.md (SRC-BLK-01), AS_IS_UNDERSTANDING.md (PROB-01, PROB-02)
+
+**Resultado:** PENDIENTE DE RESOLUCIÓN HUMANA — acciones requeridas fuera del repo
+
+**Riesgos documentados:**
+- SEC-001: Credenciales OAuth Google (Nextend Social Login) en archivo de texto plano. Acción: revocar en Google Cloud Console.
+- SEC-002: WP secret keys posiblemente expuestas en chat de sesión el 15/03/2026. Acción: generar nuevas claves y actualizar wp-config.php en servidor.
+
+**Notas del agente:**
+- Ningún secreto ni credencial fue abierto, leído ni copiado al repo durante esta revisión.
+- El conocimiento de los riesgos proviene de nombres de archivo y referencias textuales del CONTEXTO, no de la lectura de los archivos de credenciales.
+- El discovery NO debe avanzar a TARGET_OPTIONS hasta que la persona usuaria confirme haber resuelto SEC-001 y SEC-002, o haber evaluado conscientemente el riesgo residual.
+
+**Estado del workflow tras esta validación:** DISCOVERY_ABIERTO — riesgos de seguridad documentados, pendientes de resolución antes de avanzar
+
+---
+
 ## Checklist de cierre del discovery
 
 El discovery puede cerrarse cuando todos los ítems siguientes están marcados:

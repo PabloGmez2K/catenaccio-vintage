@@ -122,6 +122,8 @@ Comprensión documentada del estado actual del proyecto, construida a partir de 
 |----|---------|---------|--------|-----------|
 | PROB-01 | WP secret keys de wp-config.php expuestas en chat de sesión el 15/03/2026 — pendiente confirmar si fueron renovadas | Seguridad: riesgo si las claves siguen activas | SRC-02 | Alta |
 | PROB-02 | Credenciales OAuth de Google (client ID + secret) en archivo de texto plano: `Plugins/Nextend Social Login/usuario y clave secreta google.txt` | Seguridad: riesgo si el OAuth sigue activo | SRC-01 | Alta |
+
+**PROB-01 y PROB-02 tienen plan de acción detallado en `docs/discovery/SECURITY_REVIEW.md` (SEC-002 y SEC-001 respectivamente). El discovery no debe avanzar a TARGET_OPTIONS hasta resolver ambos riesgos o documentar el riesgo residual aceptado.**
 | PROB-03 | Páginas legales pendientes de revisión y creación (política de devoluciones, condiciones generales, aviso legal, privacidad) — obligatorio UE | Legal/compliance | SRC-02 | Alta |
 | PROB-04 | Stock publicado (~28 productos) muy por debajo del objetivo declarado (100+) — el crecimiento del catálogo es el principal bloqueante de escala | Negocio | SRC-02 | Alta |
 | PROB-05 | Crawler de Facebook puede saturar el servidor con peticiones masivas a URLs de filtros (ocurrió 15/03/2026, causó 2h downtime) | Rendimiento/disponibilidad | SRC-02 | Media |
