@@ -48,3 +48,7 @@ Thumbs.db
 # internal-suite extras
 exports/
 private/
+
+# Discovery Intake private/raw sources
+intake/
+
