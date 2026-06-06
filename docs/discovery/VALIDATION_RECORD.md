@@ -1,11 +1,11 @@
-# VALIDATION_RECORD — [NOMBRE_PROYECTO]
+# VALIDATION_RECORD — Catenaccio Vintage
 
-Registro append-only de todas las validaciones humanas realizadas durante el Discovery Intake. Cada entrada documenta qué se validó, por quién, cuándo y con qué resultado.
+Registro append-only de todas las validaciones humanas realizadas durante el Discovery Intake.
 
 **Este registro no se edita hacia atrás.** Si una validación anterior se revisa, se añade una nueva entrada.
 
-**Proyecto:** [NOMBRE_PROYECTO]  
-**Última actualización:** [FECHA]
+**Proyecto:** Catenaccio Vintage  
+**Última actualización:** 2026-06-06
 
 ---
 
@@ -20,28 +20,33 @@ Registro append-only de todas las validaciones humanas realizadas durante el Dis
 | `SEED_APROBADO` | El SEED fue revisado y aprobado para implementación |
 | `DISCOVERY_CERRADO` | `lafabrica new` ejecutado; el discovery está completo |
 
-**Estado actual del workflow:** [DISCOVERY_ABIERTO]
+**Estado actual del workflow:** DISCOVERY_ABIERTO
 
 ---
 
 ## Registro de validaciones
 
-### VAL-001 — [Título descriptivo de lo validado]
+### VAL-001 — Discovery inicial read-only ejecutado sobre carpeta legacy
 
-**Fecha:** [FECHA]  
-**Fase del discovery:** [AS-IS / TARGET / SEED / OTRO]  
-**Qué se validó:** [descripción concreta de lo que se revisó]  
-**Documento validado:** [`AS_IS_UNDERSTANDING.md` / `TARGET_OPTIONS.md` / `PROJECT_SEED.md` / otro]  
-**Fuente principal:** [SRC-XX o "información directa de la persona usuaria"]
+**Fecha:** 2026-06-06  
+**Fase del discovery:** AS-IS (construcción del borrador)  
+**Qué se validó:** Inventario completo de la carpeta legacy `C:\Users\USUARIO\Catenaccio Vintage` realizado en modo read-only. Lectura del documento CONTEXTO_PROYECTO_CATENACCIO.md y listado de estructura de directorios y subfuentes. Primer borrador de AS-IS generado.  
+**Documento validado:** `AS_IS_UNDERSTANDING.md` — estado: BORRADOR  
+**Fuente principal:** SRC-01 (carpeta legacy), SRC-02 (CONTEXTO_PROYECTO_CATENACCIO.md)
 
-**Resultado:** [APROBADO / APROBADO_CON_CAMBIOS / RECHAZADO]
+**Resultado:** PENDIENTE DE VALIDACIÓN HUMANA
 
-**Cambios tras la validación:**  
-[Si el resultado fue APROBADO_CON_CAMBIOS: qué se cambió en los documentos afectados.  
-Si fue RECHAZADO: qué bloqueó la aprobación y qué debe resolverse.  
-Si fue APROBADO sin cambios: "ningún cambio necesario".]
+**Notas del agente:**
+- La tienda es **LIVE** en catenacciovintage.com con pagos activos. No es un proyecto abandonado.
+- Se detectó un archivo de credenciales sensibles: `Plugins/Nextend Social Login/usuario y clave secreta google.txt` — registrado como SRC-BLK-01. No fue abierto. Requiere atención.
+- El CONTEXTO del proyecto (SRC-02) tiene fecha 15/03/2026; hay actividad hasta al menos 19/04/2026 (STOCK.xlsx). Los últimos ~6 semanas no están documentados.
+- AS-IS en estado BORRADOR — pendiente de revisión y aprobación por la persona usuaria antes de avanzar a TARGET_OPTIONS.
+- No se aprueba ninguna opción TARGET en este punto.
+- No se copió ningún archivo bruto al repo.
 
-**Estado del workflow tras esta validación:** [nuevo estado]
+**Cambios tras la validación:** pendiente — la persona usuaria debe revisar `AS_IS_UNDERSTANDING.md` y cambiar el estado a `VALIDADO_POR_USUARIO` cuando esté de acuerdo.
+
+**Estado del workflow tras esta validación:** DISCOVERY_ABIERTO (sin cambio — requiere validación humana para avanzar)
 
 ---
 
@@ -59,5 +64,5 @@ El discovery puede cerrarse cuando todos los ítems siguientes están marcados:
 - [ ] `VALIDATION_RECORD.md`: al menos una entrada VAL para AS-IS y una para TARGET.
 - [ ] Estado del workflow: `SEED_APROBADO`.
 
-**Fecha de cierre del discovery:** [pendiente / FECHA]  
-**Comando ejecutado:** [`lafabrica new <slug>` / pendiente]
+**Fecha de cierre del discovery:** pendiente  
+**Comando ejecutado:** pendiente
