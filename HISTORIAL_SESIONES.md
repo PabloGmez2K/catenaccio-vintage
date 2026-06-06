@@ -47,3 +47,21 @@ Cross-referencia con `agent_events.jsonl` para detalle de eventos.
 **Siguiente paso:** Sesión 1 con Opus — validación del SEED  
 **agent_events ref:** —
 ---
+
+---
+**Sesión 1** — 2026-06-06  
+**Agente:** Claude Code (Sonnet)  
+**Modo:** LITE  
+**Tipo:** docs / strategic  
+**Tarea:** Registrar nuevo driver estratégico — cancelación de suscripción Elementor Pro
+
+**Decisiones clave:**
+- No se decide arquitectura ni migración en esta sesión.
+- La cancelación de Elementor Pro se registra como factor estratégico a evaluar en AS-IS y TARGET.
+- TARGET_OPTIONS queda pendiente hasta revisar AS-IS con este nuevo dato incorporado.
+
+**Qué se validó:** Actualización de docs (CONTEXTO, BACKLOG, AS_IS_UNDERSTANDING, LAFABRICA_INTAKE_MANIFEST, TARGET_OPTIONS, DECISIONS, HISTORIAL_SESIONES) sin tocar código, WordPress, producción ni credenciales.  
+**Qué NO se tocó:** Código, WordPress, credenciales, dominio, hosting, Vercel, SEC-001, SEC-002, implementación técnica.  
+**Siguiente paso:** Sesión de revisión AS-IS con impacto de Elementor Pro incluido. Luego preparar TARGET_OPTIONS.  
+**agent_events ref:** —
+---

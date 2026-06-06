@@ -39,6 +39,8 @@ Comprensión documentada del estado actual del proyecto, construida a partir de 
 
 ## Hipótesis (requieren validación)
 
+- **Elementor Pro cancelado — impacto en el sitio pendiente de verificar**: Elementor Pro era parte del stack AS-IS (page builder, diseño frontend, widgets Pro, templates). La suscripción ha sido cancelada (2026-06-06). El impacto en la web actual —posible degradación de widgets Pro, popups, plantillas premium, capacidades del builder— no está confirmado. No asumir rotura inmediata del sitio: la versión gratuita puede mantener parte de la funcionalidad. Sí considerarlo como driver de arquitectura y factor de coste/fricción a futuro en TARGET_OPTIONS. — **pendiente de validar**
+
 - **La tienda ha tenido actividad después del 15/03/2026**: STOCK.xlsx y varias carpetas de productos en Stock/Original tienen fecha de modificación 19/04/2026. Es probable que se hayan publicado más productos o actualizado el stock entre marzo y abril. — **pendiente de validar**
 - **El "bloqueo anterior" no fue técnico sino de workflow**: la tienda funciona y tiene ventas reales. El bloqueo fue de gestión del contexto: todo el conocimiento disperso en archivos locales y chats sin persistencia entre sesiones, dificultando escalar el proyecto. — **pendiente de validar**
 - **Migrar de WordPress/WooCommerce puede no ser la decisión correcta**: la inversión en plugins custom, configuración de pagos, SEO activo, 28+ productos publicados y experiencia de usuario validada hace que la migración tenga un coste alto. Requiere evaluación objetiva en TARGET_OPTIONS. — **pendiente de validar**
@@ -150,6 +152,7 @@ Comprensión documentada del estado actual del proyecto, construida a partir de 
 
 ## Cosas que no deben asumirse
 
+- **No asumir rotura inmediata del sitio al cancelar Elementor Pro** — la versión gratuita puede mantener parte de la funcionalidad activa. El impacto exacto depende de qué widgets Pro, popups y plantillas se usen activamente. Verificar en el sitio real antes de actuar.
 - **No asumir que la tienda está inactiva o sin ventas** — está live, con pedidos reales procesados y pagos activados desde febrero 2026.
 - **No asumir que migrar de WordPress es la decisión correcta** — hay inversión significativa en plugins custom, configuración de pagos, SEO activo y 28+ productos publicados. La migración tendría coste real. Evaluar en TARGET_OPTIONS con evidencia.
 - **No asumir que el estado del CONTEXTO (15/03/2026) refleja el estado actual** — hay ~3 meses sin documentar. Pueden existir cambios en productos, configuración o incidentes.

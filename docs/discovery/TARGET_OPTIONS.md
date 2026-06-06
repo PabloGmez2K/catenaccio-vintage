@@ -1,4 +1,8 @@
-# TARGET_OPTIONS — [NOMBRE_PROYECTO]
+# TARGET_OPTIONS — Catenaccio Vintage
+
+> **NOTA PREPARATORIA (2026-06-06):** TARGET_OPTIONS no iniciado. Este documento se completará una vez que `AS_IS_UNDERSTANDING.md` tenga estado `VALIDADO_POR_USUARIO`. Cuando se inicie, debe comparar explícitamente la continuidad WordPress/WooCommerce con o sin Elementor Pro frente a la migración/reconstrucción en stack moderno. Next.js/Vercel es candidato, no decisión cerrada. La cancelación de la suscripción de Elementor Pro es un factor a incluir en el análisis comparativo.
+
+---
 
 Opciones de diseño TARGET para el proyecto. Este documento se genera **después** de que `AS_IS_UNDERSTANDING.md` tenga estado `VALIDADO_POR_USUARIO`.
 

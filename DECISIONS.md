@@ -166,3 +166,24 @@ _(completar)_
 **Implicaciones:**
 _(completar si aplica)_
 
+---
+
+### PEND-1 — Arquitectura futura (pendiente — no decidida)
+**Fecha:** 2026-06-06
+**Tipo:** estratégica / pendiente
+**Estado:** PENDIENTE — NO DECIDIDA
+
+**Contexto:**
+La cancelación de la suscripción de Elementor Pro es un nuevo factor estratégico. La decisión sobre la arquitectura futura queda explícitamente pendiente hasta:
+1. Validar el AS-IS con el impacto de Elementor Pro incluido.
+2. Completar TARGET_OPTIONS con análisis comparativo de las opciones.
+3. Aprobación explícita de la persona usuaria.
+
+**Opciones abiertas (ninguna descartada todavía):**
+- a) Mantener WordPress/WooCommerce reduciendo dependencia de Elementor Pro.
+- b) WordPress como backend/headless con frontend moderno desacoplado.
+- c) Reconstrucción/migración a Next.js/React/Vercel u otra arquitectura moderna.
+- d) Aplazar migración y priorizar catálogo/operativa antes de decidir.
+
+**No asumir:** que Next.js/Vercel es la respuesta correcta. Tampoco que WordPress debe mantenerse. Evaluar con evidencia una vez que AS-IS esté validado.
+

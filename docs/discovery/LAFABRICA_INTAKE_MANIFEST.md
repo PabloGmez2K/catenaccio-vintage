@@ -81,6 +81,7 @@ La carpeta legacy (`C:\Users\USUARIO\Catenaccio Vintage`) es fuente externa. Se 
 8. ¿Next.js/Vercel es la arquitectura correcta dado el AS-IS, o hay razones para elegir otra opción?
 9. ¿Hay datos sensibles, credenciales o PII en la carpeta legacy que deban manejarse con cuidado?
 10. ¿Qué URLs, rutas o slugs deben preservarse para no romper SEO o links existentes?
+11. ¿Qué impacto real tiene cancelar Elementor Pro sobre la web actual, la edición futura, el mantenimiento y la decisión TARGET?
 
 ---
 
@@ -109,3 +110,4 @@ El intake se cierra cuando:
 | Fecha | Cambio | Quién |
 |-------|--------|-------|
 | 2026-06-06 | Abierto el intake. Configuración inicial del Discovery Intake. | Claude Code (setup) |
+| 2026-06-06 | Añadida pregunta de discovery #11 sobre impacto de cancelación Elementor Pro. | Claude Code (docs) |
