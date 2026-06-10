@@ -9,20 +9,16 @@ Actualizar al cierre de cada sesión. Los ítems completados se mueven a DONE o 
 
 ## NOW — Esta semana / próxima sesión
 
-- [ ] Activar Discovery Intake Pack.
-- [ ] Registrar fuentes iniciales.
-- [ ] Crear Controlled Intake Folder.
-- [ ] Preparar prompt read-only de discovery.
-- [ ] Revisar AS-IS con el nuevo dato de Elementor Pro cancelado.
-- [ ] Evaluar impacto de la dependencia Elementor Pro antes de TARGET_OPTIONS.
+- [ ] **Validar AS_IS_UNDERSTANDING.md** — revisión final por el operador y cambiar estado a VALIDADO_POR_USUARIO.
+- [ ] **Preparar TARGET_OPTIONS** — deadline real: ~2026-07-01 (expiración Elementor Pro). Evaluar mínimo: a) WP+WC sin Elementor Pro; b) WP headless; c) migración; d) aplazar.
+- [ ] Verificar páginas Carrito y Mi Cuenta en el front-end (PROB-13 — posible falso positivo Elementor).
+- [ ] Decidir qué hacer con OPcache lleno (PROB-09) y WP_MEMORY_LIMIT 40M (PROB-10).
 
 ---
 
 ## NEXT — Próximo mes
 
-- [ ] **SERVER_ACCESS_SAFE_SETUP / SERVER_CONTEXT_CHECK_READONLY** — Diseñar acceso seguro read-only al servidor para verificar estado actual del sitio: versiones reales de plugins, estado post-Elementor Pro, configuración LiteSpeed, salud general. No conectar hasta tener el diseño de acceso aprobado. Pendiente de sesión dedicada.
-- [ ] Sintetizar AS-IS.
-- [ ] Validar AS-IS.
+- [ ] Sintetizar y aprobar TARGET_OPTIONS.
 - [ ] Preparar TARGET_OPTIONS comparando, como mínimo:
   - a) Mantener WordPress/WooCommerce con menor dependencia de Elementor Pro.
   - b) WordPress como backend/headless (frontend desacoplado).
@@ -51,3 +47,5 @@ Actualizar al cierre de cada sesión. Los ítems completados se mueven a DONE o 
 | Init desde lafabrica-template | 2026-06-06 | Sesión 0 |
 | SEC-001 resuelto — OAuth Google / Nextend Social Login rotado por operador | 2026-06-06 | Sesión 002 |
 | SEC-002 resuelto — WP secret keys rotadas en servidor por operador | 2026-06-06 | Sesión 002 |
+| SERVER_CONTEXT_CHECK_READONLY completado — evidencia via WP Admin/WC Status (no SSH) | 2026-06-10 | Sesión 003 |
+| AS_IS_UNDERSTANDING.md actualizado con datos reales del servidor (plugins, versiones, HPOS, OPcache, Elementor Pro deadline) | 2026-06-10 | Sesión 003 |
