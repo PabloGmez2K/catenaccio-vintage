@@ -40,7 +40,7 @@ Hipótesis no verificadas del SEED:
 
 ## Siguiente paso recomendado
 
-Sesión de revisión AS-IS con el nuevo dato de Elementor Pro cancelado. Evaluar impacto sobre el stack actual antes de preparar TARGET_OPTIONS.
+**Sesión 005 — TARGET_OPTIONS.** AS-IS validado el 2026-06-10. Deadline: ~2026-07-01 (expiración Elementor Pro). Preparar y comparar opciones TARGET: a) WP+WC sin Elementor Pro; b) WP headless; c) migración a stack moderno; d) aplazar migración y priorizar catálogo. El operador decide la opción y el SEED queda listo para implementación.
 
 ---
 
@@ -56,4 +56,6 @@ Sesión 1 (2026-06-06, Claude Code Sonnet): DOCS_ONLY / strategic. Registrado nu
 Sesión 002 (2026-06-06, Claude Code Sonnet): LITE / DOCS_ONLY / security-sync. SEC-001 y SEC-002 marcados RESUELTOS por confirmación manual del operador. AS_IS_UNDERSTANDING.md actualizado con versiones confirmadas (WP 7.0, WooCommerce 10.8.1), hosting server (com1014, cPanel 134.0, Apache 2.4.67, MariaDB 11.4.10-cll-lve), matiz Elementor Pro (caduca en semanas), LiteSpeed como problema (ralentiza la web), hipótesis workflow/AI-first validada, Bloque 3 validado. BACKLOG.md: bloqueante SEC eliminado, nueva tarea SERVER_CONTEXT_CHECK_READONLY añadida. No se tocó código, WordPress, producción, credenciales, hosting, Google Cloud ni dominio.
 
 Sesión 003 (2026-06-10, Claude Code Sonnet): API_FAST_DISCOVERY / SERVER_CONTEXT_CHECK_READONLY. Evidencias recopiladas vía WP Admin (Salud del sitio + WooCommerce System Status) sin SSH. Confirmados: WP 7.0, PHP 8.3.31, servidor HTTP LiteSpeed (no Apache — corrección AS-IS), 28 productos, HPOS activo, WooPayments live, 19 plugins activos, 3 inactivos. **Dato crítico: Elementor Pro expira ~2026-07-01, operador NO renueva** — pasa a ser el driver y deadline de TARGET_OPTIONS. Riesgos detectados: OPcache lleno (16 bytes libres), WP_MEMORY_LIMIT=40M, mini-cart override Elementor desactualizado, WPS Hide Login inactivo. AS_IS_UNDERSTANDING.md actualizado con todos los datos confirmados, 7 nuevos PROBs añadidos (09-15). BACKLOG.md actualizado. No se tocó código, WordPress, producción, credenciales ni hosting.
+
+Sesión 004 (2026-06-10, Claude Code Sonnet): DOCS_ONLY / as-is-validation. **AS-IS validado por el operador.** AS_IS_UNDERSTANDING.md cambiado de BORRADOR a VALIDADO_POR_USUARIO. VALIDATION_RECORD.md con VAL-004. BACKLOG.md, CONTEXTO.md, HISTORIAL_SESIONES.md y agent_events.jsonl actualizados. Workflow pasa a AS_IS_VALIDADO. Siguiente sesión: TARGET_OPTIONS con deadline ~2026-07-01. No se tocó código, WordPress ni producción.
 

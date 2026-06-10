@@ -9,8 +9,7 @@ Actualizar al cierre de cada sesión. Los ítems completados se mueven a DONE o 
 
 ## NOW — Esta semana / próxima sesión
 
-- [ ] **Validar AS_IS_UNDERSTANDING.md** — revisión final por el operador y cambiar estado a VALIDADO_POR_USUARIO.
-- [ ] **Preparar TARGET_OPTIONS** — deadline real: ~2026-07-01 (expiración Elementor Pro). Evaluar mínimo: a) WP+WC sin Elementor Pro; b) WP headless; c) migración; d) aplazar.
+- [ ] **Preparar TARGET_OPTIONS** — AS-IS validado (2026-06-10). Deadline real: ~2026-07-01 (expiración Elementor Pro). Evaluar mínimo: a) WP+WC sin Elementor Pro; b) WP headless; c) migración a stack moderno; d) aplazar migración y priorizar catálogo.
 - [ ] Verificar páginas Carrito y Mi Cuenta en el front-end (PROB-13 — posible falso positivo Elementor).
 - [ ] Decidir qué hacer con OPcache lleno (PROB-09) y WP_MEMORY_LIMIT 40M (PROB-10).
 
@@ -49,3 +48,4 @@ Actualizar al cierre de cada sesión. Los ítems completados se mueven a DONE o 
 | SEC-002 resuelto — WP secret keys rotadas en servidor por operador | 2026-06-06 | Sesión 002 |
 | SERVER_CONTEXT_CHECK_READONLY completado — evidencia via WP Admin/WC Status (no SSH) | 2026-06-10 | Sesión 003 |
 | AS_IS_UNDERSTANDING.md actualizado con datos reales del servidor (plugins, versiones, HPOS, OPcache, Elementor Pro deadline) | 2026-06-10 | Sesión 003 |
+| AS_IS_UNDERSTANDING.md validado por operador — estado cambiado a VALIDADO_POR_USUARIO | 2026-06-10 | Sesión 004 |

@@ -20,7 +20,7 @@ Registro append-only de todas las validaciones humanas realizadas durante el Dis
 | `SEED_APROBADO` | El SEED fue revisado y aprobado para implementación |
 | `DISCOVERY_CERRADO` | `lafabrica new` ejecutado; el discovery está completo |
 
-**Estado actual del workflow:** DISCOVERY_ABIERTO
+**Estado actual del workflow:** AS_IS_VALIDADO
 
 ---
 
@@ -95,6 +95,30 @@ Registro append-only de todas las validaciones humanas realizadas durante el Dis
 
 ---
 
+### VAL-004 — AS-IS validado por el operador: suficientemente correcto para abrir TARGET_OPTIONS
+
+**Fecha:** 2026-06-10  
+**Fase del discovery:** AS-IS (validación humana final)  
+**Qué se validó:** El operador (Pablo) confirma que `AS_IS_UNDERSTANDING.md` es suficientemente correcto para avanzar a TARGET_OPTIONS. Las incógnitas residuales (contenido de backlog_catenaccio_v6.xlsx, estado real del buscador AJAX, presencia exacta en Vinted) no bloquean la decisión de arquitectura.  
+**Documento validado:** `docs/discovery/AS_IS_UNDERSTANDING.md` — estado cambiado de `BORRADOR` a `VALIDADO_POR_USUARIO`  
+**Fuentes cubiertas al momento de validación:** SRC-01, SRC-02, SRC-03, SRC-04, SRC-05, SRC-06 + SERVER_CONTEXT_CHECK (2026-06-10)
+
+**Resultado:** VALIDADO — confirmación humana directa del operador
+
+**Confirmación del operador:**
+- "Valido AS_IS_UNDERSTANDING.md como suficientemente correcto para avanzar a TARGET_OPTIONS."
+- "No necesito más discovery antes de abrir TARGET_OPTIONS. Las incógnitas residuales no bloquean la decisión."
+
+**Notas del agente:**
+- El AS-IS cubre 15 problemas documentados (PROB-01 a PROB-15), 5 hipótesis con estado de validación, hechos confirmados del stack técnico completo y procesos actuales del operador.
+- Los dos bloqueantes de seguridad (SEC-001, SEC-002) fueron resueltos antes de esta validación (VAL-003).
+- El SERVER_CONTEXT_CHECK_READONLY fue completado antes de esta validación (Sesión 003, 2026-06-10).
+- El driver central de TARGET_OPTIONS queda establecido: Elementor Pro expira ~2026-07-01, operador no renueva.
+
+**Estado del workflow tras esta validación:** AS_IS_VALIDADO — habilitado para preparar TARGET_OPTIONS
+
+---
+
 ## Checklist de cierre del discovery
 
 El discovery puede cerrarse cuando todos los ítems siguientes están marcados:
@@ -102,7 +126,7 @@ El discovery puede cerrarse cuando todos los ítems siguientes están marcados:
 - [ ] `LAFABRICA_INTAKE_MANIFEST.md`: todas las preguntas del discovery tienen respuesta documentada.
 - [ ] `SOURCE_REGISTRY.md`: todas las fuentes relevantes tienen estado `PROCESADA` o `VALIDADA` (no quedan en `EN_LECTURA`).
 - [ ] `CONFLICT_REGISTER.md`: no hay conflictos en estado `DETECTADO` o `EN_REVISIÓN` con impacto CRÍTICO o ALTO.
-- [ ] `AS_IS_UNDERSTANDING.md`: estado `VALIDADO_POR_USUARIO`.
+- [x] `AS_IS_UNDERSTANDING.md`: estado `VALIDADO_POR_USUARIO`. *(2026-06-10, VAL-004)*
 - [ ] `TARGET_OPTIONS.md`: estado `OPCIÓN_APROBADA`.
 - [ ] `RECOMMENDED_IMPLEMENTATION_PLAN.md`: estado `APROBADO_PARA_IMPLEMENTACIÓN`.
 - [ ] `PROJECT_SEED.md`: generado y aprobado.

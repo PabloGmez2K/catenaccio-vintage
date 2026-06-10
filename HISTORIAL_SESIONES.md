@@ -111,3 +111,22 @@ Cross-referencia con `agent_events.jsonl` para detalle de eventos.
 **Siguiente paso:** Operador valida AS_IS_UNDERSTANDING.md → cambia estado a VALIDADO_POR_USUARIO → preparar TARGET_OPTIONS con deadline ~2026-07-01.  
 **agent_events ref:** 2026-06-10T10:30:00Z (server_context_check_complete)
 ---
+
+---
+**Sesión 004** — 2026-06-10  
+**Agente:** Claude Code (Sonnet)  
+**Modo:** DOCS_ONLY  
+**Tipo:** docs / as-is-validation  
+**Tarea:** Cerrar la validación del AS-IS de Catenaccio Vintage: cambiar estado de AS_IS_UNDERSTANDING.md a VALIDADO_POR_USUARIO y registrar la validación formal.
+
+**Decisiones clave:**
+- El operador valida explícitamente el AS-IS como suficientemente correcto para avanzar a TARGET_OPTIONS.
+- Las incógnitas residuales (backlog_v6.xlsx, buscador AJAX, presencia Vinted) no bloquean la decisión de arquitectura.
+- El workflow de discovery avanza de `DISCOVERY_ABIERTO` a `AS_IS_VALIDADO`.
+- Próxima sesión: TARGET_OPTIONS con deadline ~2026-07-01 (expiración Elementor Pro).
+
+**Qué se validó:** AS_IS_UNDERSTANDING.md estado → VALIDADO_POR_USUARIO. VALIDATION_RECORD.md con VAL-004 y checklist AS-IS marcado. BACKLOG.md con validación en DONE y TARGET_OPTIONS como prioridad NOW. CONTEXTO.md con siguiente paso actualizado y sesión 004 registrada. HISTORIAL_SESIONES.md con esta entrada. agent_events.jsonl con evento as_is_validated. Commit docs-only.  
+**Qué NO se tocó:** Código, WordPress, WooCommerce, producción, credenciales, hosting, dominio, DNS. No se preparó TARGET_OPTIONS. No se tomaron decisiones de arquitectura.  
+**Siguiente paso:** Sesión 005 — TARGET_OPTIONS. Comparar mínimo 4 opciones con deadline ~2026-07-01. El operador aprueba la opción y se genera el SEED.  
+**agent_events ref:** 2026-06-10T11:00:00Z (as_is_validated)
+---

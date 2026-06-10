@@ -6,7 +6,7 @@ Comprensión documentada del estado actual del proyecto, construida a partir de 
 
 **Proyecto:** Catenaccio Vintage  
 **Fecha de última actualización:** 2026-06-10  
-**Estado:** BORRADOR  
+**Estado:** VALIDADO_POR_USUARIO  
 **Fuentes consultadas:** SRC-01, SRC-02, SRC-03, SRC-04, SRC-05, SRC-06, SERVER_CONTEXT_CHECK (2026-06-10)  
 **Conflictos resueltos antes de esta versión:** ver CONFLICT_REGISTER.md — CONF-001 detectado, pendiente de resolución
 
@@ -194,4 +194,4 @@ Lee cada sección. Para cada ítem:
 - Si algo es incorrecto o incompleto: añade una nota bajo el ítem o actualiza directamente.
 - Cuando hayas revisado todo: cambia el estado de este documento a `VALIDADO_POR_USUARIO` y registra la validación en `VALIDATION_RECORD.md`.
 
-**Estado de validación:** pendiente — BORRADOR generado el 2026-06-06 por Claude Code (discovery)
+**Estado de validación:** VALIDADO_POR_USUARIO — confirmado el 2026-06-10 por el operador (Pablo). El AS-IS es suficientemente correcto para avanzar a TARGET_OPTIONS. Las incógnitas residuales no bloquean la decisión. Ver VALIDATION_RECORD.md (VAL-004).
