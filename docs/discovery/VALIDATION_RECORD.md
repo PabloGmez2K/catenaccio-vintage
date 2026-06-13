@@ -20,7 +20,7 @@ Registro append-only de todas las validaciones humanas realizadas durante el Dis
 | `SEED_APROBADO` | El SEED fue revisado y aprobado para implementación |
 | `DISCOVERY_CERRADO` | `lafabrica new` ejecutado; el discovery está completo |
 
-**Estado actual del workflow:** AS_IS_VALIDADO
+**Estado actual del workflow:** TARGET_APROBADO
 
 ---
 
@@ -119,6 +119,32 @@ Registro append-only de todas las validaciones humanas realizadas durante el Dis
 
 ---
 
+### VAL-005 — TARGET_OPTIONS aprobado por el operador: A0 + B1
+
+**Fecha:** 2026-06-13  
+**Fase del discovery:** TARGET (aprobación formal)  
+**Qué se validó:** El operador (Pablo) aprueba explícitamente la estrategia A0 + B1 para Catenaccio Vintage. Marketplace queda como NORTH_STAR / DEFER.  
+**Documento validado:** `docs/discovery/TARGET_OPTIONS.md` — estado cambiado de `EN_REVISIÓN` a `OPCIÓN_APROBADA`
+
+**Resultado:** APROBADO — confirmación literal del operador
+
+**Confirmación del operador:**
+- "APPROVE A0 + B1. Marketplace queda como NORTH_STAR / DEFER."
+
+**Decisión aprobada:**
+- **A0:** estabilizar WordPress/WooCommerce antes del 2026-07-01. Quitar dependencia crítica de Elementor Pro. Resolver performance mínima. Sin tocar pagos, pedidos, SEO ni productos.
+- **B1:** construir Catenaccio Studio — app interna Next.js para subida controlada de productos via WooCommerce REST API, asistida por Claude.
+- **Marketplace:** visión a largo plazo (NORTH_STAR). No construir multi-vendor hasta cumplir los gates documentados en TARGET_OPTIONS.md §11.
+
+**Notas del agente:**
+- La aprobación fue explícita y literal. Se registra sin interpretación.
+- El workflow avanza de `AS_IS_VALIDADO` a `TARGET_APROBADO`.
+- Siguiente paso: generar `RECOMMENDED_IMPLEMENTATION_PLAN.md` para A0 y `PROJECT_SEED.md` para B1.
+
+**Estado del workflow tras esta validación:** TARGET_APROBADO — implementación desbloqueada
+
+---
+
 ## Checklist de cierre del discovery
 
 El discovery puede cerrarse cuando todos los ítems siguientes están marcados:
@@ -127,10 +153,10 @@ El discovery puede cerrarse cuando todos los ítems siguientes están marcados:
 - [ ] `SOURCE_REGISTRY.md`: todas las fuentes relevantes tienen estado `PROCESADA` o `VALIDADA` (no quedan en `EN_LECTURA`).
 - [ ] `CONFLICT_REGISTER.md`: no hay conflictos en estado `DETECTADO` o `EN_REVISIÓN` con impacto CRÍTICO o ALTO.
 - [x] `AS_IS_UNDERSTANDING.md`: estado `VALIDADO_POR_USUARIO`. *(2026-06-10, VAL-004)*
-- [ ] `TARGET_OPTIONS.md`: estado `OPCIÓN_APROBADA`.
+- [x] `TARGET_OPTIONS.md`: estado `OPCIÓN_APROBADA`. *(2026-06-13, VAL-005)*
 - [ ] `RECOMMENDED_IMPLEMENTATION_PLAN.md`: estado `APROBADO_PARA_IMPLEMENTACIÓN`.
 - [ ] `PROJECT_SEED.md`: generado y aprobado.
-- [ ] `VALIDATION_RECORD.md`: al menos una entrada VAL para AS-IS y una para TARGET.
+- [x] `VALIDATION_RECORD.md`: al menos una entrada VAL para AS-IS y una para TARGET. *(VAL-004 AS-IS + VAL-005 TARGET)*
 - [ ] Estado del workflow: `SEED_APROBADO`.
 
 **Fecha de cierre del discovery:** pendiente  

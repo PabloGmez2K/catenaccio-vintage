@@ -3,16 +3,17 @@
 **Proyecto:** Catenaccio Vintage  
 **Fecha:** 2026-06-13 (Sesión 005 + corrección 005b)  
 **Basado en AS-IS validado:** 2026-06-10 (VAL-004)  
-**Estado:** EN_REVISIÓN — pendiente de aprobación del operador  
-**Opción aprobada:** ninguna todavía  
-**Deadline crítico:** ~2026-07-01 (expiración Elementor Pro — 18 días)  
-**Agente:** Claude Code Sonnet (Sesión 005 + 005b)
+**Estado:** OPCIÓN_APROBADA  
+**Opción aprobada:** A0 + B1 — aprobada por el operador el 2026-06-13  
+**Marketplace:** NORTH_STAR / DEFER — visión a largo plazo, no MVP  
+**Deadline crítico:** ~2026-07-01 (expiración Elementor Pro)  
+**Agente:** Claude Code Sonnet (Sesiones 005 / 005b / 005c / 005d)
 
 ---
 
 ## 1. VEREDICTO
 
-**APPROVE Estrategia A0 + B1.**
+**✅ APROBADO por el operador el 2026-06-13. Estrategia A0 + B1.**
 
 - **A0 (Track 0):** Continuidad de la tienda actual. Quitar la dependencia crítica de Elementor Pro antes del 2026-07-01. Resolver performance mínima. Sin riesgo de pagos.
 - **B1 (Track 1):** Construir Catenaccio Studio — un backoffice/PIM AI-first para catalogar camisetas. Next.js + formularios a medida + WooCommerce REST API. WooCommerce sigue siendo el motor de venta y pagos.

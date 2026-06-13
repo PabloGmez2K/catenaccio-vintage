@@ -9,12 +9,11 @@ Actualizar al cierre de cada sesión. Los ítems completados se mueven a DONE o 
 
 ## NOW — Esta semana / próxima sesión
 
-- [x] **TARGET_OPTIONS preparado y corregido** — 2026-06-13 (Sesión 005 + 005b). Veredicto: APPROVE A0 + B1. Ver `docs/discovery/TARGET_OPTIONS.md` sección 12.
-- [ ] **[BLOQUEANTE] Operador aprueba estrategia A0 + B1** — responder a la pregunta de sección 12 de TARGET_OPTIONS.md. Si aprueba → Sesión 006: Track 0 + arranque Studio.
-- [ ] **ROOT_CAUSE_FRICTION_MAP** — validar con el operador que los 5 bloqueantes identificados (Elementor, backoffice, catálogo, performance, visión) son correctos y completos.
-- [ ] **Auditoría Elementor Pro templates (Track 0)** — listar los 19 items en elementor_library y clasificar cuáles usan widgets Pro exclusivos. WP Admin read-only.
-- [ ] **WC_API_ACCESS_MODEL** — crear Application Password en WP Admin: usuario limitado (Editor de productos), copiar password para Studio. Guía paso a paso en sesión 006.
-- [ ] Verificar páginas Carrito y Mi Cuenta en el front-end (PROB-13 — parte del Track 0).
+- [x] **TARGET_OPTIONS APROBADO** — 2026-06-13 (Sesión 005d). Operador aprueba A0 + B1. Marketplace = NORTH_STAR / DEFER. Ver `docs/discovery/TARGET_OPTIONS.md`.
+- [ ] **A0_IMPLEMENTATION_PLAN** — diseñar el plan de implementación de Track 0: auditoría elementor_library, migración Cart/Mi Cuenta/mini-cart, OPcache fix. Próxima sesión: Sesión 006.
+- [ ] **B1_CATENACCIO_STUDIO_SEED** — arrancar el diseño de Catenaccio Studio: formulario, campos, stack Next.js, scaffold inicial. Parallel a Track 0.
+- [ ] **CMS_API_ACCESS_MODEL_READONLY** — crear Application Password en WP Admin: usuario limitado (Editor de productos). Guía paso a paso. Prerequisito para Studio.
+- [ ] **Auditoría Elementor Pro templates (Track 0)** — listar los 19 items en elementor_library y clasificar cuáles usan widgets Pro exclusivos. WP Admin read-only. Urgente: deadline 2026-07-01.
 - [ ] Arreglar OPcache (PROB-09) — solicitar a Raiola aumentar `opcache.memory_consumption`.
 
 ---
@@ -53,7 +52,9 @@ Actualizar al cierre de cada sesión. Los ítems completados se mueven a DONE o 
 
 ## BLOCKED — No avanzar hasta que...
 
-- [ ] Implementación técnica de nueva arquitectura bloqueada hasta AS-IS validado y TARGET aprobado.
+_(sin bloqueos activos — TARGET aprobado, implementación desbloqueada)_
+
+- [x] ~~Implementación técnica bloqueada hasta AS-IS validado y TARGET aprobado.~~ — DESBLOQUEADO 2026-06-13 (TARGET APROBADO)
 
 ---
 
@@ -70,3 +71,4 @@ Actualizar al cierre de cada sesión. Los ítems completados se mueven a DONE o 
 | TARGET_OPTIONS.md preparado — comparativa A/B/C/D/E, veredicto APPROVE Opción A, plan 7/30/90 días | 2026-06-13 | Sesión 005 |
 | TARGET_OPTIONS.md corregido — Root Cause añadida, veredicto corregido a A0+B1 (Catenaccio Studio), modelo acceso API | 2026-06-13 | Sesión 005b |
 | TARGET_OPTIONS.md — Marketplace North Star añadido: fases 1-4, gates, implicaciones de diseño | 2026-06-13 | Sesión 005c |
+| **TARGET A0 + B1 APROBADO** por el operador. VALIDATION_RECORD.md con VAL-005. DECISIONS.md DEC-8 cerrada. Implementación desbloqueada. | 2026-06-13 | Sesión 005d |

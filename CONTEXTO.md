@@ -40,7 +40,7 @@ Hipótesis no verificadas del SEED:
 
 ## Siguiente paso recomendado
 
-**Sesión 006 — Aprobación + arranque Track 0 + Track 1.** TARGET_OPTIONS v005c EN_REVISIÓN (2026-06-13). El operador aprueba A0+B1 → Track 0: auditoría elementor_library + migración + fixes. Track 1 paralelo: Application Password + scaffold Studio + test WC REST API. Deadline Track 0: ~2026-07-01. Marketplace: NORTH_STAR documentado, no construir hasta Fase 4.
+**Sesión 006 — Track 0: implementación.** TARGET APROBADO (2026-06-13, VAL-005). Arrancar auditoría elementor_library + migración Cart/Mi Cuenta/mini-cart + OPcache fix. Deadline: ~2026-07-01. Paralelo: Application Password + scaffold Studio (Track 1). Marketplace: NORTH_STAR, no construir hasta Fase 4.
 
 ---
 
@@ -66,4 +66,6 @@ Sesión 005 (2026-06-13, Claude Code Sonnet): DOCS_ONLY / strategic / TARGET_OPT
 Sesión 005b (2026-06-13, Claude Code Sonnet): DOCS_ONLY / strategic / ROOT_CAUSE_AND_TARGET_REFRAME. TARGET_OPTIONS.md reescrito con causa raíz de la fricción real (5 bloqueantes: Elementor, backoffice, catálogo, performance, visión). Veredicto corregido: APPROVE A0 + B1. Modelo de acceso sin SSH definido.
 
 Sesión 005c (2026-06-13, Claude Code Sonnet): DOCS_ONLY / strategic / MARKETPLACE_NORTH_STAR. Marketplace multi-vendor añadido como visión a largo plazo (NORTH_STAR). Fases 1-4 documentadas. Gates explícitos para abrir Fase 4. Implicaciones de diseño ahora sin construir el marketplace. DECISIONS.md con PEND-2. BACKLOG.md con MARKETPLACE_NORTH_STAR_VALIDATION en LATER. Recomendación A0+B1 sin cambios. No se tocó WordPress, producción, pagos ni código.
+
+Sesión 005d (2026-06-13, Claude Code Sonnet): DOCS_ONLY / approve + push. **TARGET A0 + B1 APROBADO** por el operador ("APPROVE A0 + B1. Marketplace queda como NORTH_STAR / DEFER."). TARGET_OPTIONS.md → OPCIÓN_APROBADA. VALIDATION_RECORD.md con VAL-005. DECISIONS.md DEC-8 cerrada. BACKLOG.md bloqueo levantado, nuevas tareas NOW (A0_IMPLEMENTATION_PLAN, B1_CATENACCIO_STUDIO_SEED, CMS_API_ACCESS_MODEL_READONLY). Commits 005/005b/005c/005d pusheados a origin/main. Workflow: TARGET_APROBADO. No se tocó WordPress, producción, pagos ni código.
 

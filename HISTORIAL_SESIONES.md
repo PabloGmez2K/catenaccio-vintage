@@ -132,6 +132,27 @@ Cross-referencia con `agent_events.jsonl` para detalle de eventos.
 ---
 
 ---
+**Sesión 005d** — 2026-06-13  
+**Agente:** Claude Code (Sonnet)  
+**Modo:** DOCS_ONLY  
+**Tipo:** approve + push  
+**Tarea:** Registrar aprobación formal del operador para A0 + B1, cerrar TARGET_OPTIONS como aprobado, y pushear los commits pendientes a GitHub.
+
+**Decisiones clave:**
+- TARGET_OPTIONS.md → estado `OPCIÓN_APROBADA`. Opción aprobada: A0 + B1.
+- Aprobación literal del operador: "APPROVE A0 + B1. Marketplace queda como NORTH_STAR / DEFER."
+- Workflow de discovery avanza: AS_IS_VALIDADO → TARGET_APROBADO.
+- VALIDATION_RECORD.md con VAL-005. DECISIONS.md DEC-8 cerrada como APROBADA. DEC-8 / PEND-2 marketplace confirmado como NORTH_STAR/DEFER.
+- BACKLOG.md: bloqueo de implementación levantado. Nuevas tareas NOW: A0_IMPLEMENTATION_PLAN, B1_CATENACCIO_STUDIO_SEED, CMS_API_ACCESS_MODEL_READONLY.
+- 4 commits (005, 005b, 005c, 005d) pusheados a origin/main.
+
+**Qué se validó:** TARGET_OPTIONS.md OPCIÓN_APROBADA. VALIDATION_RECORD.md VAL-005. DECISIONS.md DEC-8 APROBADA. BACKLOG.md actualizado. CONTEXTO.md, HISTORIAL_SESIONES.md, agent_events.jsonl actualizados. Push a GitHub completado.  
+**Qué NO se tocó:** WordPress, WooCommerce, producción, credenciales, hosting, dominio, DNS, pagos, código. No se implementó código. No se creó Application Password.  
+**Siguiente paso:** Sesión 006 — Track 0: auditoría elementor_library + migración + fixes (deadline 2026-07-01). Track 1 paralelo: Application Password + scaffold Studio.  
+**agent_events ref:** 2026-06-13T15:00:00Z (target_approved_and_pushed)
+---
+
+---
 **Sesión 005c** — 2026-06-13  
 **Agente:** Claude Code (Sonnet)  
 **Modo:** DOCS_ONLY  

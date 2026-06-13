@@ -171,9 +171,10 @@ _(completar si aplica)_
 ### PEND-1 → DEC-8 — Arquitectura TARGET recomendada: Estrategia A0 + B1
 **Fecha original:** 2026-06-06  
 **Fecha de recomendación inicial (005):** 2026-06-13 — Opción A (WP+WC sin Elementor Pro)  
-**Fecha de recomendación corregida (005b):** 2026-06-13 — Estrategia A0 + B1 (ver abajo)  
+**Fecha de recomendación corregida (005b):** 2026-06-13 — Estrategia A0 + B1  
+**Fecha de aprobación:** 2026-06-13 (Sesión 005d — aprobación literal del operador)  
 **Tipo:** estratégica  
-**Estado:** RECOMENDACIÓN FUERTE — pendiente de aprobación explícita del operador
+**Estado:** ✅ APROBADA — confirmación literal del operador: "APPROVE A0 + B1."
 
 **Recomendación del agente (Sesión 005b — versión corregida):**
 APPROVE Estrategia A0 + B1.
@@ -200,8 +201,8 @@ La recomendación inicial ("Quitar Elementor Pro → Gutenberg") respondía al d
 - Shopify: STOP — pérdida de activos reales sin justificación.
 - Track 3 (storefront público Next.js): DEFER — post 100 productos y evidencia de tráfico.
 
-**Condición para convertirse en decisión formal:**
-El operador aprueba explícitamente A0 + B1. Ver pregunta en TARGET_OPTIONS.md sección 13.
+**Aprobación del operador (literal, 2026-06-13):**
+"APPROVE A0 + B1. Marketplace queda como NORTH_STAR / DEFER."
 
 **Implicaciones si se aprueba:**
 - Sesión 006: Track 0 — auditoría elementor_library + fixes + validación visual Pablo.
@@ -213,7 +214,7 @@ El operador aprueba explícitamente A0 + B1. Ver pregunta en TARGET_OPTIONS.md s
 ### PEND-2 — Marketplace multi-vendor (NORTH_STAR / DEFER)
 **Fecha:** 2026-06-13 (Sesión 005c)  
 **Tipo:** estratégica / visión largo plazo  
-**Estado:** NORTH_STAR — documentada como visión, no como decisión de implementación
+**Estado:** ✅ NORTH_STAR / DEFER — confirmado por el operador el 2026-06-13
 
 **Contexto:**
 Pablo declara que la visión a largo plazo de Catenaccio es un marketplace especializado en camisetas de fútbol — sistema donde otros coleccionistas puedan publicar sus propias camisetas bajo la marca Catenaccio.
