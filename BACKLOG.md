@@ -14,7 +14,9 @@ Actualizar al cierre de cada sesión. Los ítems completados se mueven a DONE o 
 - [x] **B1_STOCK_OPERATIONS_MODEL** — modelo operativo de stock definido en `docs/operations/STOCK_OPERATIONS_MODEL.md` (Sesión 006c). Contexto capturado para B1 — no bloquea A0 ni la activación del acceso.
 - [x] **ACCESS_MODEL_ACTIVATION_READONLY** — completado. Usuario `catenaccio-studio-agent` con rol `shop_manager`. `.env.local` configurado y verificado. Acceso WC REST API v3 confirmado.
 - [x] **WP_WC_API_READONLY_PROBE** — probe completo (público + autenticado). Sesiones 007/007b. Credenciales OK: `catenaccio-studio-agent`, rol `shop_manager`. 28 productos, 7 atributos WC, Elementor Pro `isExpired:false`, 14 templates listados. **Hallazgo crítico: productos usan ACF meta fields (no WC attributes[]).** Ver `docs/operations/API_READONLY_PROBE_RESULT.md`.
-- [ ] **A0_ELEMENTOR_DEPENDENCY_AUDIT** — 14 templates listados (no 19). 12/14 son Pro-dependientes por tipo (loop-item×5, product-archive×2, product, header, footer, error-404, search-results). Para widget-level audit: necesita App Password de Admin o WP Admin visual. Decidir vía con Pablo. Urgente: deadline 2026-07-01.
+- [x] **A0_ELEMENTOR_DEPENDENCY_AUDIT** — completado sesión 008. Widget-level audit completo: 17 templates + 2 páginas WC auditadas. 15/20 requieren migración. Ver `docs/operations/ELEMENTOR_DEPENDENCY_AUDIT.md`. Hallazgo: Carrito/Mi Cuenta usan Pro (no Blocks); Finalizar Compra SÍ está en Blocks ✅.
+- [ ] **A0_MIGRATION_PLAN** — crear plan técnico PHP child theme para P1-A (header), P1-B (producto individual), P1-C (archivo productos). Deadline: antes del 2026-07-01. Sesión 009.
+- [ ] **CARRITO_MICUENTA_QUICKWIN** — Pablo reemplaza widgets Pro (`woocommerce-cart`, `woocommerce-my-account`) por shortcodes en Elementor. 10 min en WP Admin. Ver audit §6 P2-B/C.
 - [ ] **Arreglar OPcache (PROB-09)** — Pablo abre ticket a Raiola para aumentar `opcache.memory_consumption`. Acción paralela, sin agente.
 
 ---

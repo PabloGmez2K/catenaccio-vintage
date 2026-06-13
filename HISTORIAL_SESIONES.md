@@ -345,3 +345,27 @@ Cross-referencia con `agent_events.jsonl` para detalle de eventos.
 **Siguiente paso:** Sesión 007 — Track 0: Pablo entrega capturas/lista de elementor_library (19 items) → auditoría Elementor con Antigravity o Sonnet. Acción inmediata sin agente: Pablo abre ticket Raiola (OPcache) siguiendo §9 del ACCESS_MODEL_NO_SSH.md.  
 **agent_events ref:** 2026-06-13T16:00:00Z (access_model_no_ssh_defined)
 ---
+
+---
+**Sesión 008** — 2026-06-13  
+**Agente:** Claude Code (Sonnet)  
+**Modo:** READ_ONLY (ventana temporal de Administrator)  
+**Tipo:** audit / A0_ELEMENTOR_DEPENDENCY_AUDIT  
+**Tarea:** Auditoría widget-level de todos los templates Elementor con credenciales de Administrador. Pablo elevó temporalmente `catenaccio-studio-agent` a Administrator para esta sesión. Crear `docs/operations/ELEMENTOR_DEPENDENCY_AUDIT.md`.
+
+**Decisiones clave:**
+- Widget-level audit completado via `wp/v2/elementor_library/{id}?context=edit` — método que funciona con Admin (vs. 403 con shop_manager).
+- 17 templates de elementor_library + 2 páginas WC (Carrito, Mi Cuenta) auditados.
+- **CRÍTICOS (3):** Cabecera (653) con nav-menu + woocommerce-menu-cart, Producto individual (100) con 5 widgets WC Pro, Archivo productos (129) con loop-grid.
+- **ALTO impacto (8+):** footer form, loop items ×5, resultados búsqueda, popup menú, carrito y mi cuenta.
+- **Hallazgo correctivo:** Carrito (id=25) y Mi Cuenta (id=27) usan widgets Pro (`woocommerce-cart`, `woocommerce-my-account`). No estaban en WooCommerce Blocks como indicaban notas previas.
+- **Finalizar Compra (id=1548) SÍ está en Blocks** — único elemento de checkout ya migrado.
+- id=1414 posiblemente inactivo en uso real — conditions excluyen shop/cat/search.
+- Quick win disponible: Carrito + Mi Cuenta reemplazables por shortcodes en WP Admin en ~10 min.
+- Plan de migración A0 definido en 4 prioridades (P1 crítico, P2 alto, P3 medio, P4 bajo).
+
+**Qué se validó:** `docs/operations/ELEMENTOR_DEPENDENCY_AUDIT.md` creado con tabla completa, catálogo de 17 widgets Pro, mapa de impacto por sección, plan de migración priorizado. `API_READONLY_PROBE_RESULT.md` actualizado con nota de sesión 008 y hallazgo Carrito/Mi Cuenta. BACKLOG.md: A0_ELEMENTOR_DEPENDENCY_AUDIT ✅, A0_MIGRATION_PLAN + CARRITO_MICUENTA_QUICKWIN añadidos a NOW. CONTEXTO.md siguiente paso actualizado. HISTORIAL_SESIONES.md esta entrada. agent_events.jsonl con evento.  
+**Qué NO se tocó:** WordPress, WooCommerce, producción, configuración, Elementor templates, páginas, plugins. Ningún write al sitio. Ningún POST/PUT/PATCH/DELETE ejecutado.  
+**Siguiente paso:** (1) Pablo revierte `catenaccio-studio-agent` a Gestor de la tienda. (2) Pablo hace quickwin Carrito + Mi Cuenta (10 min en WP Admin). (3) Sesión 009: A0_MIGRATION_PLAN — plan técnico child theme para P1-A/B/C.  
+**agent_events ref:** 2026-06-13T22:00:00Z (elementor_dependency_audit_complete)
+---

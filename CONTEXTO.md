@@ -40,12 +40,13 @@ Hipótesis no verificadas del SEED:
 
 ## Siguiente paso recomendado
 
-**ORDEN CORRECTO — estado actualizado Sesión 007b:**
+**ORDEN CORRECTO — estado actualizado Sesión 008:**
 1. ✅ Acceso confirmado: `catenaccio-studio-agent` (shop_manager), WC REST API v3 operativo.
 2. ✅ Probe completo: 28 productos, 7 atributos, Elementor Pro activo (`isExpired:false`), 14 templates listados.
-3. **Hallazgo crítico documentado:** productos usan ACF meta fields (no WC attributes[]). Studio debe escribir en `meta_data`. Ver `API_READONLY_PROBE_RESULT.md §5 y §8`.
-4. **Sesión 008 — A0_ELEMENTOR_DEPENDENCY_AUDIT:** 12/14 templates ya clasificados como Pro por tipo. Para widget-level: decidir si se crea App Password de Admin o se hace audit visual en WP Admin.
-5. **Sesión 009 — Studio MVP:** formulario Next.js con selectores via `wc/v3/products/attributes/{id}/terms`. Escribir en `meta_data`. `POST /wc/v3/products` con `status:draft`.
+3. ✅ Hallazgo crítico: productos usan ACF meta fields (no WC attributes[]). Studio escribe en `meta_data`.
+4. ✅ A0_ELEMENTOR_DEPENDENCY_AUDIT completo. Widget-level: 15/20 elementos requieren migración. CRÍTICOS: header (653), producto (100), archive (129). Carrito/Mi Cuenta usan Pro. Checkout en Blocks ✅. Ver `ELEMENTOR_DEPENDENCY_AUDIT.md`.
+5. **Acción inmediata Pablo:** revertir `catenaccio-studio-agent` a Gestor de la tienda (shop_manager). Luego: Carrito + Mi Cuenta quickwin en WP Admin (10 min).
+6. **Sesión 009 — A0_MIGRATION_PLAN:** plan técnico child theme para P1-A/B/C antes del 2026-07-01.
 
 ---
 

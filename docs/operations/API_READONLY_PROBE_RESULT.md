@@ -236,17 +236,28 @@ Studio necesita:
 
 ---
 
-## 9. PRÓXIMOS PASOS
+## 9. NOTA — SESIÓN 008: WIDGET-LEVEL AUDIT COMPLETADO
+
+Sesión 008 elevó `catenaccio-studio-agent` temporalmente a Administrator.  
+Auditoría widget-level completada via `wp/v2/elementor_library/{id}?context=edit`.  
+Ver `docs/operations/ELEMENTOR_DEPENDENCY_AUDIT.md` para el análisis completo.
+
+**Hallazgo adicional sesión 008:**
+- Carrito (id=25) y Mi cuenta (id=27) usan widgets Pro (`woocommerce-cart`, `woocommerce-my-account`).
+- Finalizar compra (id=1548) NO usa Elementor — ya en WooCommerce Blocks ✅.
+- 15/20 elementos auditados requieren migración antes del 2026-07-01.
+
+## 10. PRÓXIMOS PASOS
 
 | Paso | Sesión | Acción |
 |------|--------|--------|
-| Widget-level Elementor audit | 008 | Pablo genera Application Password adicional de usuario Admin temporal para auditoría. O auditoría visual en WP Admin si se prefiere. |
-| A0_ELEMENTOR_DEPENDENCY_AUDIT | 008 | Con lista de templates y tipos ya en mano: 12/14 son Pro. El audit profundo confirma qué widgets se pueden migrar. |
-| Studio — diseño de formulario | 009 | Usar `GET /wc/v3/products/attributes/{id}/terms` para poblar selectores de liga/equipo/año/talla/marca/condición. Escribir en `meta_data`, no en `attributes[]`. |
-| Studio — test de escritura | 009 | `POST /wc/v3/products` con `status: draft` + `meta_data`. Confirmar que los campos ACF se guardan correctamente y el Filtro Pro los lee. |
+| A0_MIGRATION_PLAN | 009 | Plan técnico de migración basado en ELEMENTOR_DEPENDENCY_AUDIT.md. Prioridades P1-A/B/C. |
+| Studio — diseño de formulario | 009 | Usar `GET /wc/v3/products/attributes/{id}/terms` para poblar selectores. Escribir en `meta_data`. |
+| Studio — test de escritura | 009 | `POST /wc/v3/products` con `status: draft` + `meta_data`. Confirmar que Filtro Pro los lee. |
+| Carrito + Mi Cuenta — quick win | Inmediato (Pablo) | Reemplazar widgets Pro por shortcodes `[woocommerce_cart]` / `[woocommerce_my_account]` en Elementor. 10 min. |
 
 ---
 
-*Versión 007 (público) + 007b (autenticado) — 2026-06-13 — Claude Code Sonnet.*  
-*Probe ejecutado en modo estrictamente READ_ONLY. Ningún write al sitio.*  
+*Versión 007 (público) + 007b (autenticado) + 008 (admin audit) — 2026-06-13 — Claude Code Sonnet.*  
+*Probe y auditoría ejecutados en modo estrictamente READ_ONLY. Ningún write al sitio.*  
 *Credenciales no almacenadas en este documento. Ver `.env.local` (ignorado por Git).*
