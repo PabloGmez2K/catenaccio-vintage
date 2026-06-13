@@ -442,13 +442,69 @@ Raiola Inicio SSD 2.0 no ofrece SSH. Esto no bloquea operación de agentes — s
 
 ---
 
-## 11. QUÉ NO HACER TODAVÍA
+## 11. MARKETPLACE NORTH STAR — Visión a largo plazo
+
+### La visión
+
+La intención declarada de Pablo a largo plazo es que Catenaccio evolucione hacia un **marketplace especializado en camisetas de fútbol** — un sistema tipo Vinted pero enfocado, donde otros coleccionistas puedan publicar sus propias camisetas bajo la marca y los estándares de calidad de Catenaccio.
+
+Esta visión es legítima y cambia el modelo de datos que conviene diseñar desde el principio. Pero **no es el MVP** y no debe serlo.
+
+### Las 4 fases
+
+| Fase | Descripción | Criterio de entrada |
+|------|-------------|-------------------|
+| **Fase 1 — Tienda propia estable** | catenacciovintage.com funcionando, rápida, sin fricción técnica. Elementor Pro resuelto. Performance mínima. | Track 0 completado |
+| **Fase 2 — Studio interno** | Catenaccio Studio operativo para publicar las propias camisetas de Pablo. Workflow validado: ≤10 min por producto. | Track 1 MVP operativo |
+| **Fase 3 — Catálogo robusto** | 100+ productos publicados, taxonomía estable, SEO de atributos activo, operación fluida sin intervención técnica. | 100 productos + SEO Track 2 |
+| **Fase 4 — Marketplace (si hay tracción)** | Otros usuarios publican sus camisetas en Catenaccio. Multi-vendor, confianza/autenticidad, modelo de comisión o suscripción. | Ver gates abajo |
+
+### Gates para abrir el marketplace (Fase 4)
+
+**No abrir Fase 4 hasta cumplir TODOS:**
+
+- [ ] 100+ productos propios publicados y vendiendo.
+- [ ] Workflow interno validado: publicación de producto en ≤10 minutos de forma consistente.
+- [ ] Tráfico orgánico demostrable (ej: 1.000+ visitas/mes desde Google) o comunidad activa documentada.
+- [ ] Ventas recurrentes reales (no solo pedidos aislados).
+- [ ] **Propuesta de valor clara frente a Vinted:** ¿por qué un vendedor publicaría en Catenaccio antes que en Vinted? (especialización, audiencia específica, autenticación, precio premium, comisión menor, marca, etc.)
+- [ ] Sistema de confianza/autenticidad definido: ¿cómo garantiza Catenaccio que las camisetas son auténticas? ¿fotos obligatorias de etiqueta? ¿validación por Pablo? ¿reputación de vendedor?
+- [ ] Decisión sobre el modelo económico: ¿comisión por venta? ¿suscripción mensual? ¿freemium?
+- [ ] Capacidad técnica: modelo de datos multi-usuario implementado en Studio (users, listings, ownership).
+
+### Implicaciones de diseño ahora (sin construir el marketplace)
+
+Aunque el marketplace es Fase 4, algunas decisiones de diseño ahora pueden evitar reescrituras costosas más adelante:
+
+| Decisión | Recomendación ahora | Por qué |
+|----------|--------------------|----|
+| **Modelo de producto en Studio** | Incluir campo `owner_id` (aunque sea siempre Pablo en Fase 2) | Facilita multi-vendor sin migración de datos |
+| **Autenticación en Studio** | Diseñar con JWT / sesiones propias, no hardcoded a un solo usuario | Permite añadir usuarios externos sin reescribir auth |
+| **WooCommerce como backend** | Mantenerlo solo si escala a marketplace; evaluar en Fase 3 | WC multi-vendor requiere plugins pesados (Dokan, WCFM); puede que en Fase 4 convenga otro backend |
+| **Modelo de datos de camiseta** | Taxonomías actuales (pa_liga, pa_equipo, etc.) son correctas y reutilizables en marketplace | No cambiarlas — son la base del catálogo |
+| **URLs y SEO** | Diseñar las URLs de Fase 2 sin asumir seller subdomains | `/camisetas/real-madrid/` puede escalar a `/vendedores/pablo/camisetas/real-madrid/` con redirects |
+
+### Por qué el marketplace no es el MVP
+
+Pablo lo reconoció explícitamente (2026-06-13):
+- "El marketplace es difícil de escalar."
+- "No está claro por qué un usuario publicaría en Catenaccio antes que en Vinted."
+- La propuesta de valor del marketplace requiere que Catenaccio tenga primero tracción propia.
+
+Un marketplace construido antes de validar la demanda es el error más caro en e-commerce. Vinted tiene 90M+ usuarios y 9 años de historia. Catenaccio necesita primero ser una referencia de calidad en camisetas vintage antes de pedirle a otros que confíen su inventario a la plataforma.
+
+**La secuencia correcta:** primero Pablo lo usa y vende, luego otros quieren estar donde Pablo está.
+
+---
+
+## 12. QUÉ NO HACER TODAVÍA
 
 - **No construir el storefront público en Next.js** hasta tener evidencia de tráfico y catálogo de 100+ productos. El frontend no es el cuello de botella.
 - **No migrar a Shopify.** Pérdida de activos reales sin justificación.
 - **No implementar headless checkout.** WooPayments no lo soporta en 2026.
 - **No intentar actualizar Elementor Pro a 4.x.** La decisión de no renovar es firme.
 - **No hacer over-engineering en Studio.** El MVP es un formulario + llamada a REST API + Claude. No necesita autenticación compleja, multi-usuario, ni dashboard en la primera versión.
+- **No diseñar features de marketplace en el MVP de Studio.** Sin multi-vendor, sin sistema de comisiones, sin perfiles de vendedor, sin ratings externos. El `owner_id` en el modelo de datos es suficiente para no cerrar la puerta.
 - **No activar UCSS/CSS asíncrono en LiteSpeed** sin configurar primero las exclusiones de WooCommerce.
 - **No cambiar el PHP handler** (ea-php81 → ea-php83 da error 403 — documentado).
 - **No usar la cuenta de administrador** como Application Password de Studio.
@@ -457,7 +513,7 @@ Raiola Inicio SSD 2.0 no ofrece SSH. Esto no bloquea operación de agentes — s
 
 ---
 
-## 12. DECISIÓN QUE DEBE TOMAR EL OPERADOR
+## 13. DECISIÓN QUE DEBE TOMAR EL OPERADOR
 
 **Pregunta exacta:**
 
@@ -483,28 +539,28 @@ Raiola Inicio SSD 2.0 no ofrece SSH. Esto no bloquea operación de agentes — s
 
 ---
 
-## 13. CAMBIOS DOCUMENTALES REALIZADOS
+## 14. CAMBIOS DOCUMENTALES REALIZADOS
 
 | Documento | Cambio |
 |-----------|--------|
-| `docs/discovery/TARGET_OPTIONS.md` | Reescrito completo — Root Cause añadida, veredicto corregido de Opción A → A0+B1, Track model, acceso API sin SSH, plan 7/30/90 actualizado |
-| `DECISIONS.md` | DEC-8 actualizada: de "APPROVE Opción A (Gutenberg)" a "APPROVE A0 + B1 (Studio)" |
-| `BACKLOG.md` | Nuevas tareas: STUDIO_MVP_DESIGN, WC_API_ACCESS_MODEL, PRODUCT_WORKFLOW_DESIGN, ATTRIBUTE_TAXONOMY_SEO, PERFORMANCE_HOSTING_DECISION |
-| `CONTEXTO.md` | Sesión 005b añadida (append) |
-| `HISTORIAL_SESIONES.md` | Entrada Sesión 005b añadida (append-only) |
-| `agent_events.jsonl` | Evento `target_options_reframed` registrado |
+| `docs/discovery/TARGET_OPTIONS.md` | Reescrito completo (005b) + sección Marketplace North Star añadida (005c) |
+| `DECISIONS.md` | DEC-8 con A0+B1. PEND-2 añadida: marketplace como NORTH_STAR / DEFER |
+| `BACKLOG.md` | Nuevas tareas derivadas 005b/005c. MARKETPLACE_NORTH_STAR_VALIDATION en LATER |
+| `CONTEXTO.md` | Sesiones 005b y 005c añadidas (append) |
+| `HISTORIAL_SESIONES.md` | Entradas 005b y 005c añadidas (append-only) |
+| `agent_events.jsonl` | Eventos `target_options_reframed` y `marketplace_north_star_added` registrados |
 
 ---
 
-## 14. CIERRE DE SESIÓN
+## 15. CIERRE DE SESIÓN
 
-**Estado del workflow:** AS_IS_VALIDADO → TARGET_OPTIONS EN_REVISIÓN (versión corregida 005b)  
-**Siguiente paso:** Operador responde a la pregunta de la sección 12. Si aprueba A0+B1 → Sesión 006: Track 0 auditoría + diseño formulario Studio.  
-**Deadline:** Track 0 debe completarse antes del **2026-07-01** (18 días desde 2026-06-13).  
-**Commit de Sesión 005 (15d478c):** corregido en este commit — no pushear el commit anterior por separado.
+**Estado del workflow:** AS_IS_VALIDADO → TARGET_OPTIONS EN_REVISIÓN (versión 005c — definitiva para aprobación)  
+**Siguiente paso:** Operador responde a la pregunta de la sección 13. Si aprueba A0+B1 → Sesión 006: Track 0 + arranque Studio.  
+**Deadline:** Track 0 debe completarse antes del **2026-07-01**.  
+**Commits no pusheados:** 15d478c (005) + f7a112f (005b) + este (005c) — 3 commits ahead. No pushear hasta aprobación del operador.
 
 ---
 
-*Versión corregida generada en Sesión 005b — 2026-06-13 — Claude Code Sonnet.*  
-*Corrección de TARGET_OPTIONS v1 (Sesión 005): veredicto ampliado de "Quitar Elementor Pro → Gutenberg" a "A0 + B1 (Catenaccio Studio)".*  
+*Versión 005c — 2026-06-13 — Claude Code Sonnet.*  
+*005: TARGET_OPTIONS inicial. 005b: Root Cause + A0+B1. 005c: Marketplace North Star + fases + gates.*  
 *Basado en AS_IS_UNDERSTANDING.md (VALIDADO_POR_USUARIO, 2026-06-10) y contexto operativo del operador.*

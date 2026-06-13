@@ -132,6 +132,26 @@ Cross-referencia con `agent_events.jsonl` para detalle de eventos.
 ---
 
 ---
+**Sesión 005c** — 2026-06-13  
+**Agente:** Claude Code (Sonnet)  
+**Modo:** DOCS_ONLY  
+**Tipo:** strategic / marketplace-north-star  
+**Tarea:** Incorporar la visión de marketplace multi-vendor a largo plazo en TARGET_OPTIONS, sin cambiar la recomendación inmediata A0+B1.
+
+**Decisiones clave:**
+- Marketplace declarado como NORTH_STAR / DEFER (PEND-2 en DECISIONS.md). No es el MVP.
+- 4 fases documentadas: Fase 1 (tienda estable) → Fase 2 (Studio interno) → Fase 3 (catálogo robusto) → Fase 4 (marketplace si hay tracción).
+- Gates explícitos para Fase 4: 100+ productos, workflow ≤10 min, tráfico orgánico, ventas recurrentes, propuesta de valor clara frente a Vinted, sistema de autenticidad, modelo económico.
+- Implicaciones de diseño ahora: `owner_id` en modelo de producto, auth con JWT (no hardcoded), URLs sin asumir seller subdomains. Sin features de marketplace en MVP.
+- Recomendación A0+B1 sin cambios — sigue siendo la decisión pendiente de aprobación del operador.
+
+**Qué se validó:** TARGET_OPTIONS.md con §11 Marketplace North Star + §12 QUÉ NO HACER actualizado + §14-15 renumerados. DECISIONS.md con PEND-2. BACKLOG.md con MARKETPLACE_NORTH_STAR_VALIDATION en LATER. CONTEXTO.md, HISTORIAL_SESIONES.md, agent_events.jsonl actualizados.  
+**Qué NO se tocó:** WordPress, WooCommerce, producción, credenciales, hosting, dominio, pagos, código. Recomendación A0+B1 no modificada. No se creó Application Password. No se pusheó.  
+**Siguiente paso:** Operador aprueba A0+B1 → Sesión 006.  
+**agent_events ref:** 2026-06-13T14:00:00Z (marketplace_north_star_added)
+---
+
+---
 **Sesión 005b** — 2026-06-13  
 **Agente:** Claude Code (Sonnet)  
 **Modo:** DOCS_ONLY  

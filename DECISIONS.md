@@ -201,10 +201,34 @@ La recomendación inicial ("Quitar Elementor Pro → Gutenberg") respondía al d
 - Track 3 (storefront público Next.js): DEFER — post 100 productos y evidencia de tráfico.
 
 **Condición para convertirse en decisión formal:**
-El operador aprueba explícitamente A0 + B1. Ver pregunta en TARGET_OPTIONS.md sección 12.
+El operador aprueba explícitamente A0 + B1. Ver pregunta en TARGET_OPTIONS.md sección 13.
 
 **Implicaciones si se aprueba:**
 - Sesión 006: Track 0 — auditoría elementor_library + fixes + validación visual Pablo.
 - Sesión 006 paralela / 007: Track 1 — diseño formulario Studio + Application Password + test WC API.
 - Stack a largo plazo: WooCommerce como motor de venta/pagos + Studio como capa editorial AI-first.
+
+---
+
+### PEND-2 — Marketplace multi-vendor (NORTH_STAR / DEFER)
+**Fecha:** 2026-06-13 (Sesión 005c)  
+**Tipo:** estratégica / visión largo plazo  
+**Estado:** NORTH_STAR — documentada como visión, no como decisión de implementación
+
+**Contexto:**
+Pablo declara que la visión a largo plazo de Catenaccio es un marketplace especializado en camisetas de fútbol — sistema donde otros coleccionistas puedan publicar sus propias camisetas bajo la marca Catenaccio.
+
+**Por qué es NORTH_STAR y no MVP:**
+- El marketplace requiere primero que Catenaccio tenga tracción propia (ventas recurrentes, tráfico orgánico, reputación).
+- No está clara la propuesta de valor frente a Vinted para un vendedor externo hoy.
+- Construir multi-vendor antes de validar el mercado es el error más caro en e-commerce.
+- Pablo lo reconoció explícitamente: "El marketplace es difícil de escalar."
+
+**Gates para activar (ver TARGET_OPTIONS.md §11):**
+100+ productos propios vendiendo, tráfico orgánico ≥1.000 visitas/mes, ventas recurrentes, propuesta de valor definida frente a Vinted, sistema de autenticidad, modelo económico decidido.
+
+**Implicación de diseño ahora:**
+Incluir `owner_id` en el modelo de producto de Studio (aunque sea siempre Pablo en Fase 2). Diseñar autenticación de Studio con JWT/sesiones propias. No añadir features de marketplace al MVP.
+
+**No activar PEND-2 sin revisión explícita con evidencia de las gates.** Ver BACKLOG.md → LATER → MARKETPLACE_NORTH_STAR_VALIDATION.
 
