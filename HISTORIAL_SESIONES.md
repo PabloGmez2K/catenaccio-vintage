@@ -153,6 +153,28 @@ Cross-referencia con `agent_events.jsonl` para detalle de eventos.
 ---
 
 ---
+**Sesión 007** — 2026-06-13  
+**Agente:** Claude Code (Sonnet)  
+**Modo:** READ_ONLY  
+**Tipo:** api-probe / access-verification  
+**Tarea:** Probar acceso de solo lectura a WordPress/WooCommerce. Confirmar qué endpoints funcionan sin auth, cuáles requieren Application Password, y si elementor_library puede auditarse por API.
+
+**Decisiones clave:**
+- `.env.local` está vacío — Pablo creó el archivo pero no lo completó. Probe autenticado bloqueado hasta completarlo.
+- Endpoints públicos funcionan correctamente. 28 productos confirmados vía Store API. Elementor Pro namespace activo (`elementor-pro/v1`).
+- `elementor_library` es post type registrado y visible públicamente (wp/v2/types). Sus items requieren auth.
+- La auditoría de elementor_library es factible 100% por API con `GET /wp-json/wp/v2/elementor_library?context=edit` — sin capturas manuales de Pablo.
+- WC Store API (público) no expone atributos custom. WC REST API v3 con auth es la vía para pa_liga, pa_equipo, etc.
+- El usuario limitado debe tener rol `Shop Manager` para acceso completo a WC REST API v3. `Author` no es suficiente.
+- Precios en WC están en EUR cents (4500 = €45.00).
+
+**Qué se validó:** `API_READONLY_PROBE_RESULT.md` creado con resultados completos. BACKLOG.md actualizado. CONTEXTO.md con estado y nuevo orden. HISTORIAL_SESIONES.md con esta entrada. agent_events.jsonl con evento. Ningún write al sitio WordPress. `.env.local` no cometteado ni leído en contenido.  
+**Qué NO se tocó:** WordPress, WooCommerce, producción, código, credenciales. Ningún POST/PUT/PATCH/DELETE ejecutado.  
+**Siguiente paso:** Pablo completa `.env.local` (WP_SITE_URL, WP_APP_USER con rol Shop Manager, WP_APP_PASSWORD) → Sesión 007b: probe autenticado (usuario, WC atributos, elementor_library 19 items, licencia Pro).  
+**agent_events ref:** 2026-06-13T19:00:00Z (api_readonly_probe_executed)
+---
+
+---
 **Sesión 006d** — 2026-06-13  
 **Agente:** Claude Code (Sonnet)  
 **Modo:** DOCS_ONLY  

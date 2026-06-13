@@ -12,8 +12,9 @@ Actualizar al cierre de cada sesión. Los ítems completados se mueven a DONE o 
 - [x] **TARGET_OPTIONS APROBADO** — 2026-06-13 (Sesión 005d). Operador aprueba A0 + B1. Marketplace = NORTH_STAR / DEFER. Ver `docs/discovery/TARGET_OPTIONS.md`.
 - [x] **CMS_API_ACCESS_MODEL_READONLY** — modelo de acceso sin SSH definido en `docs/operations/ACCESS_MODEL_NO_SSH.md` (Sesión 006). Guía paso a paso lista en §6.
 - [x] **B1_STOCK_OPERATIONS_MODEL** — modelo operativo de stock definido en `docs/operations/STOCK_OPERATIONS_MODEL.md` (Sesión 006c). Contexto capturado para B1 — no bloquea A0 ni la activación del acceso.
-- [ ] **ACCESS_MODEL_ACTIVATION_READONLY** ⟵ **PRIMERA ACCIÓN** — Pablo crea el usuario WP limitado + Application Password siguiendo `docs/operations/ACCESS_MODEL_NO_SSH.md §6`. Estimado: 10-15 min en WP Admin, sin agente. Prerequisito para TODO lo que sigue: auditoría Elementor, Studio, probe API. Ver también: ticket a Raiola sobre OPcache siguiendo §9 del mismo doc.
-- [ ] **WP_WC_API_READONLY_PROBE** — primera llamada de solo lectura a WC REST API tras credenciales creadas: `GET /wp-json/wc/v3/products` + `GET /wp-json/wc/v3/products/attributes`. Confirma que el acceso funciona antes de auditar Elementor. El agente ejecuta esto, no Pablo.
+- [x] **ACCESS_MODEL_ACTIVATION_READONLY** — Pablo creó usuario limitado + Application Password. `.env.local` existe pero vacío. **Acción pendiente: Pablo completa `.env.local`** siguiendo `docs/operations/API_READONLY_PROBE_RESULT.md §6` (formato WP_SITE_URL, WP_APP_USER, WP_APP_PASSWORD). Verificar que el rol del usuario es `Shop Manager` para WC REST API v3.
+- [x] **WP_WC_API_READONLY_PROBE (parcial)** — probe ejecutado en Sesión 007. Endpoints públicos: 200 OK (site info, 28 productos, 4 categorías, elementor_library visible como tipo). Endpoints autenticados: 401 esperado — `.env.local` vacío. Ver `docs/operations/API_READONLY_PROBE_RESULT.md`.
+- [ ] **WP_WC_API_AUTH_PROBE** — probe autenticado pendiente. Pablo completa `.env.local` (§6 de `API_READONLY_PROBE_RESULT.md`). Agente verifica: usuario/rol, WC atributos, elementor_library items, licencia Pro. Sesión 007b.
 - [ ] **A0_ELEMENTOR_DEPENDENCY_AUDIT** — auditar los 19 items de elementor_library vía WP Admin / API (no requiere lista manual de Pablo si hay acceso activo). Clasificar widgets Pro exclusivos vs. Free o migrables a Gutenberg/WooCommerce Blocks. Urgente: deadline 2026-07-01.
 - [ ] **Arreglar OPcache (PROB-09)** — Pablo abre ticket a Raiola para aumentar `opcache.memory_consumption`. Acción paralela, sin agente.
 
@@ -77,6 +78,7 @@ _(sin otros bloqueos activos — TARGET aprobado, implementación desbloqueada, 
 | AS_IS_UNDERSTANDING.md actualizado con datos reales del servidor (plugins, versiones, HPOS, OPcache, Elementor Pro deadline) | 2026-06-10 | Sesión 003 |
 | AS_IS_UNDERSTANDING.md validado por operador — estado cambiado a VALIDADO_POR_USUARIO | 2026-06-10 | Sesión 004 |
 | ACCESS_MODEL_NO_SSH.md creado — modelo de acceso sin SSH completo: capas, matriz, modos, credenciales, guía App Password, revocación, staging, OPcache/Raiola | 2026-06-13 | Sesión 006 |
+| API_READONLY_PROBE_RESULT.md creado — probe public endpoints OK (28 productos, 37 namespaces, elementor-pro/v1 activo). Auth endpoints requieren .env.local completo. | 2026-06-13 | Sesión 007 |
 | STOCK_OPERATIONS_MODEL.md creado — ciclo de vida de producto (11 estados), campos mínimos Studio (8 bloques), recomendación imágenes (A→C), guía migración Excel, tareas derivadas | 2026-06-13 | Sesión 006c |
 | TARGET_OPTIONS.md preparado — comparativa A/B/C/D/E, veredicto APPROVE Opción A, plan 7/30/90 días | 2026-06-13 | Sesión 005 |
 | TARGET_OPTIONS.md corregido — Root Cause añadida, veredicto corregido a A0+B1 (Catenaccio Studio), modelo acceso API | 2026-06-13 | Sesión 005b |

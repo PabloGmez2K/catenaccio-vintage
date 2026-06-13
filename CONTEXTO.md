@@ -40,11 +40,12 @@ Hipótesis no verificadas del SEED:
 
 ## Siguiente paso recomendado
 
-**ORDEN CORRECTO (corregido en Sesión 006d):**
-1. **Acción Pablo sin agente (ahora):** crear usuario WP limitado + Application Password siguiendo `docs/operations/ACCESS_MODEL_NO_SSH.md §6` — 10-15 min en WP Admin. Paralelo: ticket a Raiola para OPcache (§9 del mismo doc).
-2. **Sesión 007 — WP_WC_API_READONLY_PROBE:** el agente verifica el acceso con `GET /wp-json/wc/v3/products` + `GET /wp-json/wc/v3/products/attributes`. Sin lista manual de Pablo.
-3. **Sesión 008 — A0_ELEMENTOR_DEPENDENCY_AUDIT:** con acceso confirmado, el agente audita los 19 items de elementor_library vía WP Admin supervisado. No se pide lista manual a Pablo salvo fallback.
-4. **Sesión 009+ — Track 1 Studio:** con acceso API probado, arrancar scaffold Studio (Next.js + WC REST API + Claude). Ver `STOCK_OPERATIONS_MODEL.md` para campos y estados. Stock/Excel/fotos: contexto B1, no urgente, no bloquea A0.
+**ORDEN CORRECTO — estado actualizado Sesión 007:**
+1. ✅ Pablo creó usuario + App Password. `.env.local` existe pero vacío.
+2. **Acción Pablo (ahora, 5 min):** completar `.env.local` con WP_SITE_URL, WP_APP_USER, WP_APP_PASSWORD. Ver formato en `docs/operations/API_READONLY_PROBE_RESULT.md §6`. Verificar rol = `Shop Manager`.
+3. **Sesión 007b — WP_WC_API_AUTH_PROBE:** probe autenticado. Confirmar usuario, WC atributos (pa_liga, etc.), 19 items elementor_library, licencia Pro.
+4. **Sesión 008 — A0_ELEMENTOR_DEPENDENCY_AUDIT:** con datos API en mano, auditar los 19 items y clasificar widgets Pro vs. Free. Sin capturas manuales.
+5. **Sesión 009+ — Track 1 Studio:** scaffold Next.js + WC REST API + Claude. Stock/Excel/fotos: contexto B1, no urgente, no bloquea A0.
 
 ---
 
@@ -74,6 +75,8 @@ Sesión 005c (2026-06-13, Claude Code Sonnet): DOCS_ONLY / strategic / MARKETPLA
 Sesión 005d (2026-06-13, Claude Code Sonnet): DOCS_ONLY / approve + push. **TARGET A0 + B1 APROBADO** por el operador ("APPROVE A0 + B1. Marketplace queda como NORTH_STAR / DEFER."). TARGET_OPTIONS.md → OPCIÓN_APROBADA. VALIDATION_RECORD.md con VAL-005. DECISIONS.md DEC-8 cerrada. BACKLOG.md bloqueo levantado, nuevas tareas NOW (A0_IMPLEMENTATION_PLAN, B1_CATENACCIO_STUDIO_SEED, CMS_API_ACCESS_MODEL_READONLY). Commits 005/005b/005c/005d pusheados a origin/main. Workflow: TARGET_APROBADO. No se tocó WordPress, producción, pagos ni código.
 
 Sesión 006 (2026-06-13, Claude Code Sonnet): DOCS_ONLY / ACCESS_MODEL_NO_SSH. Modelo de acceso sin SSH definido: 4 capas (sin acceso servidor / WP Admin manual / WP+WC REST API / cPanel+Raiola), 6 modos de operación (READ_ONLY, API_READ_ONLY, DRAFT_ONLY, APPLY_WITH_APPROVAL, MANUAL_BY_PABLO, BLOCKED_WITHOUT_STAGING), matriz completa tarea→canal→permisos→riesgo, guía App Password + WC API Key, modelo de revocación, operaciones bloqueadas sin staging + procedimiento microfix, plan OPcache/Raiola. DECISIONS.md DEC-9. BACKLOG.md actualizado. Siguiente: Sesión 007 (auditoría Elementor Library) + Sesión 008 (Pablo crea credenciales según §6 del modelo). No se tocó WordPress, producción, credenciales, cPanel ni código.
+
+Sesión 007 (2026-06-13, Claude Code Sonnet): READ_ONLY / WP_WC_API_READONLY_PROBE. Probe público completado. Endpoints sin auth: `/wp-json/` 200 OK (37 namespaces, elementor-pro/v1 activo, confirma Pro en servidor), `wp/v2/types` 200 OK (elementor_library visible como post type), `wc/store/v1/products` 200 OK (28 productos confirmados, 4 categorías, precios EUR). Endpoints autenticados: todos 401 — `.env.local` vacío. Bloqueante: Pablo completa `.env.local` con WP_APP_USER (Shop Manager) y WP_APP_PASSWORD. Descubrimiento clave: elementor_library auditable 100% por API con auth (`wp/v2/elementor_library?context=edit`), sin capturas manuales. WC Store API no expone atributos custom — se necesita wc/v3 con auth. `API_READONLY_PROBE_RESULT.md` creado. No se tocó WP, no se hizo ningún write.
 
 Sesión 006d (2026-06-13, Claude Code Sonnet): DOCS_ONLY / REORDER_ACCESS_FIRST. Orden operativo corregido: access-first es la política activa. Añadido ACCESS_MODEL_ACTIVATION_READONLY como primera acción en BACKLOG NOW. Añadido WP_WC_API_READONLY_PROBE como segunda acción. A0_ELEMENTOR_DEPENDENCY_AUDIT pasa a ser vía agente con acceso real (no depende de lista manual de Pablo como vía principal). B1_CATENACCIO_STUDIO_SEED movido de NOW a NEXT. Tareas stock/Excel/Vinted/imágenes confirman posición NEXT (no acción inmediata de Pablo). CONTEXTO.md siguiente paso actualizado con orden correcto 4 pasos. STOCK_OPERATIONS_MODEL.md con nota de que no bloquea A0. DEC-9 con nota access-first como política operativa. No se tocó WordPress, producción, código ni credenciales.
 
