@@ -45,8 +45,9 @@ Hipótesis no verificadas del SEED:
 2. ✅ Probe completo: 28 productos, 7 atributos, Elementor Pro activo (`isExpired:false`), 14 templates listados.
 3. ✅ Hallazgo crítico: productos usan ACF meta fields (no WC attributes[]). Studio escribe en `meta_data`.
 4. ✅ A0_ELEMENTOR_DEPENDENCY_AUDIT completo. Widget-level: 15/20 elementos requieren migración. CRÍTICOS: header (653), producto (100), archive (129). Carrito/Mi Cuenta usan Pro. Checkout en Blocks ✅. Ver `ELEMENTOR_DEPENDENCY_AUDIT.md`.
-5. **Acción inmediata Pablo:** revertir `catenaccio-studio-agent` a Gestor de la tienda (shop_manager). Luego: Carrito + Mi Cuenta quickwin en WP Admin (10 min).
-6. **Sesión 009 — A0_MIGRATION_PLAN:** plan técnico child theme para P1-A/B/C antes del 2026-07-01.
+5. ✅ Ventana admin cerrada. `catenaccio-studio-agent` verificado como `shop_manager` (Sesión 008b).
+6. **Sesión 009 — SERVER_FILESYSTEM_READONLY_DISCOVERY:** mapear estructura real del servidor (child theme, plugins custom, Elementor overrides) antes de escribir ningún patch. Prerequisito para A0_MIGRATION_PLAN.
+7. **Acción Pablo (sin agente):** CARRITO_MICUENTA_QUICKWIN — reemplazar widgets Pro en Carrito y Mi Cuenta por shortcodes (10 min en WP Admin).
 
 ---
 

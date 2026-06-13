@@ -369,3 +369,22 @@ Cross-referencia con `agent_events.jsonl` para detalle de eventos.
 **Siguiente paso:** (1) Pablo revierte `catenaccio-studio-agent` a Gestor de la tienda. (2) Pablo hace quickwin Carrito + Mi Cuenta (10 min en WP Admin). (3) Sesión 009: A0_MIGRATION_PLAN — plan técnico child theme para P1-A/B/C.  
 **agent_events ref:** 2026-06-13T22:00:00Z (elementor_dependency_audit_complete)
 ---
+
+---
+**Sesión 008b** — 2026-06-13  
+**Agente:** Claude Code (Sonnet)  
+**Modo:** READ_ONLY  
+**Tipo:** close / role-verify / sync  
+**Tarea:** Cerrar ventana admin de Sesión 008. Verificar que `catenaccio-studio-agent` volvió a `shop_manager`. Pushear commit documental de Sesión 008. Añadir SERVER_FILESYSTEM_READONLY_DISCOVERY al backlog como prerequisito de A0_MIGRATION_PLAN.
+
+**Decisiones clave:**
+- `catenaccio-studio-agent` verificado como `shop_manager` via `GET /wp/v2/users/me?context=edit` → roles: `["shop_manager"]`. Ventana admin cerrada correctamente.
+- La migración real no puede planificarse sin conocer la estructura del servidor: child theme existente, archivos Elementor override, plugins custom. Se añade SERVER_FILESYSTEM_READONLY_DISCOVERY como prerequisito antes de A0_MIGRATION_PLAN.
+- CARRITO_MICUENTA_QUICKWIN no requiere agente — Pablo puede hacerlo directamente en WP Admin (10 min).
+- Commit de Sesión 008 pusheado a origin/main.
+
+**Qué se validó:** rol `shop_manager` confirmado por API GET. `.env.local` confirmado ignorado (`.gitignore:6`). Commit `97d470c` de Sesión 008 pusheado. BACKLOG.md con SERVER_FILESYSTEM_READONLY_DISCOVERY añadido como prerequisito. CONTEXTO.md siguiente paso actualizado. HISTORIAL_SESIONES.md esta entrada. agent_events.jsonl con evento.  
+**Qué NO se tocó:** WordPress, configuración, roles, templates, páginas, producción. No se modificó ningún documento de Sesión 008. Ningún write al sitio.  
+**Siguiente paso:** Sesión 009 — SERVER_FILESYSTEM_READONLY_DISCOVERY: mapear child theme, plugins custom, archivos override del servidor (vía cPanel File Manager read-only o FTP readonly). Luego A0_MIGRATION_PLAN con contexto real.  
+**agent_events ref:** 2026-06-13T23:00:00Z (admin_window_closed_role_verified)
+---
