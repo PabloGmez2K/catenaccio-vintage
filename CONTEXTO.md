@@ -40,7 +40,7 @@ Hipótesis no verificadas del SEED:
 
 ## Siguiente paso recomendado
 
-**Sesión 005 — TARGET_OPTIONS.** AS-IS validado el 2026-06-10. Deadline: ~2026-07-01 (expiración Elementor Pro). Preparar y comparar opciones TARGET: a) WP+WC sin Elementor Pro; b) WP headless; c) migración a stack moderno; d) aplazar migración y priorizar catálogo. El operador decide la opción y el SEED queda listo para implementación.
+**Sesión 006 — Aprobación y SEED.** TARGET_OPTIONS EN_REVISIÓN (2026-06-13). El operador debe aprobar explícitamente la Opción A (WP+WC sin Elementor Pro) → generar RECOMMENDED_IMPLEMENTATION_PLAN.md + SEED. Si aprueba, la primera acción técnica es la auditoría de los 19 items de elementor_library en WP Admin (read-only). Deadline: ~2026-07-01.
 
 ---
 
@@ -60,4 +60,6 @@ Sesión 003 (2026-06-10, Claude Code Sonnet): API_FAST_DISCOVERY / SERVER_CONTEX
 Sesión 004 (2026-06-10, Claude Code Sonnet): DOCS_ONLY / as-is-validation. **AS-IS validado por el operador.** AS_IS_UNDERSTANDING.md cambiado de BORRADOR a VALIDADO_POR_USUARIO. VALIDATION_RECORD.md con VAL-004. BACKLOG.md, CONTEXTO.md, HISTORIAL_SESIONES.md y agent_events.jsonl actualizados. Workflow pasa a AS_IS_VALIDADO. Siguiente sesión: TARGET_OPTIONS con deadline ~2026-07-01. No se tocó código, WordPress ni producción.
 
 Sesión 004c (2026-06-13, Claude Code Sonnet): LITE / DOCS_ONLY / repo-os-sync. Transferencia de aprendizajes genéricos de Bijuymoda Suite al sistema operativo documental de Catenaccio. Actualizado ORCHESTRATOR.md (stack real, lectura proporcional +git step 0, guardrails de dominio, tabla de agentes, §16 WORKSTREAM_ANCHOR, §17 TARGET binario), AGENTS.md (tabla de superficies específica, guardrails de dominio, stop-loss con clasificación, microparches WP), CHATGPT_PROJECT_INSTRUCTIONS.md (estado actual, agentes, workstream anchor). No se tocó WordPress, producción, TARGET_OPTIONS ni Bijuymoda Suite.
+
+Sesión 005 (2026-06-13, Claude Code Sonnet): DOCS_ONLY / strategic / TARGET_OPTIONS. TARGET_OPTIONS.md completado con comparativa A/B/C/D/E, tabla comparativa, riesgos, plan 7/30/90 días. Veredicto: APPROVE Opción A — WP+WC sin Elementor Pro. Insight clave: el Checkout ya está en Gutenberg Blocks (migrado feb 2026) — la parte más crítica ya estaba hecha. BACKLOG.md, DECISIONS.md, HISTORIAL_SESIONES.md, agent_events.jsonl actualizados. Workflow: AS_IS_VALIDADO → TARGET_OPTIONS EN_REVISIÓN. Pendiente: operador aprueba Opción A explícitamente. No se tocó WordPress, producción, pagos ni código.
 

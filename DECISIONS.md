@@ -168,22 +168,33 @@ _(completar si aplica)_
 
 ---
 
-### PEND-1 — Arquitectura futura (pendiente — no decidida)
-**Fecha:** 2026-06-06
-**Tipo:** estratégica / pendiente
-**Estado:** PENDIENTE — NO DECIDIDA
+### PEND-1 → DEC-8 — Arquitectura TARGET recomendada: Opción A (WP+WC sin Elementor Pro)
+**Fecha original:** 2026-06-06  
+**Fecha de recomendación fuerte:** 2026-06-13 (Sesión 005)  
+**Tipo:** estratégica  
+**Estado:** RECOMENDACIÓN FUERTE — pendiente de aprobación explícita del operador
 
-**Contexto:**
-La cancelación de la suscripción de Elementor Pro es un nuevo factor estratégico. La decisión sobre la arquitectura futura queda explícitamente pendiente hasta:
-1. Validar el AS-IS con el impacto de Elementor Pro incluido.
-2. Completar TARGET_OPTIONS con análisis comparativo de las opciones.
-3. Aprobación explícita de la persona usuaria.
+**Recomendación del agente (Sesión 005):**
+APPROVE Opción A — mantener WordPress + WooCommerce y eliminar la dependencia de Elementor Pro migrando el frontend a bloques Gutenberg/WooCommerce antes del 2026-07-01.
 
-**Opciones abiertas (ninguna descartada todavía):**
-- a) Mantener WordPress/WooCommerce reduciendo dependencia de Elementor Pro.
-- b) WordPress como backend/headless con frontend moderno desacoplado.
-- c) Reconstrucción/migración a Next.js/React/Vercel u otra arquitectura moderna.
-- d) Aplazar migración y priorizar catálogo/operativa antes de decidir.
+**Razonamiento:**
+1. El Checkout ya fue migrado a Gutenberg Checkout Blocks en febrero 2026 — la parte más crítica ya está hecha. El riesgo de pagos al eliminar Elementor Pro es prácticamente cero.
+2. La migración del frontend de catálogo (19 items elementor_library + Cart + Mi Cuenta + mini-cart) es manejable en 5-14 días focales.
+3. Las opciones alternativas (headless, migración completa, Shopify) son inviables antes del deadline de 2026-07-01 y añaden riesgo sin resolver el problema inmediato.
+4. El cuello de botella real no es el frontend — es el catálogo (28 productos vs. objetivo 100+). Opción A libera energía hacia el catálogo.
 
-**No asumir:** que Next.js/Vercel es la respuesta correcta. Tampoco que WordPress debe mantenerse. Evaluar con evidencia una vez que AS-IS esté validado.
+**Alternativas descartadas:**
+- B (headless): WooPayments no soporta headless en producción — STOP.
+- C (migración completa): no factible antes del deadline — DEFER (reevaluar con evidencia en 6-12 meses).
+- D (aplazar): fallback aceptable solo si Opción A resulta más compleja de lo esperado en la primera semana.
+- E (Shopify): pérdida de activos reales sin justificación — STOP.
+
+**Condición para convertirse en decisión formal (DEC-8):**
+El operador aprueba explícitamente la Opción A. Ver pregunta en TARGET_OPTIONS.md sección 9.
+
+**Implicaciones si se aprueba:**
+- Próxima sesión: auditoría de los 19 items elementor_library en WP Admin (read-only).
+- Siguiente sesión: migración de Cart, Mi Cuenta y mini-cart.
+- Plazo de implementación: 5-14 días antes del 2026-07-01.
+- Stack a largo plazo: WordPress + WooCommerce + Gutenberg blocks + tema ligero. Elementor eliminado completamente o solo en free para contenido estático.
 

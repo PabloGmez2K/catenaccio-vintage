@@ -132,6 +132,28 @@ Cross-referencia con `agent_events.jsonl` para detalle de eventos.
 ---
 
 ---
+**Sesión 005** — 2026-06-13  
+**Agente:** Claude Code (Sonnet)  
+**Modo:** DOCS_ONLY  
+**Tipo:** strategic / target-options  
+**Tarea:** Preparar TARGET_OPTIONS.md con comparativa estratégica completa y recomendación para el deadline de Elementor Pro (~2026-07-01).
+
+**Decisiones clave:**
+- Veredicto APPROVE Opción A: mantener WordPress + WooCommerce y eliminar la dependencia de Elementor Pro antes del 2026-07-01.
+- Insight crítico documentado: el Checkout ya fue migrado a Gutenberg Checkout Blocks en febrero 2026. El riesgo de pagos al quitar Elementor Pro es prácticamente cero.
+- Opción B (headless) STOP: WooPayments no soporta headless en producción.
+- Opción C (migración completa) DEFER: inviable antes del deadline. Reevaluar con evidencia en 6-12 meses.
+- Opción D (aplazar) DEFER condicional: solo si Opción A resulta más compleja de lo esperado.
+- Opción E (Shopify) STOP: pérdida de activos reales sin justificación.
+- PEND-1 avanzada a recomendación fuerte DEC-8 en DECISIONS.md (pendiente de aprobación del operador).
+
+**Qué se validó:** TARGET_OPTIONS.md generado con 11 secciones (veredicto, contexto, opciones, comparativa, riesgos, recomendación binaria, plan 7/30/90, qué no hacer, pregunta al operador, cambios documentales, cierre). BACKLOG.md con TARGET_OPTIONS marcado DONE, nuevas tareas de auditoría e implementación. DECISIONS.md con DEC-8 propuesta. CONTEXTO.md e HISTORIAL_SESIONES.md actualizados. agent_events.jsonl con evento.  
+**Qué NO se tocó:** WordPress, WooCommerce, producción, credenciales, hosting, dominio, DNS, pagos, código, Elementor Pro. No se generó SEED ni plan de implementación. No se inició ninguna tarea técnica.  
+**Siguiente paso:** Operador aprueba Opción A → Sesión 006: generar RECOMMENDED_IMPLEMENTATION_PLAN.md + SEED + auditoría elementor_library en WP Admin.  
+**agent_events ref:** 2026-06-13T00:00:00Z (target_options_ready)
+---
+
+---
 **Sesión 004c** — 2026-06-13  
 **Agente:** Claude Code (Sonnet)  
 **Modo:** LITE  
