@@ -153,6 +153,28 @@ Cross-referencia con `agent_events.jsonl` para detalle de eventos.
 ---
 
 ---
+**Sesión 006c** — 2026-06-13  
+**Agente:** Claude Code (Sonnet)  
+**Modo:** DOCS_ONLY  
+**Tipo:** strategic / stock-operations-model  
+**Tarea:** Modelar la operativa real de stock de Pablo para que Catenaccio Studio sea un sistema operativo de inventario, no solo un formulario de publicación.
+
+**Decisiones clave:**
+- Catenaccio Studio definido explícitamente como PIM + gestor de estados + asistente de publicación web/Vinted + base futura de marketplace (sin construirlo).
+- 11 estados del ciclo de vida de una camiseta: COMPRADA → PENDIENTE_FOTOS → FOTOS_HECHAS → PENDIENTE_DESCRIPCION → BORRADOR_WEB → PENDIENTE_WEB → PUBLICADA_WEB → PENDIENTE_VINTED → PUBLICADA_VINTED → RESERVADA → VENDIDA → ARCHIVADA.
+- 8 bloques de campos mínimos definidos: identificación, compra/coste, precio/margen (con cálculo automático de margen_esperado y margen_real), atributos WC (pa_liga, pa_equipo, etc.), contenido Claude (título SEO, descripción, precio sugerido), imágenes (carpeta_local, estado_fotos), estado operativo/publicación (id_woocommerce, url_web, url_vinted, canal_venta), ubicación física y notas.
+- Recomendación imágenes: Opción A en MVP (registrar ruta de carpeta local, sin mover fotos), escalar a Opción C (upload directo a WC Media Library vía `POST /wp-json/wp/v2/media`) cuando Studio esté en uso.
+- No importar Excel todavía. Primer paso: Pablo comparte columnas reales de STOCK.xlsx. Segundo paso: plantilla CSV futura compatible con Studio. Tercer paso: importador en iteración posterior.
+- 5 tareas derivadas añadidas al BACKLOG: EXCEL_STOCK_IMPORT_MAPPING, LOCAL_IMAGE_FOLDER_WORKFLOW, VINTED_PUBLICATION_TRACKING, STUDIO_PRODUCT_STATUS_PIPELINE, STUDIO_MVP_DESIGN actualizado con referencia a este documento.
+- Qué NO construir en MVP: marketplace, multi-vendor, sincronización Vinted automática, publicación sin revisión, sistema de pagos propio, gestión pedidos, import automático precios mercado, app móvil.
+
+**Qué se validó:** `docs/operations/STOCK_OPERATIONS_MODEL.md` creado. BACKLOG.md con B1_STOCK_OPERATIONS_MODEL marcado done + 5 tareas derivadas añadidas + registro en DONE. CONTEXTO.md y HISTORIAL_SESIONES.md con Sesión 006c. agent_events.jsonl con evento stock_operations_model_defined.  
+**Qué NO se tocó:** WordPress, WooCommerce, producción, credenciales, hosting, dominio, pagos, código, Excel de Pablo. No se creó Application Password. No se implementó código.  
+**Siguiente paso:** Sesión 007 (auditoría Elementor Library) + Pablo comparte columnas de STOCK.xlsx (acción sin agente) + Sesión 008 (Pablo crea credenciales ACCESS_MODEL §6) + Sesión 009 (Studio MVP).  
+**agent_events ref:** 2026-06-13T17:00:00Z (stock_operations_model_defined)
+---
+
+---
 **Sesión 005c** — 2026-06-13  
 **Agente:** Claude Code (Sonnet)  
 **Modo:** DOCS_ONLY  
