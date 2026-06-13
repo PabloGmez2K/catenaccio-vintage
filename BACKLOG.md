@@ -10,9 +10,9 @@ Actualizar al cierre de cada sesión. Los ítems completados se mueven a DONE o 
 ## NOW — Esta semana / próxima sesión
 
 - [x] **TARGET_OPTIONS APROBADO** — 2026-06-13 (Sesión 005d). Operador aprueba A0 + B1. Marketplace = NORTH_STAR / DEFER. Ver `docs/discovery/TARGET_OPTIONS.md`.
-- [ ] **A0_IMPLEMENTATION_PLAN** — diseñar el plan de implementación de Track 0: auditoría elementor_library, migración Cart/Mi Cuenta/mini-cart, OPcache fix. Próxima sesión: Sesión 006.
+- [ ] **A0_ELEMENTOR_AUDIT** — auditar los 19 items de elementor_library: clasificar cuáles usan widgets Pro exclusivos vs. widgets Free o migrables a Gutenberg/WooCommerce Blocks. Sesión 007. Prerequisito: Pablo entrega lista o capturas del Elementor Library.
 - [ ] **B1_CATENACCIO_STUDIO_SEED** — arrancar el diseño de Catenaccio Studio: formulario, campos, stack Next.js, scaffold inicial. Parallel a Track 0.
-- [ ] **CMS_API_ACCESS_MODEL_READONLY** — crear Application Password en WP Admin: usuario limitado (Editor de productos). Guía paso a paso. Prerequisito para Studio.
+- [x] **CMS_API_ACCESS_MODEL_READONLY** — modelo de acceso sin SSH definido en `docs/operations/ACCESS_MODEL_NO_SSH.md` (Sesión 006). Guía paso a paso lista en §6. **Pendiente de ejecución por Pablo** (crear usuario + Application Password — 10-15 min en WP Admin). Prerequisito para Studio.
 - [ ] **Auditoría Elementor Pro templates (Track 0)** — listar los 19 items en elementor_library y clasificar cuáles usan widgets Pro exclusivos. WP Admin read-only. Urgente: deadline 2026-07-01.
 - [ ] Arreglar OPcache (PROB-09) — solicitar a Raiola aumentar `opcache.memory_consumption`.
 
@@ -52,6 +52,10 @@ Actualizar al cierre de cada sesión. Los ítems completados se mueven a DONE o 
 
 ## BLOCKED — No avanzar hasta que...
 
+- [ ] **Studio API access** — Studio no puede arrancar hasta que Pablo ejecute la guía §6 de `docs/operations/ACCESS_MODEL_NO_SSH.md` (crear usuario limitado + Application Password). Estimado: 10-15 min manual en WP Admin. Sesión 008.
+
+
+
 _(sin bloqueos activos — TARGET aprobado, implementación desbloqueada)_
 
 - [x] ~~Implementación técnica bloqueada hasta AS-IS validado y TARGET aprobado.~~ — DESBLOQUEADO 2026-06-13 (TARGET APROBADO)
@@ -68,6 +72,7 @@ _(sin bloqueos activos — TARGET aprobado, implementación desbloqueada)_
 | SERVER_CONTEXT_CHECK_READONLY completado — evidencia via WP Admin/WC Status (no SSH) | 2026-06-10 | Sesión 003 |
 | AS_IS_UNDERSTANDING.md actualizado con datos reales del servidor (plugins, versiones, HPOS, OPcache, Elementor Pro deadline) | 2026-06-10 | Sesión 003 |
 | AS_IS_UNDERSTANDING.md validado por operador — estado cambiado a VALIDADO_POR_USUARIO | 2026-06-10 | Sesión 004 |
+| ACCESS_MODEL_NO_SSH.md creado — modelo de acceso sin SSH completo: capas, matriz, modos, credenciales, guía App Password, revocación, staging, OPcache/Raiola | 2026-06-13 | Sesión 006 |
 | TARGET_OPTIONS.md preparado — comparativa A/B/C/D/E, veredicto APPROVE Opción A, plan 7/30/90 días | 2026-06-13 | Sesión 005 |
 | TARGET_OPTIONS.md corregido — Root Cause añadida, veredicto corregido a A0+B1 (Catenaccio Studio), modelo acceso API | 2026-06-13 | Sesión 005b |
 | TARGET_OPTIONS.md — Marketplace North Star añadido: fases 1-4, gates, implicaciones de diseño | 2026-06-13 | Sesión 005c |

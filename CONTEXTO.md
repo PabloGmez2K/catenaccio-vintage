@@ -40,7 +40,7 @@ Hipótesis no verificadas del SEED:
 
 ## Siguiente paso recomendado
 
-**Sesión 006 — Track 0: implementación.** TARGET APROBADO (2026-06-13, VAL-005). Arrancar auditoría elementor_library + migración Cart/Mi Cuenta/mini-cart + OPcache fix. Deadline: ~2026-07-01. Paralelo: Application Password + scaffold Studio (Track 1). Marketplace: NORTH_STAR, no construir hasta Fase 4.
+**Sesión 007 — Track 0: auditoría Elementor Library (urgente, deadline 2026-07-01).** Pablo entrega lista/capturas de los 19 items de elementor_library. Agente clasifica widgets Pro vs. Free. **Sesión 008 — Track 1 prerequisito:** Pablo crea usuario limitado + Application Password siguiendo `docs/operations/ACCESS_MODEL_NO_SSH.md §6` (10-15 min en WP Admin). Studio no puede arrancar sin este paso. **Acción inmediata sin agente:** Pablo abre ticket a Raiola sobre OPcache siguiendo §9 del mismo documento.
 
 ---
 
@@ -68,4 +68,6 @@ Sesión 005b (2026-06-13, Claude Code Sonnet): DOCS_ONLY / strategic / ROOT_CAUS
 Sesión 005c (2026-06-13, Claude Code Sonnet): DOCS_ONLY / strategic / MARKETPLACE_NORTH_STAR. Marketplace multi-vendor añadido como visión a largo plazo (NORTH_STAR). Fases 1-4 documentadas. Gates explícitos para abrir Fase 4. Implicaciones de diseño ahora sin construir el marketplace. DECISIONS.md con PEND-2. BACKLOG.md con MARKETPLACE_NORTH_STAR_VALIDATION en LATER. Recomendación A0+B1 sin cambios. No se tocó WordPress, producción, pagos ni código.
 
 Sesión 005d (2026-06-13, Claude Code Sonnet): DOCS_ONLY / approve + push. **TARGET A0 + B1 APROBADO** por el operador ("APPROVE A0 + B1. Marketplace queda como NORTH_STAR / DEFER."). TARGET_OPTIONS.md → OPCIÓN_APROBADA. VALIDATION_RECORD.md con VAL-005. DECISIONS.md DEC-8 cerrada. BACKLOG.md bloqueo levantado, nuevas tareas NOW (A0_IMPLEMENTATION_PLAN, B1_CATENACCIO_STUDIO_SEED, CMS_API_ACCESS_MODEL_READONLY). Commits 005/005b/005c/005d pusheados a origin/main. Workflow: TARGET_APROBADO. No se tocó WordPress, producción, pagos ni código.
+
+Sesión 006 (2026-06-13, Claude Code Sonnet): DOCS_ONLY / ACCESS_MODEL_NO_SSH. Modelo de acceso sin SSH definido: 4 capas (sin acceso servidor / WP Admin manual / WP+WC REST API / cPanel+Raiola), 6 modos de operación (READ_ONLY, API_READ_ONLY, DRAFT_ONLY, APPLY_WITH_APPROVAL, MANUAL_BY_PABLO, BLOCKED_WITHOUT_STAGING), matriz completa tarea→canal→permisos→riesgo, guía App Password + WC API Key, modelo de revocación, operaciones bloqueadas sin staging + procedimiento microfix, plan OPcache/Raiola. DECISIONS.md DEC-9. BACKLOG.md actualizado. Siguiente: Sesión 007 (auditoría Elementor Library) + Sesión 008 (Pablo crea credenciales según §6 del modelo). No se tocó WordPress, producción, credenciales, cPanel ni código.
 

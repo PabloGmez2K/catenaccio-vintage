@@ -211,6 +211,26 @@ La recomendación inicial ("Quitar Elementor Pro → Gutenberg") respondía al d
 
 ---
 
+### DEC-9 — Modelo de acceso sin SSH: Application Password + usuario limitado + DRAFT_ONLY
+**Fecha:** 2026-06-13 (Sesión 006)  
+**Tipo:** operativa / seguridad  
+**Quién aprobó:** Operador (por aprobación implícita de la estrategia A0+B1 que requiere acceso API)  
+**Estado:** ACTIVA — pendiente de ejecución (creación de credenciales por Pablo)
+
+**Decisión:**
+El agente opera el CMS/catálogo exclusivamente vía WP REST API + WC REST API con Application Password de un usuario WP limitado. Modo por defecto: DRAFT_ONLY. Pablo publica. El agente no publica directamente.
+
+**Razonamiento:**
+Sin SSH (Raiola Inicio SSD 2.0), la única vía controlada y segura para que un agente opere el catálogo es la REST API con credenciales de mínimo privilegio. La alternativa (usar la cuenta admin de Pablo) introduce riesgo de compromiso total del sitio.
+
+**Implicaciones:**
+- Usuario limitado `catenaccio-studio-agent` separado del admin.
+- Application Password revocable independientemente del admin.
+- Credenciales en `.env.local` local — nunca en el repo, nunca en el chat.
+- Ver guía completa en `docs/operations/ACCESS_MODEL_NO_SSH.md`.
+
+---
+
 ### PEND-2 — Marketplace multi-vendor (NORTH_STAR / DEFER)
 **Fecha:** 2026-06-13 (Sesión 005c)  
 **Tipo:** estratégica / visión largo plazo  

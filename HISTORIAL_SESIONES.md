@@ -232,3 +232,29 @@ Cross-referencia con `agent_events.jsonl` para detalle de eventos.
 **Siguiente paso:** Sesión 005 — TARGET_OPTIONS. Usar Opus para evaluación final y veredicto APPROVE/STOP.  
 **agent_events ref:** 2026-06-13T00:00:00Z (repo_os_sync)
 ---
+
+---
+**Sesión 006** — 2026-06-13  
+**Agente:** Claude Code (Sonnet)  
+**Modo:** DOCS_ONLY  
+**Tipo:** docs / access-model / operations  
+**Tarea:** Definir el modelo operativo de acceso a WordPress/WooCommerce sin SSH (Raiola Inicio SSD 2.0) para Catenaccio Vintage, prerequisito para Catenaccio Studio (Track 1).
+
+**Decisiones clave:**
+- Modelo de acceso en 4 capas: sin acceso servidor (siempre activo para el agente) / WP Admin manual (Pablo) / WP+WC REST API (agente con credenciales limitadas) / cPanel+Raiola Soporte (Pablo, excepcional).
+- 6 modos de operación definidos: READ_ONLY, API_READ_ONLY, DRAFT_ONLY, APPLY_WITH_APPROVAL, MANUAL_BY_PABLO, BLOCKED_WITHOUT_STAGING.
+- Modo por defecto del agente: DRAFT_ONLY. El agente prepara borradores — Pablo publica.
+- Credencial recomendada para Studio: Application Password de usuario limitado `catenaccio-studio-agent`. Alternativa: WC API Key.
+- Credenciales prohibidas: contraseña admin, wp-config.php, cPanel, pasarelas de pago.
+- Regla de oro: credenciales en `.env.local` local — nunca en repo, nunca en chat.
+- Modelo de revocación documentado (por nombre de password, por key, por usuario).
+- Operaciones bloqueadas sin staging: functions.php, tema hijo, plugins custom — solo microfix con procedimiento autorizado.
+- Opciones de staging en Raiola documentadas (subdominio manual, WP Duplicator, upgrade, entorno local).
+- Plan OPcache/Raiola: valores recomendados (`opcache.memory_consumption=128`, `max_accelerated_files=4000`), texto de ticket para Raiola, fix de `WP_MEMORY_LIMIT` en wp-config.php.
+- DEC-9 añadida en DECISIONS.md.
+
+**Qué se validó:** `docs/operations/ACCESS_MODEL_NO_SSH.md` creado. DECISIONS.md con DEC-9. BACKLOG.md actualizado (CMS_API_ACCESS_MODEL_READONLY marcado completado-pendiente-ejecución, nuevas entradas, DONE actualizado). CONTEXTO.md con sesión 006 y nuevo siguiente paso. HISTORIAL_SESIONES.md esta entrada. agent_events.jsonl con evento. git diff --check limpio.  
+**Qué NO se tocó:** WordPress, WooCommerce, producción, credenciales, cPanel, hosting, dominio, DNS, pagos, código, Elementor. No se creó ninguna credencial. No se entró en WP Admin.  
+**Siguiente paso:** Sesión 007 — Track 0: Pablo entrega capturas/lista de elementor_library (19 items) → auditoría Elementor con Antigravity o Sonnet. Acción inmediata sin agente: Pablo abre ticket Raiola (OPcache) siguiendo §9 del ACCESS_MODEL_NO_SSH.md.  
+**agent_events ref:** 2026-06-13T16:00:00Z (access_model_no_ssh_defined)
+---
