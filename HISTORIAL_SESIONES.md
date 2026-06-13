@@ -153,6 +153,27 @@ Cross-referencia con `agent_events.jsonl` para detalle de eventos.
 ---
 
 ---
+**Sesión 007b** — 2026-06-13  
+**Agente:** Claude Code (Sonnet)  
+**Modo:** READ_ONLY  
+**Tipo:** api-probe / authenticated  
+**Tarea:** Probe autenticado completo usando Application Password de `catenaccio-studio-agent`. Verificar acceso WC REST API v3, Elementor, y auditar modelo de datos real de productos.
+
+**Decisiones clave:**
+- Credenciales verificadas: usuario id=16, slug `catenaccio-studio-agent`, rol `shop_manager` = "Gestor de la tienda". Capacidad `manage_woocommerce` confirmada.
+- **Hallazgo crítico:** todos los productos tienen `attributes: []` (vacío) en WC REST API. Los atributos se almacenan en `meta_data` como ACF fields: `liga`/`equipo`/`jugador`/`ano_temporada` como IDs de término WC, `talla`/`condicion` como strings. Studio debe escribir en `meta_data`, no en `attributes[]`.
+- Elementor Pro: `isExpired: false`. Licencia activa con ~18 días restantes.
+- 14 templates en elementor_library (no 19 como decía el AS_IS — 5 menos, posiblemente eliminados). 12/14 son Pro-dependientes por tipo de template (loop-item, product-archive, product, header, footer, search-results, error-404). Solo `single-page` podría no requerir Pro.
+- Límite de shop_manager: puede listar templates pero no leer su contenido JSON. Para widget-level audit se necesita Application Password de Administrator.
+- pa_equipo: 21 términos confirmados. pa_liga: 6 términos (Bundesliga, Eredivisie, LaLiga, Ligue 1, Premier League, Serie A).
+
+**Qué se validó:** `API_READONLY_PROBE_RESULT.md` actualizado con todos los hallazgos autenticados. BACKLOG.md, CONTEXTO.md, HISTORIAL_SESIONES.md, agent_events.jsonl actualizados. Ningún write al sitio.  
+**Qué NO se tocó:** WordPress, producción, ninguna escritura. `.env.local` no mostrado ni cometteado.  
+**Siguiente paso:** Sesión 008 — A0_ELEMENTOR_DEPENDENCY_AUDIT. Decidir si crear App Password de Admin para widget-level audit, o hacer auditoría visual en WP Admin. 12/14 templates ya clasificados como Pro por tipo.  
+**agent_events ref:** 2026-06-13T20:00:00Z (api_auth_probe_complete)
+---
+
+---
 **Sesión 007** — 2026-06-13  
 **Agente:** Claude Code (Sonnet)  
 **Modo:** READ_ONLY  

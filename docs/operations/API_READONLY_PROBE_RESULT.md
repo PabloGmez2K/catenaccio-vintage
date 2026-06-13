@@ -4,7 +4,7 @@ Resultado del probe de solo lectura a la API de WordPress/WooCommerce sin SSH.
 
 **Proyecto:** Catenaccio Vintage  
 **Fecha:** 2026-06-13  
-**Sesión:** 007  
+**Sesión:** 007 (público) + 007b (autenticado)  
 **Modo:** READ_ONLY — ningún POST, PUT, PATCH ni DELETE ejecutado  
 **Agente:** Claude Code (Sonnet)  
 **Site URL testada:** `https://catenacciovintage.com`
@@ -13,227 +13,240 @@ Resultado del probe de solo lectura a la API de WordPress/WooCommerce sin SSH.
 
 ## 1. VEREDICTO
 
-**Acceso parcialmente confirmado.** Los endpoints públicos funcionan y devuelven datos reales. Los endpoints autenticados (WC REST API v3, elementor_library, elementor templates) requieren las credenciales de Application Password.
+**Acceso confirmado. Probe completo ejecutado.**
 
-**Bloqueante actual:** `.env.local` existe pero está vacío — las variables `WP_SITE_URL`, `WP_APP_USER` y `WP_APP_PASSWORD` no están definidas. Pablo debe completarlo (ver §6).
-
-**Con credenciales válidas en `.env.local`, el agente podrá:**
-- Leer los 19 items de `elementor_library` con sus datos completos (tipo, widgets usados, estado).
-- Leer todos los productos WooCommerce con atributos completos (pa_liga, pa_equipo, etc.).
-- Verificar el estado de licencia de Elementor Pro.
-- Auditar Track 0 sin intervención manual de Pablo.
+- Application Password de `catenaccio-studio-agent` (rol: `shop_manager`) funciona correctamente.
+- WC REST API v3: acceso total de lectura. 28 productos. 7 atributos. Terms resueltos.
+- Elementor Pro: licencia **activa** (`isExpired: false`). 14 templates listados por tipo.
+- **Hallazgo crítico:** los productos actuales almacenan los atributos como ACF meta fields (IDs de término), no como WC product attributes. El campo WC `attributes` está vacío para todos los productos.
+- Elementor template content: requiere Application Password de **Administrator** — shop_manager ve la lista pero no el contenido de cada template. Fallback: WP Admin visual.
 
 ---
 
-## 2. ESTADO DE .env.local
+## 2. CREDENCIALES VERIFICADAS
 
 | Check | Resultado |
 |-------|-----------|
-| Archivo existe | ✅ `.env.local` existe |
-| Ignorado por Git | ✅ `.gitignore` línea 5: `.env.*` |
-| `WP_SITE_URL` definida | ❌ Archivo vacío (0 bytes) |
-| `WP_APP_USER` definida | ❌ Archivo vacío (0 bytes) |
-| `WP_APP_PASSWORD` definida | ❌ Archivo vacío (0 bytes) |
-
-**Acción requerida:** Pablo completa `.env.local` (ver §6).
+| `.env.local` existe | ✅ |
+| Ignorado por Git | ✅ `.gitignore`: `.env.*` + `.env.local` explícito |
+| `WP_SITE_URL` definida | ✅ |
+| `WP_APP_USER` definida | ✅ |
+| `WP_APP_PASSWORD` definida | ✅ (longitud 29 — formato correcto con espacios) |
+| Auth `wp/v2/users/me` | ✅ 200 OK |
+| Usuario ID | 16 |
+| Slug | `catenaccio-studio-agent` |
+| Rol | `shop_manager` (= "Gestor de la tienda") |
+| Capacidad `manage_woocommerce` | ✅ confirmada |
 
 ---
 
 ## 3. RESULTADOS POR ENDPOINT
 
-### 3.1 Endpoints públicos — sin autenticación
+### 3.1 Endpoints públicos (sin autenticación)
 
-| Endpoint | Método | Status | Resultado |
-|----------|--------|--------|-----------|
-| `/wp-json/` | GET | **200 OK** | Site info + 37 namespaces registrados |
-| `/wp-json/wp/v2/types` | GET | **200 OK** | 16 post types visibles incluyendo `elementor_library` y `product` |
-| `/wp-json/wc/store/v1/products?per_page=100` | GET | **200 OK** | **28 productos**, precios en EUR cents |
-| `/wp-json/wc/store/v1/products/categories` | GET | **200 OK** | 4 categorías |
-| `/wp-json/wc/store/v1/products/1792` | GET | **200 OK** | Detalle público (sin atributos WC) |
+| Endpoint | Status | Resultado |
+|----------|--------|-----------|
+| `GET /wp-json/` | **200** | 37 namespaces. `elementor-pro/v1` activo. |
+| `GET /wp-json/wp/v2/types` | **200** | 16 post types. `elementor_library` visible. |
+| `GET /wc/store/v1/products?per_page=100` | **200** | 28 productos. `X-WP-Total: 28`. |
+| `GET /wc/store/v1/products/categories` | **200** | 4 categorías. |
 
-#### Datos confirmados vía endpoints públicos
+### 3.2 Endpoints autenticados — Application Password (shop_manager)
 
-**Site:**
-```
-name: Catenaccio Vintage
-url: https://catenacciovintage.com
-namespaces activos: 37
-```
-
-**Namespaces clave confirmados:**
-```
-wc/v3              ← WooCommerce REST API v3 disponible
-wc/store/v1        ← WC Store API (público)
-wp/v2              ← WordPress REST API
-elementor/v1       ← Elementor API
-elementor-pro/v1   ← Elementor Pro API ← confirma Pro sigue activo en servidor
-elementor-one/v1   ← Elementor
-```
-
-**Post types accesibles (GET /wp-json/wp/v2/types):**
-```
-post, page, attachment, nav_menu_item, wp_block, wp_template,
-wp_template_part, wp_global_styles, wp_navigation, wp_font_family,
-wp_font_face, e-floating-buttons, elementor_library,
-elementor_snippet, product, templately_library
-```
-→ `elementor_library` está registrado y visible como tipo. Sus items requieren auth.
-
-**Productos (28 confirmados, muestra):**
-```
-id=1792  "2014-15 France Away Shirt - (XXL)"  €45.00
-id=1782  "2022-23 Ajax Away Shirt - (XXL)"    €55.00
-id=1773  "2022-23 Liverpool Home Shirt - (XXL)" €45.00
-```
-→ Precios en EUR cents. Store API no expone atributos custom (pa_liga, etc.) — se necesita WC REST API v3 con auth.
-
-**Categorías WooCommerce:**
-```
-id=149  Leyendas              (14 productos)
-id=22   Nuevo                 (16 productos)
-id=148  Selecciones Nacionales (9 productos)
-id=17   Sin categorizar        (5 productos)
-```
+| Endpoint | Status | Resultado |
+|----------|--------|-----------|
+| `GET /wp/v2/users/me?context=edit` | **200** | Usuario, rol, capacidades WC. |
+| `GET /wc/v3/products?per_page=10` | **200** | 28 productos. `attrs=0` (ver §5). |
+| `GET /wc/v3/products/1792` | **200** | Producto completo. Meta fields con atributos. |
+| `GET /wc/v3/products/attributes` | **200** | 7 atributos (pa_liga, pa_equipo, etc.). |
+| `GET /wc/v3/products/attributes/5/terms` (pa_liga) | **200** | 6 ligas. |
+| `GET /wc/v3/products/attributes/4/terms` (pa_equipo) | **200** | 21 equipos. Total en API. |
+| `GET /elementor/v1/site-editor/templates` | **200** | 14 templates. Tipos y estados. |
+| `GET /elementor-pro/v1/license/get-license-status` | **200** | `{"isExpired":false}` |
+| `GET /elementor-pro/v1/license/tier-features` | **200** | Features disponibles. |
+| `GET /wp/v2/elementor_library?context=edit` | **403** | Requiere Administrator. |
+| `GET /elementor/v1/post?id=653` | **403** | Requiere Administrator. |
 
 ---
 
-### 3.2 Endpoints autenticados — requieren Application Password
+## 4. DATOS CONFIRMADOS
 
-| Endpoint | Método | Status sin auth | Diagnóstico |
-|----------|--------|-----------------|-------------|
-| `/wp-json/wp/v2/users/me` | GET | **401** | Requiere auth — confirma usuario |
-| `/wp-json/wp/v2/elementor_library?per_page=100` | GET | **401** | Requiere auth — lista los 19 items |
-| `/wp-json/elementor/v1/site-editor/templates` | GET | **401** | Requiere auth — templates con estructura completa |
-| `/wp-json/elementor-pro/v1/license/get-license-status` | GET | **401** | Requiere auth — estado de licencia Pro |
-| `/wp-json/wc/v3/products?per_page=5` | GET | **401** | Requiere auth — productos con atributos completos |
-| `/wp-json/wc/v3/products/attributes` | GET | **401** | Requiere auth — lista pa_liga, pa_equipo, etc. |
-| `/wp-json/wc/v3/products/categories` | GET | **401** | Requiere auth |
+### WordPress / WooCommerce
 
-**Todos los 401 son comportamiento correcto** — la API está protegida. No hay endpoints sensibles expuestos públicamente.
+```
+Productos activos:   28
+Categorías WC:       4
+  - Leyendas (14), Nuevo (16), Selecciones Nacionales (9), Sin categorizar (5)
+Precios:             EUR, enteros (45 = €45.00 — no cents en WC REST API v3)
+```
+
+### Atributos WooCommerce (taxonomías)
+
+| ID | Nombre | Slug | Terms conocidos |
+|----|--------|------|-----------------|
+| 7 | Año | `pa_ano` | — |
+| 2 | Condición | `pa_condicion` | — |
+| 4 | Equipo | `pa_equipo` | 21 términos (Ajax, Bayern, Barcelona…) |
+| 6 | Jugador | `pa_jugador` | — |
+| 5 | Liga | `pa_liga` | 6 (Bundesliga, Eredivisie, LaLiga, Ligue 1, Premier, Serie A) |
+| 3 | Marca | `pa_marca` | — |
+| 1 | Talla | `pa_talla` | — |
+
+### Equipos en pa_equipo (21 términos confirmados)
+
+AC Milan, Ajax, Alemania, Arsenal, AS Roma, Bayern Munich, Borussia Dortmund, Colombia, Escocia, FC Barcelona, Francia, Juventus, Lazio, Liverpool, Málaga, Manchester United, Paraguay, PSG, Paris Saint-Germain, Real Madrid + más.
 
 ---
 
-## 4. DESCUBRIMIENTOS RELEVANTES
+## 5. HALLAZGO CRÍTICO — MODELO DE DATOS REAL
 
-### Elementor Pro sigue activo en el servidor
+**Los productos NO usan WC product attributes. Usan ACF meta fields.**
 
-El namespace `elementor-pro/v1` aparece en `/wp-json/` sin auth. Elementor Pro 3.35.1 sigue registrado y activo. La expiración de la licencia (~2026-07-01) afectará al editor y a algunos widgets, pero el runtime sigue activo hoy.
+Todos los productos tienen `attributes: []` (vacío) en WC REST API v3. Los atributos están almacenados en `meta_data` como pares clave-valor:
 
-**Implicación para auditoría:** las rutas de Elementor Pro API son accesibles con credenciales. Podremos verificar el estado de licencia directamente vía `GET /wp-json/elementor-pro/v1/license/get-license-status`.
-
-### La auditoría de elementor_library es factible 100% por API
-
-Con Application Password, el agente puede hacer:
 ```
-GET /wp-json/wp/v2/elementor_library?per_page=100&context=edit
+meta_data de producto 1792 (2014-15 France Away Shirt):
+  liga         = ''         ← vacío (Francia = selección, no liga de club)
+  equipo       = '129'      ← ID del término "Francia" en pa_equipo
+  jugador      = ''
+  ano_temporada = '139'     ← ID del término en pa_ano
+  talla        = 'XXL'      ← string directo
+  condicion    = 'Excelente' ← string directo
+  descripcion_del_producto = '<p>...</p>'  ← HTML generado por Claude
 ```
-Esto devuelve todos los items con:
-- `id`, `title`, `status`, `type` (page, section, widget, etc.)
-- `meta` con el contenido Elementor serializado — permite detectar qué widgets usan
-- Sin necesidad de capturas manuales de Pablo
 
-**Alternativa complementaria:** `GET /wp-json/elementor/v1/site-editor/templates` con auth — devuelve los templates con su estructura completa.
+**Resolución de IDs confirmada:**
+- `pa_equipo` id=129 → "Francia"
+- `pa_liga` id=177 → "Eredivisie", id=72 → "LaLiga", id=95 → "Premier League", id=51 → "Serie A"
 
-### WC Store API expone datos básicos públicamente
+**Por qué esto importa para Studio:**
 
-28 productos, 4 categorías y precios son accesibles sin auth. **Pero los atributos taxonomómicos** (pa_liga, pa_equipo, pa_talla, pa_marca, pa_condicion, pa_ano, pa_jugador) **no están en el Store API** — solo en WC REST API v3 con auth.
+| Escenario | Implicación |
+|-----------|-------------|
+| Studio crea un producto | Debe escribir en `meta_data`, no en `attributes[]` |
+| Filtro Camisetas Pro | Lee de ACF meta fields — Studio debe respetar este contrato |
+| Formato de IDs vs strings | `liga`, `equipo`, `jugador`, `ano_temporada` → term IDs. `talla`, `condicion` → strings directos |
+| `descripcion_del_producto` | Campo ACF donde va la descripción larga generada por Claude |
 
-Para Studio, es WC REST API v3 con Application Password. El Store API no es suficiente.
-
-### Permisos necesarios para WC REST API v3
-
-Application Password de un usuario WordPress funciona para WC REST API v3 **solo si el usuario tiene rol con capacidades WooCommerce**. Un `Author` puro puede no tener acceso a `wc/v3`. Las opciones:
-
-| Rol recomendado | Acceso WC REST API v3 | Riesgo |
-|----------------|----------------------|--------|
-| `Administrator` | Total | Alto — no usar para el agente |
-| `Shop Manager` | Total sobre productos, pedidos, etc. | Medio — acceso amplio |
-| `Editor` + `manage_woocommerce` capability | Sí (si el rol tiene la cap) | Bajo si bien configurado |
-| `Author` puro | No | Insuficiente para WC API |
-
-**Recomendación:** el usuario limitado del agente debe tener rol `Shop Manager` o ser un `Editor` al que se añada la capacidad `manage_woocommerce`. Verificar en §6.
+**Nota:** las taxonomías pa_ tienen terms con counts correctos (pa_equipo: Ajax count=1, Francia count=3, etc.), lo que confirma que los productos SÍ están asignados a los términos WC vía `wp_term_relationships` — pero la relación no pasa por `_product_attributes`, que es lo que expone el campo `attributes[]` de WC REST API. Los ACF fields almacenan el ID del término como referencia; el Filtro Camisetas Pro usa ambas rutas.
 
 ---
 
-## 5. ESTADO DE CADA OBJETIVO DEL PROBE
+## 6. ELEMENTOR — TEMPLATES Y LICENCIA
 
-| Objetivo | Estado | Notas |
-|----------|--------|-------|
-| Confirmar site URL real | ✅ | `https://catenacciovintage.com` — 200 OK |
-| Confirmar namespaces disponibles | ✅ | 37 namespaces, wc/v3, elementor-pro/v1 activos |
-| Confirmar 28 productos | ✅ | X-WP-Total: 28 vía Store API |
-| Confirmar elementor_library como tipo accesible | ✅ | Visible en wp/v2/types |
-| Leer items de elementor_library | ⏳ | Requiere .env.local completo |
-| Leer productos WC con atributos | ⏳ | Requiere .env.local completo |
-| Confirmar usuario y permisos del agente | ⏳ | Requiere .env.local completo |
-| Verificar licencia Elementor Pro | ⏳ | Requiere .env.local completo |
-| Leer atributos WC (pa_liga, etc.) | ⏳ | Requiere .env.local completo |
+### Licencia Pro
+
+```json
+{"isExpired": false}
+```
+
+**Elementor Pro 3.35.1 sigue activo** (expira ~2026-07-01, quedan ~18 días desde 2026-06-13).
+
+### Templates en elementor_library (14 registros)
+
+| ID | Título | Tipo | Status | Dep. Pro |
+|----|--------|------|--------|----------|
+| 1471 | Elementos Buscador | `loop-item` | publish | **PRO** |
+| 1414 | Elementor Archivo de productos #1414 | `product-archive` | publish | **PRO** |
+| 1107 | Elementor Página individual #1107 | `single-page` | draft | — |
+| 892 | Grid de Tienda | `loop-item` | publish | **PRO** |
+| 878 | Elementor Elemento de bucle #878 | `loop-item` | publish | **PRO** |
+| 833 | Elementor Error 404 #833 | `error-404` | publish | PRO (Theme Builder) |
+| 761 | Elementor Resultados de búsqueda #761 | `search-results` | publish | **PRO** |
+| 720 | Live Results - Search | `loop-item` | publish | **PRO** |
+| 653 | Cabecera simple | `header` | publish | **PRO** (Theme Builder) |
+| 354 | Slide de productos recientes | `loop-item` | publish | **PRO** |
+| 141 | Plantilla Página Individual | `single-page` | publish | — (depende del contenido) |
+| 129 | Archivo de Productos - Loop + Filtro personalizado | `product-archive` | publish | **PRO** |
+| 100 | Plantilla producto individual | `product` | publish | **PRO** (WC Single Product) |
+| 87 | Elementor Pie de página #87 | `footer` | publish | **PRO** (Theme Builder) |
+
+**Resumen por tipo:**
+- `loop-item` × 5 → Elementor Loop — **exclusivo Pro**
+- `product-archive` × 2 → WooCommerce Archive — **exclusivo Pro**
+- `product` × 1 → WooCommerce Single Product — **exclusivo Pro**
+- `header` × 1 → Theme Builder — **exclusivo Pro**
+- `footer` × 1 → Theme Builder — **exclusivo Pro**
+- `error-404` × 1 → Theme Builder — **Pro (puede hacerse con página estática)**
+- `search-results` × 1 → Theme Builder — **Pro**
+- `single-page` × 2 → genérico — sin información de widgets todavía
+
+**12 de 14 templates son definitivamente Pro-dependientes por su tipo.**
+
+### Límite de permisos para el audit profundo
+
+El rol `shop_manager` puede:
+- ✅ Listar templates (`elementor/v1/site-editor/templates`)
+- ✅ Ver tipo, ID, título, status
+- ❌ Leer el JSON de Elementor con widgets (`elementor/v1/post?id=X` → 403)
+- ❌ Leer `_elementor_data` meta field via `wp/v2/elementor_library?context=edit` → 403
+
+Para el widget-level audit necesitamos una de estas opciones:
+- **Opción A:** Application Password de un usuario Administrador (no shop_manager).
+- **Opción B:** WP Admin supervisado — Pablo abre Elementor Library, el agente inspecciona.
+
+La Opción A es la más limpia. El agente no necesita acceso admin permanente — solo para la sesión de auditoría de Elementor, con credenciales separadas y revocables.
 
 ---
 
-## 6. FORMATO REQUERIDO PARA .env.local
+## 7. MAPA DE ACCESO REAL (shop_manager)
 
-Pablo debe completar `.env.local` con este formato exacto:
-
-```
-WP_SITE_URL=https://catenacciovintage.com
-WP_APP_USER=nombre-del-usuario-limitado
-WP_APP_PASSWORD=xxxx xxxx xxxx xxxx xxxx xxxx
-```
-
-**Notas importantes:**
-- `WP_APP_PASSWORD` tiene espacios — es el formato nativo de WordPress Application Passwords. No quitar los espacios.
-- `WP_APP_USER` es el username (login) del usuario limitado, no el email ni el display name.
-- El usuario debe tener rol `Shop Manager` para acceso completo a WC REST API v3.
-- Si el usuario fue creado con rol `Author`, cambiarlo a `Shop Manager` en WP Admin → Usuarios → Editar.
-- Nunca usar el usuario administrador principal como `WP_APP_USER`.
-
-**Verificación después de completar:**
-
-El agente ejecutará:
-```
-GET /wp-json/wp/v2/users/me
-Authorization: Basic base64(WP_APP_USER:WP_APP_PASSWORD)
-```
-Si devuelve 200 con los datos del usuario → credenciales correctas.  
-Si devuelve 401 → usuario o password incorrectos.  
-Si devuelve 403 → usuario existe pero no tiene permisos WC.
+| Operación | shop_manager | Notas |
+|-----------|-------------|-------|
+| Leer productos WC | ✅ | wc/v3/products — completo |
+| Leer atributos WC + terms | ✅ | wc/v3/products/attributes + /terms |
+| Leer categorías WC | ✅ | wc/v3/products/categories |
+| Crear producto en draft | ✅ probable | A testear en sesión de escritura |
+| Leer meta fields (ACF) | ✅ | En meta_data del producto |
+| Escribir meta fields (ACF) | ✅ probable | WC REST API admite meta_data writes |
+| Leer lista de templates Elementor | ✅ | elementor/v1/site-editor/templates |
+| Leer JSON de template Elementor | ❌ 403 | Requiere Administrator |
+| Leer Elementor Pro license | ✅ | isExpired: false |
+| WP Admin acceso | N/A | Solo Pablo |
 
 ---
 
-## 7. CAMINO RECOMENDADO PARA AUDITAR ELEMENTOR
+## 8. IMPLICACIONES PARA STUDIO (cambio de diseño)
 
-### Opción A — Por API (recomendada, una vez .env.local completo)
+### Campo de atributos en Studio → meta_data, no attributes[]
 
+Cuando Studio cree un producto via WC REST API:
+
+```json
+{
+  "name": "2014-15 France Away Shirt - (XXL)",
+  "status": "draft",
+  "meta_data": [
+    { "key": "liga",           "value": "" },
+    { "key": "equipo",         "value": "129" },
+    { "key": "ano_temporada",  "value": "139" },
+    { "key": "talla",          "value": "XXL" },
+    { "key": "condicion",      "value": "Excelente" },
+    { "key": "jugador",        "value": "" },
+    { "key": "descripcion_del_producto", "value": "<p>...</p>" }
+  ]
+}
 ```
-GET /wp-json/wp/v2/elementor_library?per_page=100&context=edit
-Authorization: Basic base64(user:app_password)
-```
 
-Devuelve todos los items con título, tipo, status y el JSON de Elementor con los widgets usados. El agente puede parsear el JSON para detectar widgets Pro (Loop Grid, Woo Archive, Pricing Table, etc.) automáticamente.
-
-**Ventaja:** sin intervención de Pablo, resultado 100% automatizable.  
-**Requiere:** .env.local completo + usuario con permisos suficientes.
-
-### Opción B — WP Admin supervisado (fallback)
-
-Si la API no da acceso suficiente al JSON de Elementor, Pablo abre WP Admin → Elementor → Templates → Library y el agente inspecciona la pantalla vía captura. Más lento pero siempre funciona.
-
-**Recomendación:** probar Opción A primero. Fallback a B solo si `context=edit` no devuelve el JSON de Elementor completo.
+Studio necesita:
+1. Un selector de `liga` → lista los terms de pa_liga via `GET /wc/v3/products/attributes/5/terms`.
+2. Un selector de `equipo` → lista los terms de pa_equipo via `GET /wc/v3/products/attributes/4/terms`.
+3. Al guardar: convertir el term seleccionado a su ID para el campo meta.
+4. `talla` y `condicion`: strings directos (no term IDs).
 
 ---
 
-## 8. PRÓXIMO PASO
+## 9. PRÓXIMOS PASOS
 
-1. **Pablo completa `.env.local`** (§6) — 5 minutos.
-2. **Sesión 007b** — Agente ejecuta probe autenticado:
-   - `GET /wp-json/wp/v2/users/me` → confirma usuario y rol.
-   - `GET /wp-json/wc/v3/products/attributes` → lista pa_liga, pa_equipo, etc.
-   - `GET /wp-json/wp/v2/elementor_library?per_page=100&context=edit` → los 19 items con widgets.
-   - `GET /wp-json/elementor-pro/v1/license/get-license-status` → estado de licencia Pro.
-3. **Sesión 008** — A0_ELEMENTOR_DEPENDENCY_AUDIT con datos reales del API.
+| Paso | Sesión | Acción |
+|------|--------|--------|
+| Widget-level Elementor audit | 008 | Pablo genera Application Password adicional de usuario Admin temporal para auditoría. O auditoría visual en WP Admin si se prefiere. |
+| A0_ELEMENTOR_DEPENDENCY_AUDIT | 008 | Con lista de templates y tipos ya en mano: 12/14 son Pro. El audit profundo confirma qué widgets se pueden migrar. |
+| Studio — diseño de formulario | 009 | Usar `GET /wc/v3/products/attributes/{id}/terms` para poblar selectores de liga/equipo/año/talla/marca/condición. Escribir en `meta_data`, no en `attributes[]`. |
+| Studio — test de escritura | 009 | `POST /wc/v3/products` con `status: draft` + `meta_data`. Confirmar que los campos ACF se guardan correctamente y el Filtro Pro los lee. |
 
 ---
 
-*Versión 007 — 2026-06-13 — Claude Code Sonnet.*  
-*Probe ejecutado en modo estrictamente READ_ONLY. Ninguna escritura al sitio.*
+*Versión 007 (público) + 007b (autenticado) — 2026-06-13 — Claude Code Sonnet.*  
+*Probe ejecutado en modo estrictamente READ_ONLY. Ningún write al sitio.*  
+*Credenciales no almacenadas en este documento. Ver `.env.local` (ignorado por Git).*

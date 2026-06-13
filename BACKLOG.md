@@ -12,10 +12,9 @@ Actualizar al cierre de cada sesión. Los ítems completados se mueven a DONE o 
 - [x] **TARGET_OPTIONS APROBADO** — 2026-06-13 (Sesión 005d). Operador aprueba A0 + B1. Marketplace = NORTH_STAR / DEFER. Ver `docs/discovery/TARGET_OPTIONS.md`.
 - [x] **CMS_API_ACCESS_MODEL_READONLY** — modelo de acceso sin SSH definido en `docs/operations/ACCESS_MODEL_NO_SSH.md` (Sesión 006). Guía paso a paso lista en §6.
 - [x] **B1_STOCK_OPERATIONS_MODEL** — modelo operativo de stock definido en `docs/operations/STOCK_OPERATIONS_MODEL.md` (Sesión 006c). Contexto capturado para B1 — no bloquea A0 ni la activación del acceso.
-- [x] **ACCESS_MODEL_ACTIVATION_READONLY** — Pablo creó usuario limitado + Application Password. `.env.local` existe pero vacío. **Acción pendiente: Pablo completa `.env.local`** siguiendo `docs/operations/API_READONLY_PROBE_RESULT.md §6` (formato WP_SITE_URL, WP_APP_USER, WP_APP_PASSWORD). Verificar que el rol del usuario es `Shop Manager` para WC REST API v3.
-- [x] **WP_WC_API_READONLY_PROBE (parcial)** — probe ejecutado en Sesión 007. Endpoints públicos: 200 OK (site info, 28 productos, 4 categorías, elementor_library visible como tipo). Endpoints autenticados: 401 esperado — `.env.local` vacío. Ver `docs/operations/API_READONLY_PROBE_RESULT.md`.
-- [ ] **WP_WC_API_AUTH_PROBE** — probe autenticado pendiente. Pablo completa `.env.local` (§6 de `API_READONLY_PROBE_RESULT.md`). Agente verifica: usuario/rol, WC atributos, elementor_library items, licencia Pro. Sesión 007b.
-- [ ] **A0_ELEMENTOR_DEPENDENCY_AUDIT** — auditar los 19 items de elementor_library vía WP Admin / API (no requiere lista manual de Pablo si hay acceso activo). Clasificar widgets Pro exclusivos vs. Free o migrables a Gutenberg/WooCommerce Blocks. Urgente: deadline 2026-07-01.
+- [x] **ACCESS_MODEL_ACTIVATION_READONLY** — completado. Usuario `catenaccio-studio-agent` con rol `shop_manager`. `.env.local` configurado y verificado. Acceso WC REST API v3 confirmado.
+- [x] **WP_WC_API_READONLY_PROBE** — probe completo (público + autenticado). Sesiones 007/007b. Credenciales OK: `catenaccio-studio-agent`, rol `shop_manager`. 28 productos, 7 atributos WC, Elementor Pro `isExpired:false`, 14 templates listados. **Hallazgo crítico: productos usan ACF meta fields (no WC attributes[]).** Ver `docs/operations/API_READONLY_PROBE_RESULT.md`.
+- [ ] **A0_ELEMENTOR_DEPENDENCY_AUDIT** — 14 templates listados (no 19). 12/14 son Pro-dependientes por tipo (loop-item×5, product-archive×2, product, header, footer, error-404, search-results). Para widget-level audit: necesita App Password de Admin o WP Admin visual. Decidir vía con Pablo. Urgente: deadline 2026-07-01.
 - [ ] **Arreglar OPcache (PROB-09)** — Pablo abre ticket a Raiola para aumentar `opcache.memory_consumption`. Acción paralela, sin agente.
 
 ---
@@ -31,7 +30,7 @@ Actualizar al cierre de cada sesión. Los ítems completados se mueven a DONE o 
 
 **Track 1 (Catenaccio Studio) — después de WP_WC_API_READONLY_PROBE confirmado:**
 - [ ] **B1_CATENACCIO_STUDIO_SEED** — arrancar el diseño de Catenaccio Studio: formulario, campos, stack Next.js, scaffold inicial. Parallel a Track 0 una vez el acceso API esté activo.
-- [ ] **STUDIO_MVP_DESIGN** — diseñar formulario Studio con campos exactos de camiseta vintage. Decidir stack (Next.js + WC REST API). Scaffold inicial. Ver campos en `docs/operations/STOCK_OPERATIONS_MODEL.md §3`.
+- [ ] **STUDIO_MVP_DESIGN** — diseñar formulario Studio. **Cambio de diseño confirmado por probe:** escribir en `meta_data` (no en `attributes[]`). Selectores de liga/equipo/año via `GET /wc/v3/products/attributes/{id}/terms`. `talla` y `condicion` como strings directos. Ver `API_READONLY_PROBE_RESULT.md §8` y `STOCK_OPERATIONS_MODEL.md §3`.
 - [ ] **PRODUCT_WORKFLOW_DESIGN** — documentar el flujo completo: foto → Studio → Claude → borrador WC → aprobación Pablo → publicado. Ver flujo principal en `STOCK_OPERATIONS_MODEL.md §7`.
 - [ ] **WC_API_WRITE_ACCESS_TEST** — testar `POST /wp-json/wc/v3/products` con status=draft y atributos custom (pa_liga, pa_equipo, etc.). Prerequisito: probe de solo lectura confirmado.
 - [ ] **EXCEL_STOCK_IMPORT_MAPPING** — Pablo comparte columnas reales de `STOCK.xlsx` cuando Studio esté en marcha. Preparar plantilla CSV compatible con Studio para migración futura. Ver `STOCK_OPERATIONS_MODEL.md §5`. No urgente — no bloquea A0.

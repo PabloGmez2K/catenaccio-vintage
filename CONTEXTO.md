@@ -40,12 +40,12 @@ Hipótesis no verificadas del SEED:
 
 ## Siguiente paso recomendado
 
-**ORDEN CORRECTO — estado actualizado Sesión 007:**
-1. ✅ Pablo creó usuario + App Password. `.env.local` existe pero vacío.
-2. **Acción Pablo (ahora, 5 min):** completar `.env.local` con WP_SITE_URL, WP_APP_USER, WP_APP_PASSWORD. Ver formato en `docs/operations/API_READONLY_PROBE_RESULT.md §6`. Verificar rol = `Shop Manager`.
-3. **Sesión 007b — WP_WC_API_AUTH_PROBE:** probe autenticado. Confirmar usuario, WC atributos (pa_liga, etc.), 19 items elementor_library, licencia Pro.
-4. **Sesión 008 — A0_ELEMENTOR_DEPENDENCY_AUDIT:** con datos API en mano, auditar los 19 items y clasificar widgets Pro vs. Free. Sin capturas manuales.
-5. **Sesión 009+ — Track 1 Studio:** scaffold Next.js + WC REST API + Claude. Stock/Excel/fotos: contexto B1, no urgente, no bloquea A0.
+**ORDEN CORRECTO — estado actualizado Sesión 007b:**
+1. ✅ Acceso confirmado: `catenaccio-studio-agent` (shop_manager), WC REST API v3 operativo.
+2. ✅ Probe completo: 28 productos, 7 atributos, Elementor Pro activo (`isExpired:false`), 14 templates listados.
+3. **Hallazgo crítico documentado:** productos usan ACF meta fields (no WC attributes[]). Studio debe escribir en `meta_data`. Ver `API_READONLY_PROBE_RESULT.md §5 y §8`.
+4. **Sesión 008 — A0_ELEMENTOR_DEPENDENCY_AUDIT:** 12/14 templates ya clasificados como Pro por tipo. Para widget-level: decidir si se crea App Password de Admin o se hace audit visual en WP Admin.
+5. **Sesión 009 — Studio MVP:** formulario Next.js con selectores via `wc/v3/products/attributes/{id}/terms`. Escribir en `meta_data`. `POST /wc/v3/products` con `status:draft`.
 
 ---
 
@@ -75,6 +75,8 @@ Sesión 005c (2026-06-13, Claude Code Sonnet): DOCS_ONLY / strategic / MARKETPLA
 Sesión 005d (2026-06-13, Claude Code Sonnet): DOCS_ONLY / approve + push. **TARGET A0 + B1 APROBADO** por el operador ("APPROVE A0 + B1. Marketplace queda como NORTH_STAR / DEFER."). TARGET_OPTIONS.md → OPCIÓN_APROBADA. VALIDATION_RECORD.md con VAL-005. DECISIONS.md DEC-8 cerrada. BACKLOG.md bloqueo levantado, nuevas tareas NOW (A0_IMPLEMENTATION_PLAN, B1_CATENACCIO_STUDIO_SEED, CMS_API_ACCESS_MODEL_READONLY). Commits 005/005b/005c/005d pusheados a origin/main. Workflow: TARGET_APROBADO. No se tocó WordPress, producción, pagos ni código.
 
 Sesión 006 (2026-06-13, Claude Code Sonnet): DOCS_ONLY / ACCESS_MODEL_NO_SSH. Modelo de acceso sin SSH definido: 4 capas (sin acceso servidor / WP Admin manual / WP+WC REST API / cPanel+Raiola), 6 modos de operación (READ_ONLY, API_READ_ONLY, DRAFT_ONLY, APPLY_WITH_APPROVAL, MANUAL_BY_PABLO, BLOCKED_WITHOUT_STAGING), matriz completa tarea→canal→permisos→riesgo, guía App Password + WC API Key, modelo de revocación, operaciones bloqueadas sin staging + procedimiento microfix, plan OPcache/Raiola. DECISIONS.md DEC-9. BACKLOG.md actualizado. Siguiente: Sesión 007 (auditoría Elementor Library) + Sesión 008 (Pablo crea credenciales según §6 del modelo). No se tocó WordPress, producción, credenciales, cPanel ni código.
+
+Sesión 007b (2026-06-13, Claude Code Sonnet): READ_ONLY / WP_WC_API_AUTH_PROBE. Probe autenticado completo. Usuario `catenaccio-studio-agent` (id=16, rol=shop_manager) verificado. WC REST API v3: 28 productos, 7 atributos (pa_liga×6 terms, pa_equipo×21 terms), categorías. **Hallazgo crítico: productos usan ACF meta fields con term IDs (no WC attributes[]).** Studio debe escribir en meta_data: `liga`/`equipo`/`ano_temporada` como IDs de término, `talla`/`condicion` como strings. Elementor: Pro `isExpired:false`, 14 templates listados (12/14 son Pro por tipo), contenido de cada template requiere Administrator (shop_manager recibe 403 en elementor/v1/post y wp/v2/elementor_library context=edit). `API_READONLY_PROBE_RESULT.md` actualizado con hallazgos completos. Ningún write al sitio.
 
 Sesión 007 (2026-06-13, Claude Code Sonnet): READ_ONLY / WP_WC_API_READONLY_PROBE. Probe público completado. Endpoints sin auth: `/wp-json/` 200 OK (37 namespaces, elementor-pro/v1 activo, confirma Pro en servidor), `wp/v2/types` 200 OK (elementor_library visible como post type), `wc/store/v1/products` 200 OK (28 productos confirmados, 4 categorías, precios EUR). Endpoints autenticados: todos 401 — `.env.local` vacío. Bloqueante: Pablo completa `.env.local` con WP_APP_USER (Shop Manager) y WP_APP_PASSWORD. Descubrimiento clave: elementor_library auditable 100% por API con auth (`wp/v2/elementor_library?context=edit`), sin capturas manuales. WC Store API no expone atributos custom — se necesita wc/v3 con auth. `API_READONLY_PROBE_RESULT.md` creado. No se tocó WP, no se hizo ningún write.
 
