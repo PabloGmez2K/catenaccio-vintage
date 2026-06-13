@@ -10,32 +10,33 @@ Actualizar al cierre de cada sesión. Los ítems completados se mueven a DONE o 
 ## NOW — Esta semana / próxima sesión
 
 - [x] **TARGET_OPTIONS APROBADO** — 2026-06-13 (Sesión 005d). Operador aprueba A0 + B1. Marketplace = NORTH_STAR / DEFER. Ver `docs/discovery/TARGET_OPTIONS.md`.
-- [ ] **A0_ELEMENTOR_AUDIT** — auditar los 19 items de elementor_library: clasificar cuáles usan widgets Pro exclusivos vs. widgets Free o migrables a Gutenberg/WooCommerce Blocks. Sesión 007. Prerequisito: Pablo entrega lista o capturas del Elementor Library.
-- [x] **B1_STOCK_OPERATIONS_MODEL** — modelo operativo de stock definido en `docs/operations/STOCK_OPERATIONS_MODEL.md` (Sesión 006c). Ciclo de vida de producto (11 estados), campos mínimos Studio, recomendación imágenes locales (Opción A→C), guía migración Excel. Ver §8 para tareas derivadas.
-- [ ] **B1_CATENACCIO_STUDIO_SEED** — arrancar el diseño de Catenaccio Studio: formulario, campos, stack Next.js, scaffold inicial. Parallel a Track 0.
-- [x] **CMS_API_ACCESS_MODEL_READONLY** — modelo de acceso sin SSH definido en `docs/operations/ACCESS_MODEL_NO_SSH.md` (Sesión 006). Guía paso a paso lista en §6. **Pendiente de ejecución por Pablo** (crear usuario + Application Password — 10-15 min en WP Admin). Prerequisito para Studio.
-- [ ] **Auditoría Elementor Pro templates (Track 0)** — listar los 19 items en elementor_library y clasificar cuáles usan widgets Pro exclusivos. WP Admin read-only. Urgente: deadline 2026-07-01.
-- [ ] Arreglar OPcache (PROB-09) — solicitar a Raiola aumentar `opcache.memory_consumption`.
+- [x] **CMS_API_ACCESS_MODEL_READONLY** — modelo de acceso sin SSH definido en `docs/operations/ACCESS_MODEL_NO_SSH.md` (Sesión 006). Guía paso a paso lista en §6.
+- [x] **B1_STOCK_OPERATIONS_MODEL** — modelo operativo de stock definido en `docs/operations/STOCK_OPERATIONS_MODEL.md` (Sesión 006c). Contexto capturado para B1 — no bloquea A0 ni la activación del acceso.
+- [ ] **ACCESS_MODEL_ACTIVATION_READONLY** ⟵ **PRIMERA ACCIÓN** — Pablo crea el usuario WP limitado + Application Password siguiendo `docs/operations/ACCESS_MODEL_NO_SSH.md §6`. Estimado: 10-15 min en WP Admin, sin agente. Prerequisito para TODO lo que sigue: auditoría Elementor, Studio, probe API. Ver también: ticket a Raiola sobre OPcache siguiendo §9 del mismo doc.
+- [ ] **WP_WC_API_READONLY_PROBE** — primera llamada de solo lectura a WC REST API tras credenciales creadas: `GET /wp-json/wc/v3/products` + `GET /wp-json/wc/v3/products/attributes`. Confirma que el acceso funciona antes de auditar Elementor. El agente ejecuta esto, no Pablo.
+- [ ] **A0_ELEMENTOR_DEPENDENCY_AUDIT** — auditar los 19 items de elementor_library vía WP Admin / API (no requiere lista manual de Pablo si hay acceso activo). Clasificar widgets Pro exclusivos vs. Free o migrables a Gutenberg/WooCommerce Blocks. Urgente: deadline 2026-07-01.
+- [ ] **Arreglar OPcache (PROB-09)** — Pablo abre ticket a Raiola para aumentar `opcache.memory_consumption`. Acción paralela, sin agente.
 
 ---
 
 ## NEXT — Próximo mes
 
-**Track 0 (continuidad Elementor):**
+**Track 0 (continuidad Elementor) — después de A0_ELEMENTOR_DEPENDENCY_AUDIT:**
 - [ ] Migrar Cart y Mi Cuenta a WooCommerce Blocks si están en Elementor.
 - [ ] Reemplazar mini-cart override de Elementor Pro (PROB-11).
 - [ ] Evaluar catálogo (shop, categorías, producto): Loop Grid Pro → template PHP nativo si necesario.
 - [ ] Habilitar WPS Hide Login (PROB-12) — 10 minutos en WP Admin.
 - [ ] Investigar webhooks de PayPal (PROB-14).
 
-**Track 1 (Catenaccio Studio):**
+**Track 1 (Catenaccio Studio) — después de WP_WC_API_READONLY_PROBE confirmado:**
+- [ ] **B1_CATENACCIO_STUDIO_SEED** — arrancar el diseño de Catenaccio Studio: formulario, campos, stack Next.js, scaffold inicial. Parallel a Track 0 una vez el acceso API esté activo.
 - [ ] **STUDIO_MVP_DESIGN** — diseñar formulario Studio con campos exactos de camiseta vintage. Decidir stack (Next.js + WC REST API). Scaffold inicial. Ver campos en `docs/operations/STOCK_OPERATIONS_MODEL.md §3`.
 - [ ] **PRODUCT_WORKFLOW_DESIGN** — documentar el flujo completo: foto → Studio → Claude → borrador WC → aprobación Pablo → publicado. Ver flujo principal en `STOCK_OPERATIONS_MODEL.md §7`.
-- [ ] **WC_API_ACCESS_MODEL** — Application Password, usuario limitado, endpoints necesarios. Testar `POST /wp-json/wc/v3/products` con atributos custom (pa_liga, pa_equipo, etc.).
-- [ ] **EXCEL_STOCK_IMPORT_MAPPING** — Pablo comparte columnas reales de `STOCK.xlsx`. Preparar plantilla CSV compatible con Studio para migración futura. Prerequisito: ver `STOCK_OPERATIONS_MODEL.md §5`.
-- [ ] **LOCAL_IMAGE_FOLDER_WORKFLOW** — confirmar ruta y estructura de carpetas locales de fotos. Implementar campo `carpeta_local` en Studio. Evaluar cuando añadir upload directo (Opción C).
-- [ ] **VINTED_PUBLICATION_TRACKING** — diseñar recordatorio de Vinted en Studio: qué camisetas están en `PUBLICADA_WEB` sin url_vinted. UI de alerta o lista de pendientes Vinted.
-- [ ] **STUDIO_PRODUCT_STATUS_PIPELINE** — implementar vista de tabla de inventario en Studio con 11 estados, filtros por estado, columnas: Referencia / Estado / Fotos / Web / Vinted / Coste / Precio / Días en stock.
+- [ ] **WC_API_WRITE_ACCESS_TEST** — testar `POST /wp-json/wc/v3/products` con status=draft y atributos custom (pa_liga, pa_equipo, etc.). Prerequisito: probe de solo lectura confirmado.
+- [ ] **EXCEL_STOCK_IMPORT_MAPPING** — Pablo comparte columnas reales de `STOCK.xlsx` cuando Studio esté en marcha. Preparar plantilla CSV compatible con Studio para migración futura. Ver `STOCK_OPERATIONS_MODEL.md §5`. No urgente — no bloquea A0.
+- [ ] **LOCAL_IMAGE_FOLDER_WORKFLOW** — confirmar ruta y estructura de carpetas locales de fotos. Implementar campo `carpeta_local` en Studio MVP. Ver `STOCK_OPERATIONS_MODEL.md §3.6`.
+- [ ] **VINTED_PUBLICATION_TRACKING** — diseñar recordatorio de Vinted en Studio. Ver `STOCK_OPERATIONS_MODEL.md §7`. No urgente — post MVP.
+- [ ] **STUDIO_PRODUCT_STATUS_PIPELINE** — vista de tabla de inventario con 11 estados, filtros, columnas Referencia/Estado/Fotos/Web/Vinted/Coste/Precio. Ver `STOCK_OPERATIONS_MODEL.md §7`.
 - [ ] Publicar primeras 5 camisetas usando Studio (prueba real de velocidad).
 
 **Track 2 (catálogo SEO — después de Track 1):**
@@ -57,11 +58,9 @@ Actualizar al cierre de cada sesión. Los ítems completados se mueven a DONE o 
 
 ## BLOCKED — No avanzar hasta que...
 
-- [ ] **Studio API access** — Studio no puede arrancar hasta que Pablo ejecute la guía §6 de `docs/operations/ACCESS_MODEL_NO_SSH.md` (crear usuario limitado + Application Password). Estimado: 10-15 min manual en WP Admin. Sesión 008.
+- [ ] **Toda operación API / auditoría Elementor / Studio** — bloqueada hasta que Pablo complete `ACCESS_MODEL_ACTIVATION_READONLY` (ver NOW): crear usuario limitado + Application Password en WP Admin siguiendo `ACCESS_MODEL_NO_SSH.md §6`. 10-15 min, sin agente.
 
-
-
-_(sin bloqueos activos — TARGET aprobado, implementación desbloqueada)_
+_(sin otros bloqueos activos — TARGET aprobado, implementación desbloqueada, orden corregido en Sesión 006d)_
 
 - [x] ~~Implementación técnica bloqueada hasta AS-IS validado y TARGET aprobado.~~ — DESBLOQUEADO 2026-06-13 (TARGET APROBADO)
 

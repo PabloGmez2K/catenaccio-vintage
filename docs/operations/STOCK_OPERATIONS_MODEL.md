@@ -4,9 +4,10 @@ Modelo operativo real del inventario de camisetas. Define el ciclo de vida de un
 
 **Proyecto:** Catenaccio Vintage  
 **Fecha:** 2026-06-13  
-**Sesión:** 006c  
+**Sesión:** 006c (reorden: 006d)  
 **Estado:** DEFINIDO — pendiente de implementación en Studio  
 **Bloque de origen:** B1_STOCK_OPERATIONS_MODEL_CAPTURE  
+**Prioridad:** B1 (Track 1) — **no bloquea A0 ni la activación del acceso API**  
 **Agente:** Claude Code (Sonnet)
 
 ---

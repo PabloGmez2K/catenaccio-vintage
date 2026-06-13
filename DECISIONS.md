@@ -229,6 +229,8 @@ Sin SSH (Raiola Inicio SSD 2.0), la única vía controlada y segura para que un 
 - Credenciales en `.env.local` local — nunca en el repo, nunca en el chat.
 - Ver guía completa en `docs/operations/ACCESS_MODEL_NO_SSH.md`.
 
+**Nota (Sesión 006d — 2026-06-13):** Access-first es la política operativa activa. `ACCESS_MODEL_ACTIVATION_READONLY` es el prerequisito de toda sesión de agente sobre el CMS. No pedir listas o capturas manuales a Pablo antes de probar el acceso. El orden correcto: credenciales activas → probe de solo lectura → auditoría Elementor → Studio.
+
 ---
 
 ### PEND-2 — Marketplace multi-vendor (NORTH_STAR / DEFER)

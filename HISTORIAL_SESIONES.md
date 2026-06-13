@@ -153,6 +153,28 @@ Cross-referencia con `agent_events.jsonl` para detalle de eventos.
 ---
 
 ---
+**Sesión 006d** — 2026-06-13  
+**Agente:** Claude Code (Sonnet)  
+**Modo:** DOCS_ONLY  
+**Tipo:** reorder / access-first  
+**Tarea:** Corregir el orden operativo tras 006c: access-first como primera acción real, no pedir listas manuales a Pablo antes de probar el acceso.
+
+**Decisiones clave:**
+- `ACCESS_MODEL_ACTIVATION_READONLY` pasa a ser la primera acción en NOW — Pablo crea usuario limitado + Application Password (guía `ACCESS_MODEL_NO_SSH.md §6`). Prerequisito para todo lo que sigue.
+- `WP_WC_API_READONLY_PROBE` — segunda acción: el agente verifica el acceso con una llamada GET de solo lectura. Confirma antes de auditar Elementor.
+- `A0_ELEMENTOR_DEPENDENCY_AUDIT` — tercera acción: el agente audita los 19 items de elementor_library vía WP Admin / API. No depende de lista manual de Pablo como vía principal (solo fallback).
+- `B1_CATENACCIO_STUDIO_SEED` movido de NOW a NEXT — Studio no arranca hasta que el acceso API esté verificado.
+- Tareas stock/Excel/fotos/Vinted confirman posición en NEXT — no son acción inmediata de Pablo, no bloquean A0.
+- `STOCK_OPERATIONS_MODEL.md` se mantiene íntegro como contexto B1 — añadida nota de que no bloquea A0 ni la activación del acceso.
+- DEC-9 actualizada con nota: access-first es la política operativa activa.
+
+**Qué se validó:** BACKLOG.md NOW reordenado — access-first como prioridad explícita. CONTEXTO.md siguiente paso con orden correcto 4 pasos. HISTORIAL_SESIONES.md con 006d. agent_events.jsonl con access_first_reordered. DECISIONS.md DEC-9 con nota policy. STOCK_OPERATIONS_MODEL.md con nota "no bloquea A0".  
+**Qué NO se tocó:** WordPress, WooCommerce, producción, credenciales, hosting, código. STOCK_OPERATIONS_MODEL.md contenido no modificado (solo nota añadida). No se creó Application Password. No se auditó Elementor.  
+**Siguiente paso:** Pablo ejecuta `ACCESS_MODEL_ACTIVATION_READONLY` (WP Admin, 10-15 min) → Sesión 007: WP_WC_API_READONLY_PROBE → Sesión 008: A0_ELEMENTOR_DEPENDENCY_AUDIT.  
+**agent_events ref:** 2026-06-13T18:00:00Z (access_first_reordered)
+---
+
+---
 **Sesión 006c** — 2026-06-13  
 **Agente:** Claude Code (Sonnet)  
 **Modo:** DOCS_ONLY  
