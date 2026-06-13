@@ -1,358 +1,510 @@
 # TARGET_OPTIONS — Catenaccio Vintage
 
 **Proyecto:** Catenaccio Vintage  
-**Fecha:** 2026-06-13  
+**Fecha:** 2026-06-13 (Sesión 005 + corrección 005b)  
 **Basado en AS-IS validado:** 2026-06-10 (VAL-004)  
 **Estado:** EN_REVISIÓN — pendiente de aprobación del operador  
 **Opción aprobada:** ninguna todavía  
-**Deadline crítico:** ~2026-07-01 (expiración Elementor Pro — 18 días desde hoy)  
-**Agente:** Claude Code Sonnet (Sesión 005)
+**Deadline crítico:** ~2026-07-01 (expiración Elementor Pro — 18 días)  
+**Agente:** Claude Code Sonnet (Sesión 005 + 005b)
 
 ---
 
 ## 1. VEREDICTO
 
-**APPROVE Opción A — WordPress + WooCommerce sin Elementor Pro.**
+**APPROVE Estrategia A0 + B1.**
 
-La tienda puede salir de la dependencia de Elementor Pro antes del 2026-07-01 con riesgo bajo y sin tocar pagos, productos, SEO ni pedidos. El checkout ya fue migrado a Gutenberg Blocks en febrero 2026 — la parte más crítica y arriesgada ya está hecha. Lo que queda es identificar y reemplazar las plantillas Elementor Pro del frontend de catálogo.
+- **A0 (Track 0):** Continuidad de la tienda actual. Quitar la dependencia crítica de Elementor Pro antes del 2026-07-01. Resolver performance mínima. Sin riesgo de pagos.
+- **B1 (Track 1):** Construir Catenaccio Studio — un backoffice/PIM AI-first para catalogar camisetas. Next.js + formularios a medida + WooCommerce REST API. WooCommerce sigue siendo el motor de venta y pagos.
 
-Las otras opciones (headless, migración completa, SaaS) son inviables antes del deadline y añaden riesgo sin resolver el problema inmediato.
+El storefront público moderno (tipo Classic Football Shirts) queda **DEFER** hasta tener catálogo de 100+ productos, workflow probado y evidencia de tráfico/conversión.
+
+**Razón del cambio respecto a TARGET_OPTIONS v1 (Sesión 005):**  
+La Sesión 005 respondió al deadline de Elementor, pero no a la causa raíz de por qué Pablo dejó de publicar productos. Quitar Elementor con Gutenberg no soluciona la fricción del backoffice. La visión de Pablo es un workflow AI-first y una app-like experience, no solo "WordPress con otro tema".
 
 ---
 
-## 2. CONTEXTO VERIFICADO
+## 2. ROOT CAUSE — Por qué Catenaccio se bloqueó
+
+El bloqueo no fue una sola causa. Fue la acumulación de estas cinco fricciones:
+
+### Fricción 1 — Frontend: Elementor Pro no encajó
+
+Elementor Pro no fue una mala elección inicial, pero acumuló deuda:
+- Bugs y limitaciones documentadas (Elementor Loop no intercepta WooCommerce queries → workaround con `pre_get_posts`).
+- Funcionalidades ausentes que obligaron a construir plugins propios: Filtro Camisetas Pro v3.0.0 y Off-Canvas Menu v2.2.0 existen porque ningún plugin de mercado cubría el caso de uso.
+- Mini-cart override desactualizado — señal de que el mantenimiento de las plantillas Elementor generaba deuda constante.
+- El editor resultaba lento, frágil y poco predecible para el operador.
+- **Conclusión:** El problema con Elementor no era el producto en sí, sino el modelo: un page builder pensado para diseñadores, manejado por un operador que necesitaba rapidez operativa.
+
+### Fricción 2 — Backoffice: publicar una camiseta era demasiado caótico
+
+El proceso documentado (AS-IS §Proceso: Publicación de nuevo producto) tiene 5 pasos, pero en la práctica:
+- 7 taxonomías de atributo a rellenar manualmente (liga, equipo, jugador, talla, marca, condición, año).
+- Título SEO en inglés (requiere conocimiento del equipo y la temporada).
+- Descripción larga (requiere investigación de historia del club, temporada, jugadores).
+- Fotos: subir, reordenar, seleccionar principal.
+- Precio: requiere consulta de mercado (ClassicFootballShirts, eBay, Vinted).
+- Descripción corta: shortcode `[cv_short_description]`.
+- Publicar + flush CDN.
+
+Esto no es un proceso ágil para un operador solo. Es el flujo de un equipo de contenido con especialistas. El resultado: 28 productos en 4+ meses (15/03 a 10/06/2026 sin nuevas publicaciones).
+
+**El cuello de botella real es el backoffice, no el frontend.** Un storefront Next.js sin resolver el backoffice produce el mismo resultado: 28 productos y Pablo sin entrar al sistema.
+
+### Fricción 3 — Arquitectura de catálogo: compleja y parcialmente resuelta
+
+La taxonomía de Catenaccio (pa_liga, pa_equipo, pa_jugador, pa_talla, pa_marca, pa_condicion, pa_ano) es correcta y valiosa para SEO. Pero su implementación en WordPress tiene fricción:
+- URLs limpias conseguidas via rewrite rules custom en functions.php (62KB de código crítico) — esto funciona, pero es frágil: cualquier cambio en WP puede romperlo.
+- Páginas SEO indexables por combinación de atributos (ej: `/laliga/real-madrid/`, `/jugador/zidane/`) son la aspiración declarada, pero no están implementadas de forma sistemática.
+- El Filtro Camisetas Pro v3.0.0 resuelve el filtrado AJAX en frontend, pero no genera páginas indexables estáticamente.
+- Crawler de Facebook causó un downtime de 2 horas en 15/03/2026 por URLs de filtros sin paginación ni protección.
+- **Conclusión:** La arquitectura de catálogo es la deuda técnica más relevante a largo plazo. El SEO de atributos combinados (que es la propuesta de valor diferencial frente a Vinted) no está completamente construido.
+
+### Fricción 4 — Performance y hosting: fricción acumulada que invisibilizó el producto
+
+- OPcache completamente lleno (16 bytes libres) — nuevos archivos PHP no se cachean en tiempo real.
+- WP_MEMORY_LIMIT = 40M en front-end — límite para un WordPress con 19+ plugins activos.
+- LiteSpeed Cache activo pero generando una percepción de lentitud significativa (operador lo reporta directamente).
+- Backoffice lento: WP Admin con muchos plugins activos en un hosting compartido (Raiola Inicio SSD 2.0) no da la experiencia de una app.
+- QUIC Backend permanece OFF (causa error 520 si se activa) — CDN parcialmente desaprovechada.
+- **Conclusión:** El hosting y la configuración de caché no están optimizados. Parte de la lentitud es manejable con configuración (OPcache, WP_MEMORY_LIMIT) sin cambiar de plan. Pero el WP Admin nunca será tan rápido como una app moderna — es una limitación estructural de WordPress.
+
+### Fricción 5 — Visión y estrategia: la web no era el centro de la operación comercial
+
+- 4.9★ / 130+ reseñas en Vinted — canal paralelo con tracción real.
+- La web tenía pagos live desde el 21/02/2026 pero sin crecimiento de catálogo posterior.
+- El objetivo declarado era 100+ productos — pero el proceso lo hacía inviable en solitario.
+- La aspiración del operador no es "una tienda WordPress que funcione bien": es una plataforma/app donde agentes puedan operar el catálogo de forma controlada, el workflow sea AI-first, y el resultado se parezca más a classicfootballshirts.com.
+- **Conclusión:** La visión del producto no casaba con la herramienta elegida inicialmente. WordPress/WooCommerce puede seguir siendo el motor de venta, pero el centro de la operación debe ser una interfaz diseñada para catalogar camisetas vintage, no el WP Admin genérico.
+
+---
+
+## 3. QUÉ ESTABA MAL ENFOCADO EN TARGET_OPTIONS v1 (Sesión 005)
+
+| Lo que se evaluó en v1 | Lo que debería evaluarse |
+|------------------------|--------------------------|
+| Quitar Elementor Pro → Gutenberg | Rediseñar el workflow de publicación de productos |
+| Frontend de tienda pública | Backoffice/PIM de catalogación |
+| Qué tecnología para el storefront | Qué flujo hace posible subir 100 camisetas |
+| Performance del sitio web | Velocidad percibida del backoffice para el operador |
+| Opción A vs B vs C como caminos excluyentes | Tracks paralelos con distinto horizonte temporal |
+
+**La Opción A de v1 (WP+WC sin Elementor Pro → Gutenberg) era necesaria pero insuficiente.** Resuelve el deadline técnico pero no cambia la dinámica de uso del backoffice. Pablo seguiría con el mismo flujo caótico de publicación, ahora con Gutenberg en lugar de Elementor.
+
+---
+
+## 4. CONTEXTO VERIFICADO
 
 ### Stack actual (confirmado 2026-06-10)
 
 | Componente | Versión | Estado |
 |------------|---------|--------|
 | WordPress | 7.0 | Activo |
-| WooCommerce | 10.8.1 | Activo, HPOS |
+| WooCommerce | 10.8.1 | Activo, HPOS (`wp_wc_orders`) |
 | Elementor Pro | 3.35.1 | **Expira ~2026-07-01. No se renueva.** |
 | Hello Elementor Child | 1.0.0 | Activo, functions.php 62KB crítico |
-| WooPayments | 10.8.0 | LIVE, tarjeta + APMs + Apple/Google Pay |
-| PayPal Payments | 4.0.4 | Activo |
-| LiteSpeed Cache | 7.8.1 | Activo, OPcache lleno |
-| QUIC.cloud CDN | — | Activo |
-| Filtro Camisetas Pro | 3.0.0 | Plugin custom, funcional |
-| Off-Canvas Menu | 2.2.0 | Plugin custom, funcional |
-| ACF Free | 6.7.0 | Activo, 16 post types, 20 taxonomías |
-| RankMath | — | Activo, Search Console verificado |
-| Hosting | Raiola Inicio SSD 2.0 | Sin SSH. WP Admin = vía operativa permanente |
+| WooPayments | 10.8.0 | LIVE, tarjeta + Apple/Google Pay + APMs |
+| PayPal Payments | 4.0.4 | Activo, webhooks a verificar |
+| LiteSpeed Cache | 7.8.1 | Activo. OPcache lleno (16 bytes libres). |
+| QUIC.cloud CDN | — | Activo. QUIC Backend = OFF permanente. |
+| Filtro Camisetas Pro | 3.0.0 | Plugin custom, AJAX, HPOS-compatible |
+| Off-Canvas Menu | 2.2.0 | Plugin custom, acordeón liga→equipo |
+| ACF Free | 6.7.0 | 16 post types, 20 taxonomías |
+| RankMath | — | Activo, Search Console + GA verificados |
+| Hosting | Raiola Inicio SSD 2.0 | Sin SSH. WP Admin = vía operativa permanente. |
+| PHP | 8.3.31 (ea-php81) | LiteSpeed SAPI. **No cambiar handler.** |
 
-### Hechos críticos para la decisión
+### Activos reutilizables relevantes
 
-1. **Checkout ya está en Gutenberg Blocks.** Migrado 20-21/02/2026. La página más compleja de WooCommerce ya no depende de Elementor Pro. El riesgo de pagos al eliminar Elementor Pro es prácticamente cero.
-
-2. **19 items en elementor_library.** Plantillas, secciones globales y posibles popups que pueden usar widgets Pro. Su impacto en el front-end al expirar Elementor Pro depende de qué widgets Pro usen.
-
-3. **Al expirar Elementor Pro:** el editor Pro queda bloqueado (no se puede editar). El contenido ya renderizado suele mantenerse visible. Los widgets Pro pueden degradarse en el front-end. No asumir rotura inmediata total, pero sí rotura de capacidad editorial.
-
-4. **Cart y Mi Cuenta flaggeados por WooCommerce** (PROB-13). Pueden estar construidos con Elementor — si es así, son candidatos prioritarios de migración a bloques.
-
-5. **Mini-cart override ya desactualizado** (PROB-11). Elementor Pro mini-cart template sin header de versión — ya es una deuda activa antes de la expiración.
-
-6. **functions.php (62KB)** contiene lógica crítica de rewrite rules, carrito, SEO shortcodes. Es agnóstico a Elementor — se mantiene íntegro en cualquier opción.
-
-7. **Plugins custom** (Filtro Camisetas Pro, Off-Canvas Menu) son independientes de Elementor Pro. Se mantienen en cualquier opción dentro de WP+WC.
-
-8. **28 productos publicados, SEO activo, URLs limpias.** Cambiar de plataforma implicaría riesgo real de pérdida SEO y de datos.
-
-9. **Vinted: 4.9★ / 130+ reseñas.** Canal paralelo activo — el inventario y el workflow de tasación tienen más valor que el frontend específico.
+- **functions.php (62KB):** rewrite rules, carrito, SEO shortcodes, IVA, purge CDN. Producción-testeado. Agnóstico a Elementor.
+- **Filtro Camisetas Pro v3.0.0:** filtros AJAX, contadores, shortcodes, HPOS-compatible. Reutilizable en cualquier tema o desde API.
+- **Off-Canvas Menu v2.2.0:** menú "Explorar Colección" con acordeón liga→equipo. Funcional.
+- **Taxonomías (pa_liga, pa_equipo, pa_jugador, pa_talla, pa_marca, pa_condicion, pa_ano):** estructura de datos correcta y reutilizable.
+- **28 productos publicados:** con SEO, URLs limpias, atributos completos. Base del catálogo.
+- **WooPayments LIVE:** configurado, verificado, con APMs activos. No tocar.
+- **13 zonas de envío:** configuradas y operativas.
+- **STOCK.xlsx (19/04/2026):** inventario estructurado con stock sin publicar.
+- **Checkout en Gutenberg Blocks:** migrado 20-21/02/2026. La parte más crítica ya está desacoplada de Elementor.
 
 ---
 
-## 3. OPCIONES TARGET
+## 5. OPCIONES Y TRACKS
 
-### Opción A — WordPress + WooCommerce sin Elementor Pro
+### TRACK 0 — Continuidad: WordPress + WooCommerce sin Elementor Pro (deadline 2026-07-01)
 
-**Qué resuelve:** elimina la dependencia del editor y widgets de Elementor Pro antes del 2026-07-01, sin cambiar plataforma, pagos, productos ni SEO.
+**Qué resuelve:** elimina el bloqueo técnico del deadline de Elementor Pro sin riesgo a pagos, SEO ni productos.
 
 **Cómo funciona:**
-1. Auditoría de las 19 plantillas en elementor_library: identificar cuáles usan widgets Pro específicamente (Woo widgets, Loop Grid, Slides, etc.).
-2. Migrar Cart y Mi Cuenta a WooCommerce Blocks estándar (ya disponibles en WC 10.8.1).
-3. Reemplazar mini-cart override de Elementor con la solución de mini-cart nativa de WC.
-4. Para páginas de catálogo (shop, categorías, producto): evaluar migrar a un tema ligero con bloques WC, o mantener free Elementor si las plantillas no usan widgets Pro.
-5. Mantener Elementor free (sin coste) para lo que no dependa de Pro, o eliminar Elementor completamente si se cambia a tema de bloques.
-6. Tema candidato: Storefront (oficial WooCommerce, gratis) o Kadence (gratis, compatible bloques). Hello Elementor se puede mantener como tema hijo base si se queda Elementor free.
+1. Auditoría de los 19 items en `elementor_library`: identificar cuáles usan widgets Pro exclusivos (Loop Grid, Woo Widgets, Slides, Pricing Table, etc.).
+2. Migrar Cart y Mi Cuenta a WooCommerce Blocks si están construidas con Elementor.
+3. Reemplazar mini-cart override de Elementor con solución WC nativa.
+4. Para catálogo (shop, categorías, producto): evaluar si Elementor free es suficiente o si conviene un template PHP nativo del tema.
+5. OPcache: aumentar `opcache.memory_consumption` en cPanel (solicitar a Raiola si no hay acceso).
+6. Tema hijo: conservar Hello Elementor Child y functions.php intacto — la lógica crítica no depende de Elementor.
 
-**Lo que no cambia:** WooPayments, PayPal, productos, pedidos, funciones.php, plugins custom, URLs, SEO, hosting.
+**Lo que NO resuelve:** la fricción del backoffice, la velocidad de publicación, el workflow AI-first.
 
-**Duración estimada de la migración:** 5-14 días focales. El 80% del trabajo es auditoría y decisión; la implementación es proporcional a cuántas plantillas Pro haya en uso activo.
+**Coste / fricción:** bajo. Duración: 5-14 días.  
+**Riesgo:** bajo. Checkout ya en Gutenberg — el riesgo de pagos es prácticamente cero.  
+**Reversibilidad:** total. Si algo falla, se puede reinstalar Elementor free.
 
 ---
 
-### Opción B — WordPress + WooCommerce headless (frontend Next.js/Vercel)
+### TRACK 1 — Catenaccio Studio: backoffice/PIM AI-first
 
-**Qué resuelve:** desacopla el frontend de WordPress, permitiendo un frontend moderno con control total de UI, performance y experiencia de desarrollo.
+**Qué resuelve:** el cuello de botella real — la fricción de publicar productos. Diseña el workflow de catalogación para que sea rápido, AI-asistido y operable por agentes.
 
 **Cómo funciona:**
-- WooCommerce actúa como backend API (WC REST API o WPGraphQL).
-- Next.js en Vercel como frontend.
-- Checkout: requiere implementar un checkout propio o usar WooCommerce headless checkout (experimental). WooPayments en modo headless es complejo — no está diseñado para esta arquitectura.
-- Los custom plugins (Filtro Camisetas Pro, Off-Canvas Menu) requieren ser reescritos o reemplazados.
 
-**Problemas críticos para el deadline:**
-- WooPayments no tiene soporte headless oficial. Requiere solución custom o cambio de pasarela.
-- El checkout headless con WooCommerce no está maduro en 2026 para producción con WooPayments LIVE.
-- Tiempo estimado: 30-90 días de desarrollo, con riesgo de checkout roto en producción.
-- No resuelve el deadline de 2026-07-01.
+**Catenaccio Studio** = una app web ligera (Next.js) con formularios diseñados específicamente para camisetas vintage de fútbol. No es un CMS genérico: es una interfaz que conoce las taxonomías de Catenaccio.
 
----
+Flujo de publicación con Studio:
+```
+Pablo fotografía la camiseta
+    ↓
+Sube fotos a Studio (drag & drop)
+    ↓
+Studio / Claude identifica: liga, equipo, temporada (de la foto o del nombre)
+    ↓
+Claude propone: precio de mercado, descripción larga en español, título SEO en inglés, atributos completos
+    ↓
+Pablo revisa y ajusta en formulario compacto (1 pantalla, no 5 secciones de WP Admin)
+    ↓
+[Aprobar y publicar]
+    ↓
+Studio llama a WooCommerce REST API → crea el producto en WC con todos los campos
+    ↓
+WooCommerce ejecuta automáticamente: rewrite rules + flush CDN (lógica ya existe en functions.php)
+    ↓
+Producto publicado en la tienda con URL limpia, SEO y descripción lista
+```
 
-### Opción C — Migración progresiva a stack moderno (lafabrica / Next.js nuevo)
+**Componentes de Studio:**
+- **Frontend:** Next.js (React) — interfaz de formulario custom.
+- **API layer:** llamadas a WooCommerce REST API v3 (productos, taxonomías, imágenes, categorías).
+- **AI layer:** Claude (via Anthropic SDK) — asistencia en precio, descripción, título, atributos.
+- **Auth:** Application Password de WordPress (temporal, revocable, usuario limitado).
+- **Hosting Studio:** Vercel (gratis para este nivel de uso) o local durante desarrollo.
 
-**Qué resuelve:** construye una plataforma nueva con capacidad AI-first, Company Brain y lafabrica nativa. WordPress quedaría como legacy temporal o solo fuente de datos.
+**Stack mínimo viable (MVP):**
+- Formulario con campos: fotos, nombre/referencia, liga, equipo, temporada, talla, marca, condición, jugador (opcional), precio, descripción (Claude-assisted).
+- Botón "Rellenar con Claude" → Claude propone precio + descripción + título + atributos.
+- Botón "Publicar como borrador" → crea producto en WC en estado `draft`.
+- Pablo revisa en WP Admin solo lo que necesita ajustar.
+- Botón "Publicar" en WP Admin o desde Studio directamente.
 
-**Cómo funciona:**
-- Nueva web en Next.js/Vercel o equivalente.
-- Catálogo migrado desde WooCommerce (28 productos + variantes, taxonomías, stock).
-- Pagos: WooPayments no tiene implementación Next.js directa → necesitaría Stripe directo u otro proveedor.
-- SEO: riesgo real durante la migración si URLs cambian o el crawling se interrumpe.
-- Pedidos activos y clientes registrados: requieren migración de datos.
+**Lo que resuelve:**
+- Publicar una camiseta pasa de ~45 minutos a ~10 minutos.
+- El proceso es enseñable a agentes: Studio tiene una interfaz conocida y una API.
+- Pablo no necesita conocer WP Admin para el flujo principal.
+- Agents pueden operar Studio en modo DRAFT_ONLY sin acceso directo a producción.
 
-**Problemas críticos:**
-- No resuelve el deadline de 2026-07-01 bajo ninguna circunstancia.
-- Riesgo SEO real (Google indexa actualmente el sitio con RankMath + Search Console).
-- Riesgo de pagos: WooPayments no se puede "migrar" trivialmente — requiere nuevo onboarding con Stripe u otro proveedor.
-- Coste de desarrollo: el más alto de todas las opciones.
-- Los plugins custom de filtros y menú requieren reescritura completa.
-
----
-
-### Opción D — Aplazar migración, priorizar catálogo y ventas
-
-**Qué resuelve:** centra la energía operativa en lo que genera ingresos hoy (subir productos, Vinted, operación comercial) y parchea solo lo urgente antes del deadline.
-
-**Cómo funciona:**
-- Parche mínimo antes del 2026-07-01: desactivar Elementor Pro cuando expire (no renovar y dejar que venza) y evaluar si el front-end sigue funcionando.
-- Enfocar esfuerzo en subir productos (28 → 100+), mejorar la presencia en Vinted, y operar la tienda con lo que hay.
-- Diferir cualquier cambio de tema, arquitectura o stack.
-- El riesgo: si widgets Pro del front-end se degradan al expirar, el sitio puede mostrar errores visuales sin capacidad de edición.
-
-**Diferencia con Opción A:** Opción D no planifica activamente la migración — espera ver qué pasa al vencer y actúa reactivamente. Opción A actúa proactivamente antes del deadline.
-
----
-
-### Opción E — Migración a SaaS (Shopify u otro)
-
-**Qué resuelve:** elimina la deuda técnica de WordPress de raíz, cambiando a una plataforma gestionada.
-
-**Cómo funciona:**
-- Exportar catálogo (28 productos) a Shopify.
-- Reconfigurar pagos (WooPayments no existe en Shopify → Shopify Payments o Stripe directo).
-- Redirigir SEO con redirects 301.
-- Costes: Shopify Basic ≈ €29/mes. Shopify Payments cobra comisión adicional del 0.5-2% si no se usa Shopify Payments.
-
-**Por qué se descarta:**
-- No resuelve el deadline de 2026-07-01.
-- Pérdida de inversión real: plugins custom (Filtro Camisetas Pro, Off-Canvas Menu), functions.php 62KB, configuración de pagos, SEO activo, taxonomías de producto personalizadas.
-- PayPal y WooPayments no migran automáticamente — requiere nuevo onboarding.
-- El coste mensual de Shopify supera el del hosting actual para el nivel de ventas actual.
-- Los 13 zonas de envío configuradas y la lógica de IVA requieren reconfiguración completa.
+**Coste / fricción:** medio. Requiere 2-4 semanas de desarrollo. Puede comenzarse en Track 0 paralelo.  
+**Riesgo:** bajo. WooCommerce sigue siendo el backend — Studio es solo una capa de entrada.  
+**Reversibilidad:** total. Studio no modifica nada en WP — solo llama la API.
 
 ---
 
-## 4. COMPARATIVA EN TABLA
+### TRACK 2 — Arquitectura de catálogo e indexación SEO
 
-| Criterio | A: WP+WC sin Elementor Pro | B: WP+WC headless | C: Migración stack moderno | D: Aplazar migración | E: Shopify |
-|----------|---------------------------|-------------------|---------------------------|---------------------|------------|
-| **Riesgo antes del 2026-07-01** | Bajo — frontend migrado, pagos intactos | Crítico — no factible | Crítico — no factible | Medio — si Pro se degrada en front, sin capacidad de edición | Crítico — no factible |
-| **Velocidad de ejecución** | 5-14 días | 30-90 días | 60-180 días | 0 días (sin acción) | 30-60 días |
-| **Coste operativo para Pablo** | Bajo (hosting existente, tema gratis) | Medio-Alto (Vercel, horas de desarrollo) | Alto (nuevo stack, dev, hosting) | Nulo a corto plazo | Medio-Alto (suscripción mensual + comisiones) |
-| **Dependencia de agentes** | Baja — audit + migración acotada | Alta — requiere dev headless continuo | Muy alta — proyecto nuevo | Nula a corto plazo | Media — migración inicial |
-| **Seguridad** | Igual + mejora quitando Elementor Pro | Igual | Nueva superficie de ataque | Igual sin mejora | Gestionada por Shopify |
-| **SEO** | Sin riesgo (mismas URLs, mismo WP) | Riesgo medio (nueva estructura) | Riesgo alto (migración URLs) | Sin riesgo | Riesgo medio-alto (redirects) |
-| **Checkout / pagos** | Sin cambio — ya en Gutenberg Blocks | Complejo — WooPayments no headless | Requiere nueva pasarela | Sin cambio | Nueva pasarela necesaria |
-| **Catálogo e inventario** | Sin cambio — 28 productos + taxonomías | Sin cambio (backend WC) | Migración manual/export | Sin cambio | Exportación CSV + reconfiguración |
-| **Capacidad AI-first / Company Brain** | Media — WP+WC + Claude Code funciona hoy | Alta — frontend moderno | Alta — stack nativo | Baja — deuda técnica continúa | Media — Shopify tiene APIs pero stack cerrado |
-| **Compatibilidad con lafabrica** | Media — WP legacy pero operable | Alta | Alta | Baja | Media |
-| **Riesgo de tocar producción** | Bajo — cambios en tema/plugins, no en pagos | Alto — nueva arquitectura | Muy alto — migración completa | Nulo | Alto — migración completa |
-| **7 días** | ✅ Audit completa + Cart/Mi Cuenta migrados | ❌ Imposible | ❌ Imposible | ✅ Sin acción (riesgo pasivo) | ❌ Imposible |
-| **30 días** | ✅ Frontend libre de Elementor Pro + fixes | Parcial — solo arquitectura | Parcial — solo diseño | ⚠️ Deuda acumulada | Parcial — catálogo migrado |
-| **90 días** | ✅ Frontend moderno (bloques), AI-first workflow | Posible MVP headless | ⚠️ MVP incierto | ⚠️ Parche perpetuo | Posible — con pérdida de activos |
+**Qué resuelve:** las páginas SEO indexables por atributos combinados — la propuesta de valor diferencial de Catenaccio frente a Vinted.
+
+**Objetivo:** que `/laliga/fc-barcelona/`, `/champions-league/`, `/jugador/ronaldinho/`, `/marca/nike/temporada/2003-04/` sean páginas reales con contenido útil, indexadas por Google, con productos filtrados.
+
+**Cómo funciona (dentro de WP+WC):**
+- Páginas de taxonimía de producto (`product_tag`, `pa_liga`, `pa_equipo`) que WooCommerce genera automáticamente si se configuran correctamente.
+- Custom archive templates en el tema hijo para cada tipo de taxonomía.
+- RankMath: configurar SEO para archive pages de producto (título, meta description dinámicos).
+- Filtro Camisetas Pro: ya genera URLs con parámetros — evaluar si puede generar URLs indexables (permalinks) para combinaciones clave.
+- Para combinaciones de atributos (liga + equipo): considerar páginas creadas manualmente con shortcode + título SEO optimizado.
+- Protección contra crawlers: rate limiting en .htaccess o en LiteSpeed para URLs de filtros (PROB-05 ya ocurrió una vez).
+
+**Coste / fricción:** medio. Requiere decisión de arquitectura URL y config de RankMath.  
+**Timeline:** 30-60 días. No es urgente — pero condiciona el SEO a largo plazo.
 
 ---
 
-## 5. RIESGOS POR OPCIÓN
+### TRACK 3 — Storefront público moderno (DEFER)
 
-### Opción A
-| Riesgo | Probabilidad | Impacto | Mitigación |
-|--------|-------------|---------|-----------|
-| Widgets Pro que no tienen equivalente gratuito | Media | Medio | Identificar antes de desactivar; usar bloques WC o HTML estático como fallback |
-| Rotura visual de la home o páginas de catálogo post-migración | Media | Medio | Validación visual de Pablo en staging/preview antes de push |
-| Mini-cart no funciona con solución de bloques | Baja | Bajo | WC mini-cart native o tema con mini-cart integrado |
-| El tema nuevo rompe los plugins custom | Baja | Medio | Filtro Camisetas Pro y Off-Canvas Menu son independientes de Elementor; test en local |
-| OPcache lleno bloquea nuevos archivos PHP | Alta (ya ocurre) | Medio | Solucionar en la misma sesión: aumentar OPcache memory limit en cPanel o reiniciar OPcache |
+**Referencia aspiracional:** classicfootballshirts.com — experiencia de catálogo moderna, foto-centric, con filtros, búsqueda, ficha de producto detallada.
 
-### Opción B
-| Riesgo | Probabilidad | Impacto | Mitigación |
-|--------|-------------|---------|-----------|
-| WooPayments no funciona en headless | Alta | Crítico | Sin mitigación directa — requiere cambio de pasarela |
-| Checkout roto en producción durante dev | Alta | Crítico | No hay mitigación fiable en el deadline |
-| Costes Vercel inesperados | Media | Medio | Plan gratuito tiene límites; e-commerce con tráfico real puede superarlos |
-
-### Opción C
-| Riesgo | Probabilidad | Impacto | Mitigación |
-|--------|-------------|---------|-----------|
-| Pérdida de SEO durante migración | Alta | Alto | Redirects 301, pero el crawl tardará semanas en estabilizarse |
-| Pérdida de historial de pedidos | Alta | Alto | Migración de datos manual o export — no hay herramienta automática WC→Next.js |
-| Pagos requieren nuevo onboarding | Alta | Crítico | WooPayments no es portable; necesita Stripe directo u otro |
-
-### Opción D
-| Riesgo | Probabilidad | Impacto | Mitigación |
-|--------|-------------|---------|-----------|
-| Front-end con widgets Pro degradados post-2026-07-01 | Media-Alta | Medio | Observar post-expiración, actuar reactivamente |
-| Sin capacidad editorial post-expiración | Alta | Medio | El editor Pro quedará bloqueado — no se podrá editar con Elementor |
-| Deuda técnica perpetua | Muy alta | Alto a largo plazo | Sin mitigación si no se planifica la migración |
-
-### Opción E
-| Riesgo | Probabilidad | Impacto | Mitigación |
-|--------|-------------|---------|-----------|
-| Pérdida de plugins custom y configuración | Muy alta | Alto | No hay mitigación — son activos WP nativos |
-| Coste total mayor que el actual | Alta | Medio | Shopify Basic + comisiones vs. hosting Raiola ya pagado |
+**Por qué DEFER:**
+- Sin catálogo de 100+ productos, un storefront moderno no tiene impacto en ventas ni SEO.
+- WooCommerce puede servir de storefront razonablemente bien una vez resuelto Track 0 + Track 2.
+- La conversión a Next.js frontend requiere resolver el checkout headless (WooPayments no soporta headless en 2026).
+- **Cuando revisar:** con 100+ productos publicados, evidencia de tráfico orgánico y un workflow de publicación fluido (Track 1 funcionando).
 
 ---
 
-## 6. RECOMENDACIÓN BINARIA
+### TRACK 4 — Acceso de agentes al CMS sin SSH
+
+**Objetivo:** que Claude Code (u otros agentes) pueda operar el catálogo de Catenaccio de forma controlada, sin acceso SSH, con reversibilidad.
+
+Ver sección 6 (Modelo de acceso sin SSH) para el detalle técnico.
+
+---
+
+### Opciones descartadas
 
 | Opción | Veredicto | Razón |
 |--------|-----------|-------|
-| **A — WP+WC sin Elementor Pro** | **✅ APPROVE** | Resuelve el deadline con riesgo bajo. Checkout ya está en Gutenberg. Sin riesgo de pagos. Preserva todo el activo existente. |
-| B — WP+WC headless | **🛑 STOP** | WooPayments no soporta headless en producción. No resuelve el deadline. |
-| C — Migración stack moderno | **⏸ DEFER** | Conversación válida en 6-12 meses con más catálogo y tráfico como evidencia. Hoy tiene coste sin ROI demostrado. |
-| D — Aplazar migración | **⚠️ DEFER condicional** | Si Opción A resulta más compleja de lo esperado en la primera semana, aplazar al mínimo patch (desactivar Elementor Pro y observar) es el fallback aceptable. No es la opción recomendada. |
-| E — Shopify | **🛑 STOP** | Pérdida de activos reales sin ganancia justificada. No resuelve el deadline. |
+| Migración completa a Next.js (tienda pública + backend) | **DEFER** | Inviable antes del deadline. Requiere resolver checkout headless con WooPayments. Revisitar con catálogo de 100+ productos. |
+| Shopify | **STOP** | Pérdida de activos reales (plugins custom, configuración de pagos, SEO activo, taxonomías). Sin ventaja sobre WC para el caso de uso específico. |
+| WordPress + WooCommerce headless (Next.js frontend, WC backend) | **STOP a corto plazo** | WooPayments no tiene soporte headless oficial en 2026. El checkout es el componente más crítico. No riesgar pagos. Puede ser Track 3 en 12+ meses si cambia la pasarela. |
 
 ---
 
-## 7. PLAN 7 / 30 / 90 DÍAS — OPCIÓN A
+## 6. COMPARATIVA EN TABLA
 
-### Semana 1 (7 días) — Resolver el deadline
-
-**Objetivo:** estar libres de dependencia editorial de Elementor Pro antes del 2026-07-01.
-
-**Día 1-2 — Auditoría (DOCS_ONLY / WP Admin read-only):**
-- [ ] Listar los 19 items de elementor_library y clasificarlos: ¿usa widgets Pro específicos (Loop Grid, Woo Widgets, Slides, Pricing, etc.) o solo el builder básico?
-- [ ] Revisar en el front-end: Home, Shop (/camisetas/), página de producto, Cart (/finalizar-compra/ ya es Gutenberg), Mi Cuenta, páginas estáticas.
-- [ ] Confirmar si Cart y Mi Cuenta están construidas con Elementor o ya son bloques (resolver PROB-13).
-- [ ] Identificar si el mini-cart visible al usuario es el override de Elementor o el estándar.
-
-**Día 3-5 — Migración acotada (solo lo que depende de Pro):**
-- [ ] Cart y Mi Cuenta → migrar a WooCommerce Blocks si son Elementor (WC 10.8.1 tiene bloques nativos para ambas).
-- [ ] Mini-cart → reemplazar override Elementor con solución nativa (hook `woocommerce_add_to_cart_fragments` + template WC estándar, o bloque Mini-Cart de WC).
-- [ ] Para páginas de catálogo con Loop Grid de Elementor Pro → evaluar si free Elementor tiene el loop suficiente (en Elementor free, el Loop Widget es Pro exclusivo) → alternativa: usar el archive de WooCommerce nativo con el tema, que es funcional sin Elementor.
-- [ ] Mantener Filtro Camisetas Pro y Off-Canvas Menu — son agnósticos a Elementor.
-
-**Día 6-7 — Validación y cierre:**
-- [ ] Validación visual de Pablo: front-end completo — home, catálogo, producto, carrito, checkout.
-- [ ] Test de compra: simular añadir al carrito + proceso de checkout (pagos ya funcionan en Gutenberg).
-- [ ] Confirmar que RankMath y Google Analytics siguen activos.
-- [ ] Commit de cambios y registro en docs.
-- [ ] Arreglar OPcache (PROB-09): aumentar `opcache.memory_consumption` en php.ini via cPanel (de 128M a 256M) o solicitar a Raiola.
-
-**Resultado esperado:** Elementor Pro puede expirar el 2026-07-01 sin impacto operativo ni editorial. El editor de bloques es la nueva superficie de edición.
+| Criterio | Track 0 (continuidad) | Track 1 (Studio/PIM) | Track 2 (catálogo SEO) | Track 3 (storefront, DEFER) |
+|----------|----------------------|---------------------|----------------------|----------------------------|
+| **Urgencia** | Crítica — 2026-07-01 | Alta — arrancar en paralelo | Media | Baja — post 100 productos |
+| **Riesgo pagos** | Ninguno | Ninguno | Ninguno | Alto (checkout headless) |
+| **Riesgo SEO** | Ninguno | Ninguno | Bajo (si se gestiona bien) | Medio-alto (migración URLs) |
+| **Impacto en publicación** | Ninguno | Alto — de 45min a 10min | Ninguno directo | Ninguno directo |
+| **Dependencia de agentes** | Baja | Alta — Studio es el canal | Media | Alta |
+| **Coste desarrollo** | Bajo | Medio (2-4 semanas) | Bajo-Medio | Alto |
+| **Compatibilidad lafabrica** | Media | Alta — nativo Next.js | Media | Alta |
+| **7 días** | ✅ Auditoría + fixes | 🔲 Diseño formulario | ❌ No urgente | ❌ |
+| **30 días** | ✅ Completado | ✅ MVP Studio operativo | 🔲 Arquitectura URL | ❌ |
+| **90 días** | ✅ Estable | ✅ 100+ productos publicados | ✅ Páginas taxon. indexadas | 🔲 Evaluación |
 
 ---
 
-### Mes 1 (30 días) — Estabilizar y crecer
+## 7. RIESGOS POR TRACK
 
-**Frontend:**
-- [ ] Si el catálogo usa Loop Grid de Pro → evaluar tema con grid de productos integrado (Storefront, Kadence, Astra) o implementar grid con `wc_get_products()` + template PHP en el tema hijo.
+### Track 0
+| Riesgo | Probabilidad | Impacto | Mitigación |
+|--------|-------------|---------|-----------|
+| Widgets Pro sin equivalente gratuito | Media | Medio | Fallback HTML estático; template PHP nativo |
+| Cart/Mi Cuenta en Elementor → rotura en migración | Media | Medio | WC Blocks nativos disponibles en WC 10.8.1 |
+| OPcache lleno bloquea PHP | Alta (ya ocurre) | Medio | Aumentar `opcache.memory_consumption` en cPanel |
+
+### Track 1 (Studio)
+| Riesgo | Probabilidad | Impacto | Mitigación |
+|--------|-------------|---------|-----------|
+| WooCommerce REST API no acepta todos los campos de atributo | Baja | Medio | WC REST API v3 soporta `attributes[]` completo — testar en draft mode primero |
+| Application Password expuesta o reutilizada | Baja | Alto | Usar usuario limitado (solo editor de productos), revocar si se compromete |
+| Claude genera contenido incorrecto (precio, descripción) | Media | Bajo | Pablo siempre revisa antes de publicar — Studio no publica sin aprobación humana |
+| Complejidad de imágenes (upload + reorder + WC media) | Media | Medio | WC REST API soporta upload vía Media Library — puede requerir iteración |
+
+### Track 2
+| Riesgo | Probabilidad | Impacto | Mitigación |
+|--------|-------------|---------|-----------|
+| Crawlers saturan URLs de filtros (PROB-05, ya ocurrió) | Alta sin mitigación | Alto | Rate limiting en .htaccess / LiteSpeed reglas por user-agent |
+| RankMath mal configurado en archive pages | Media | Medio | Auditoría específica de RankMath en product archive templates |
+
+---
+
+## 8. RECOMENDACIÓN BINARIA
+
+| Track | Veredicto | Horizonte |
+|-------|-----------|-----------|
+| **Track 0 — Continuidad** | **✅ APPROVE — URGENTE** | 7-14 días |
+| **Track 1 — Studio AI-first** | **✅ APPROVE — arrancar en paralelo** | 14-30 días |
+| Track 2 — Catálogo SEO | **🔲 APPROVE después de Track 1** | 30-60 días |
+| Track 3 — Storefront moderno | **⏸ DEFER** | Post 100 productos + evidencia tráfico |
+| Track 4 — Acceso agentes | **✅ APPROVE — define el modelo en Track 1** | Con Track 1 |
+
+**Estrategia completa:** APPROVE A0 (Track 0) + APPROVE B1 (Track 1) en paralelo. Track 2 se activa cuando Studio tenga el primer lote de productos. Track 3 es la conversación de dentro de 6-12 meses.
+
+---
+
+## 9. MODELO DE ACCESO SIN SSH
+
+Raiola Inicio SSD 2.0 no ofrece SSH. Esto no bloquea operación de agentes — solo cambia el canal de acceso.
+
+### Niveles de acceso para agentes
+
+| Modo | Qué puede hacer el agente | Autorización requerida |
+|------|--------------------------|----------------------|
+| `READ_ONLY` | Leer estado: WP Admin / Site Health / WC Status / API GET | Ninguna (navegación normal) |
+| `DRAFT_ONLY` | Crear/editar productos en estado `draft` vía WC REST API | Application Password de usuario limitado |
+| `APPLY_WITH_APPROVAL` | Publicar producto, cambiar precio, modificar stock | Aprobación explícita de Pablo antes de cada acción |
+| `ADMIN` | Instalar plugins, cambiar configuraciones críticas | Solo Pablo vía WP Admin — agentes nunca |
+
+### Implementación práctica
+
+**Application Password de WordPress:**
+1. Crear usuario en WP Admin con rol `Author` o `Editor` limitado a productos.
+2. En el perfil de ese usuario: `Contraseñas de aplicación` → crear → copiar.
+3. Usar en las llamadas de Studio / agentes:
+   ```
+   Authorization: Basic base64(usuario:app_password)
+   ```
+4. Revocar desde WP Admin si se compromete — sin tocar el servidor.
+5. **No usar la cuenta de administrador principal** para las llamadas de API.
+
+**Endpoints WooCommerce REST API relevantes:**
+- `GET /wp-json/wc/v3/products` — listar productos
+- `POST /wp-json/wc/v3/products` — crear producto (en `status: draft` por defecto)
+- `PUT /wp-json/wc/v3/products/{id}` — actualizar producto
+- `GET /wp-json/wc/v3/products/attributes` — listar taxonomías (pa_liga, pa_equipo, etc.)
+- `POST /wp-json/wp/v2/media` — subir imagen a Media Library
+
+**Modos de operación en Studio:**
+- `DRAFT_ONLY` para el flujo principal: Studio crea en borrador, Pablo aprueba y publica.
+- Pablo puede publicar desde Studio (si se implementa el botón) o desde WP Admin.
+- Agentes (Claude Code) pueden crear borradores en modo automatizado sin autorización manual para cada producto.
+
+**Operación de WP Admin vía agente (casos excepcionales):**
+- Capturas de pantalla para verificación visual (modo READ_ONLY).
+- Antigravity / browser headless si hay una tarea puntual de configuración que requiere UI.
+- No como canal habitual — Studio + REST API es la vía principal.
+
+---
+
+## 10. PLAN 7 / 30 / 90 DÍAS
+
+### Semana 1 (7 días) — Track 0: resolver el deadline
+
+**Objetivo:** estar libres de la dependencia editorial de Elementor Pro antes del 2026-07-01.
+
+**Día 1-2 — Auditoría (WP Admin, read-only):**
+- [ ] Listar los 19 items de `elementor_library` — clasificar cuáles usan widgets Pro exclusivos (Loop Grid, Woo Widgets, Slides, Pricing Table, etc.).
+- [ ] Verificar en el front-end: Home, /camisetas/, producto individual, Cart, Mi Cuenta.
+- [ ] Confirmar si Cart y Mi Cuenta están en Elementor o ya en bloques (resolver PROB-13).
+- [ ] Confirmar qué mini-cart ve el usuario: override de Elementor o estándar.
+
+**Día 3-5 — Migración:**
+- [ ] Cart y Mi Cuenta → WooCommerce Blocks si están en Elementor.
+- [ ] Mini-cart → solución nativa WC (hook `woocommerce_add_to_cart_fragments` o bloque Mini-Cart).
+- [ ] Para catálogo: si Loop Grid es Pro → template PHP nativo en tema hijo (la lógica ya está en functions.php).
+- [ ] Mantener Filtro Camisetas Pro y Off-Canvas Menu intactos.
+- [ ] OPcache: solicitar a Raiola aumentar `opcache.memory_consumption` de 128M a 256M.
+
+**Día 6-7 — Validación visual:**
+- [ ] Pablo valida: home, catálogo, producto, carrito, checkout.
+- [ ] Test rápido: añadir al carrito + checkout (no llegar a pago real, solo verificar el flujo).
+- [ ] Confirmar que RankMath, Google Analytics y Complianz siguen activos.
+
+**Resultado esperado:** Elementor Pro puede expirar el 2026-07-01 sin impacto. El editor de bloques WP es la nueva superficie de edición de emergencia.
+
+---
+
+### Mes 1 (30 días) — Track 1: Catenaccio Studio MVP
+
+**Objetivo:** tener una interfaz mínima para publicar camisetas 10x más rápido.
+
+**Semana 2 — Diseño del formulario:**
+- [ ] Diseñar el formulario de Studio con los campos exactos de una camiseta:
+  - Fotos (upload múltiple, reordenar).
+  - Nombre de referencia (para uso interno, no SEO).
+  - Liga, Equipo, Temporada, Talla, Marca, Condición, Jugador (si aplica).
+  - Estado: draft o publicado.
+  - Precio (con sugerencia de Claude).
+  - Título SEO en inglés (sugerido por Claude).
+  - Descripción larga en español (generada por Claude).
+- [ ] Definir la estructura de llamada a WooCommerce REST API para crear un producto con todos estos campos.
+- [ ] Crear el Application Password del usuario limitado en WP Admin.
+- [ ] Validar que la API acepta la creación de producto con atributos custom (pa_liga, pa_equipo, etc.).
+
+**Semana 3 — Implementación:**
+- [ ] Scaffolding Next.js (simple, sin over-engineering — un formulario y una pantalla de revisión).
+- [ ] Integración Claude: botón "Sugerir con Claude" → rellena precio, descripción, título.
+- [ ] Integración WC REST API: botón "Crear borrador" → llama a `POST /wp-json/wc/v3/products` con status=draft.
+- [ ] Upload de imágenes: llamada a `POST /wp-json/wp/v2/media` y asignación al producto.
+
+**Semana 4 — Prueba real:**
+- [ ] Pablo publica sus primeras 5 camisetas usando Studio (sin entrar a WP Admin).
+- [ ] Medir el tiempo: ¿de cuánto baja el tiempo por camiseta?
+- [ ] Ajustes basados en feedback de uso real.
+
+**Resultado esperado:** Studio operativo. Pablo puede publicar una camiseta en ~10 minutos. Claude asiste en precio + descripción + título + atributos.
+
+---
+
+### Trimestre 1 (90 días) — Catálogo + SEO + operación AI-first
+
+**Objetivo:** 100+ productos publicados, arquitectura SEO estable, workflow operativo sin intervención técnica constante.
+
+**Catálogo:**
+- [ ] Usar Studio para publicar el stock existente: mínimo 30-50 productos nuevos.
+- [ ] Revisar STOCK.xlsx (19/04/2026): identificar stock pendiente de publicar.
+- [ ] Objetivo: 100+ productos activos a fin del trimestre.
+
+**Track 2 — SEO de catálogo:**
+- [ ] Auditar los archive templates de WooCommerce para taxonomías de producto (pa_liga, pa_equipo).
+- [ ] Configurar RankMath para títulos SEO dinámicos en archive pages (ej: "Camisetas de Real Madrid | Catenaccio Vintage").
+- [ ] Proteger URLs de filtros contra crawlers (rate limiting, robots.txt).
+- [ ] Evaluar si conviene generar páginas dedicadas para combinaciones de alta demanda (ej: `/laliga/real-madrid/`).
+
+**Operación:**
 - [ ] Habilitar WPS Hide Login (PROB-12) — 10 minutos en WP Admin.
-- [ ] WP_MEMORY_LIMIT 40M (PROB-10): evaluar con Raiola si el plan permite aumentarlo en wp-config.php (actualmente 40M front-end, 512M admin).
-- [ ] Investigar webhook de PayPal (PROB-14): verificar en WooCommerce → PayPal → webhooks si están activos o necesitan reregistrarse.
-- [ ] Resolver UCSS/CSS asíncrono en LiteSpeed Cache (PROB-06): configurar exclusiones correctas para WooCommerce y activar, mejorar PageSpeed desde 75.
-- [ ] Implementar selección de Punto Pack InPost en checkout (PROB-07) si hay widget disponible para Gutenberg.
+- [ ] Investigar webhooks de PayPal (PROB-14).
+- [ ] Resolver WP_MEMORY_LIMIT 40M (PROB-10) — solicitar a Raiola si no hay acceso vía cPanel.
+- [ ] Evaluar si el plan de Raiola es suficiente o si merece upgrade (a 100+ productos con tráfico real).
 
-**Catálogo:**
-- [ ] Subir 10-20 productos nuevos con el workflow AI-first (foto → Claude tasación y descripción → WP Admin).
-- [ ] Establecer cadencia: 2-3 sesiones de publicación por semana hasta llegar a 50 productos.
-- [ ] Revisar STOCK.xlsx (19/04/2026): hay stock sin publicar, identificar los más fotogénicos/valiosos.
-
-**Vinted:**
-- [ ] Confirmar si el stock de Vinted está sincronizado manualmente con el de la web o son catálogos independientes.
-- [ ] Evaluar si hay duplicación de ventas o si Vinted y web sirven segmentos distintos.
+**Track 3 — Evaluación:**
+- [ ] Con 100+ productos y tráfico documentado: ¿justifica el esfuerzo de un storefront Next.js?
+- [ ] Decisión en ese momento — no antes.
 
 ---
 
-### Trimestre 1 (90 días) — AI-first + Company Brain
+## 11. QUÉ NO HACER TODAVÍA
 
-**Workflow:**
-- [ ] Implementar Company Brain básico para Catenaccio: contexto del catálogo, precios de referencia, decisiones de tasación acumuladas. Claude como memoria de producto, no solo como ayudante puntual.
-- [ ] Workflow de publicación automatizado: foto → Claude (tasación + descripción + atributos) → draft en WP Admin → revisión Pablo → publicar. Tiempo objetivo: <15 min por producto.
-- [ ] lafabrica como sistema de gestión de este workflow.
-
-**Frontend:**
-- [ ] Evaluar si el tema resulta suficiente o si merece pasar a un tema de bloques puro (Twenty Twenty-Five o similar) con templates WooCommerce en HTML.
-- [ ] Considerar si los plugins custom de filtros y menú necesitan actualización o si funcionan correctamente en el nuevo contexto.
-
-**Catálogo:**
-- [ ] Objetivo: 100+ productos publicados.
-- [ ] Integración Vinted ↔ web: al menos evitar vender la misma pieza en ambos canales simultáneamente (sync manual o con herramienta).
-
-**Infraestructura:**
-- [ ] Evaluar si Raiola Inicio SSD 2.0 es suficiente a 100 productos y tráfico creciente, o si merece upgrade de plan.
-- [ ] Limpiar ghost tables de la base de datos (PROB-15) — tarea de mantenimiento baja prioridad, planificar con backup previo.
+- **No construir el storefront público en Next.js** hasta tener evidencia de tráfico y catálogo de 100+ productos. El frontend no es el cuello de botella.
+- **No migrar a Shopify.** Pérdida de activos reales sin justificación.
+- **No implementar headless checkout.** WooPayments no lo soporta en 2026.
+- **No intentar actualizar Elementor Pro a 4.x.** La decisión de no renovar es firme.
+- **No hacer over-engineering en Studio.** El MVP es un formulario + llamada a REST API + Claude. No necesita autenticación compleja, multi-usuario, ni dashboard en la primera versión.
+- **No activar UCSS/CSS asíncrono en LiteSpeed** sin configurar primero las exclusiones de WooCommerce.
+- **No cambiar el PHP handler** (ea-php81 → ea-php83 da error 403 — documentado).
+- **No usar la cuenta de administrador** como Application Password de Studio.
+- **No limpiar la base de datos (PROB-15)** sin backup previo verificado — tarea de baja urgencia.
+- **No pushear nada a producción sin aprobación visual de Pablo.** Track 0 y Track 1 tienen validación humana antes de cada acción sobre producción.
 
 ---
 
-## 8. QUÉ NO HACER TODAVÍA
-
-- **No instalar Next.js, Vercel, ni ningún stack moderno** hasta que haya catálogo de 100+ productos y evidencia de tráfico que lo justifique. La plataforma no es el cuello de botella hoy — lo es el catálogo.
-- **No migrar a Shopify.** La inversión en plugins custom, configuración de pagos y SEO activo no se recupera.
-- **No tocar WooPayments ni los flujos de checkout** hasta que Opción A esté completamente validada.
-- **No borrar Elementor Pro manualmente antes de que expire.** Dejar que venza naturalmente el 2026-07-01, con la migración del frontend ya completa.
-- **No intentar actualizar Elementor Pro a 4.1.x.** El operador ya decidió no renovar — no invertir en la plataforma que se va a abandonar.
-- **No limpiar la base de datos (PROB-15)** sin backup previo verificado. Tarea de baja urgencia.
-- **No activar UCSS/CSS asíncrono en LiteSpeed** sin configurar primero las exclusiones de WooCommerce (puede romper el carrito/checkout).
-- **No cambiar el PHP handler** (ea-php81 en Raiola → ea-php83 da error 403 — documentado en AS-IS).
-- **No preparar un SEED de implementación** hasta que el operador apruebe explícitamente una opción TARGET en este documento.
-
----
-
-## 9. DECISIÓN QUE DEBE TOMAR EL OPERADOR
+## 12. DECISIÓN QUE DEBE TOMAR EL OPERADOR
 
 **Pregunta exacta:**
 
-> **¿Apruebas la Opción A — mantener WordPress + WooCommerce y eliminar la dependencia de Elementor Pro migrando el frontend a bloques Gutenberg/WooCommerce antes del 2026-07-01?**
+> **¿Apruebas la estrategia A0 + B1 para Catenaccio Vintage?**
 >
-> Esto implica:
-> - Auditar los 19 items de elementor_library para identificar qué depende de Pro.
-> - Migrar Cart y Mi Cuenta a bloques WC si están en Elementor.
-> - Reemplazar el mini-cart override de Elementor.
-> - Para catálogo: evaluar si free Elementor es suficiente o si se necesita un template PHP nativo del tema.
-> - Sin tocar WooPayments, PayPal, productos, pedidos, URLs ni SEO.
-> - Enfocar los 90 días siguientes en subir catálogo (28 → 100+ productos) y workflow AI-first.
+> - **A0 (urgente — antes del 2026-07-01):** auditar y migrar los templates de Elementor Pro a WooCommerce Blocks / templates PHP, resolver OPcache y fixes mínimos de performance. Sin tocar pagos ni SEO.
+>
+> - **B1 (arrancar en paralelo, MVP en 30 días):** construir Catenaccio Studio — una app Next.js con formularios diseñados para catalogar camisetas, asistida por Claude para precios/descripciones/atributos, que publica directamente en WooCommerce vía REST API. El resultado: publicar una camiseta en ~10 minutos en lugar de ~45.
+>
+> WooCommerce sigue siendo el motor de venta y pagos. El storefront público moderno se evalúa en 90 días con evidencia real de tráfico y catálogo.
 
-**Respuesta posible:**
-- `APPROVE Opción A` → se genera el plan de implementación (SEED) y se inicia la migración en la próxima sesión.
-- `DEFER Opción D` → aplazar, esperar a que Elementor Pro venza el 2026-07-01, observar el impacto, y actuar reactivamente.
-- `Ajuste` → si quieres modificar el alcance de Opción A (ej: solo hacer Cart+Mi Cuenta, no tocar el catálogo todavía), indicarlo explícitamente.
+**Preguntas complementarias para afinar la decisión:**
+
+1. ¿Quieres que Studio sea una app local (solo para tu uso) o que pueda ejecutarse en la nube (Vercel)?
+2. ¿Tienes preferencia sobre cómo gestionar las fotos? (subida directa a WooCommerce, Google Drive, carpeta local)
+3. Para el formulario de Studio, ¿hay algún campo que actualmente no estés usando pero querrías añadir? (ej: dorsales, condición con escala 1-10, fotos de etiqueta)
+4. ¿La App Password de Studio la creas tú en WP Admin o prefieres que un agente te guíe paso a paso?
+
+**Respuestas posibles:**
+- `APPROVE A0 + B1` → Sesión 006: Track 0 (auditoría elementor_library) + diseño del formulario de Studio.
+- `APPROVE solo A0` → resolver el deadline, aplazar Studio.
+- `Ajuste` → especificar qué cambia en la estrategia.
 
 ---
 
-## 10. CAMBIOS DOCUMENTALES REALIZADOS
+## 13. CAMBIOS DOCUMENTALES REALIZADOS
 
 | Documento | Cambio |
 |-----------|--------|
-| `docs/discovery/TARGET_OPTIONS.md` | Creado completo — opciones A/B/C/D/E, comparativa, riesgos, plan 7/30/90, veredicto APPROVE A |
-| `BACKLOG.md` | TARGET_OPTIONS → pendiente de marcar DONE; nueva tarea "Auditoría Elementor Pro templates" en NOW |
-| `CONTEXTO.md` | Sesión 005 añadida (append) |
-| `HISTORIAL_SESIONES.md` | Entrada Sesión 005 añadida (append) |
-| `DECISIONS.md` | DEC-8 propuesta: PEND-1 → RECOMENDACIÓN STRONG Opción A (pendiente de aprobación del operador) |
-| `agent_events.jsonl` | Evento `target_options_ready` registrado |
+| `docs/discovery/TARGET_OPTIONS.md` | Reescrito completo — Root Cause añadida, veredicto corregido de Opción A → A0+B1, Track model, acceso API sin SSH, plan 7/30/90 actualizado |
+| `DECISIONS.md` | DEC-8 actualizada: de "APPROVE Opción A (Gutenberg)" a "APPROVE A0 + B1 (Studio)" |
+| `BACKLOG.md` | Nuevas tareas: STUDIO_MVP_DESIGN, WC_API_ACCESS_MODEL, PRODUCT_WORKFLOW_DESIGN, ATTRIBUTE_TAXONOMY_SEO, PERFORMANCE_HOSTING_DECISION |
+| `CONTEXTO.md` | Sesión 005b añadida (append) |
+| `HISTORIAL_SESIONES.md` | Entrada Sesión 005b añadida (append-only) |
+| `agent_events.jsonl` | Evento `target_options_reframed` registrado |
 
 ---
 
-## 11. CIERRE DE SESIÓN
+## 14. CIERRE DE SESIÓN
 
-**Estado del workflow:** AS_IS_VALIDADO → TARGET_OPTIONS EN_REVISIÓN  
-**Siguiente paso:** El operador responde a la pregunta de la sección 9. Si aprueba Opción A → se genera `RECOMMENDED_IMPLEMENTATION_PLAN.md` y el SEED.  
-**Deadline:** Opción A debe estar implementada antes del **2026-07-01** (18 días desde 2026-06-13).  
-**Bloqueante activo:** ninguno — la decisión está en manos del operador.
+**Estado del workflow:** AS_IS_VALIDADO → TARGET_OPTIONS EN_REVISIÓN (versión corregida 005b)  
+**Siguiente paso:** Operador responde a la pregunta de la sección 12. Si aprueba A0+B1 → Sesión 006: Track 0 auditoría + diseño formulario Studio.  
+**Deadline:** Track 0 debe completarse antes del **2026-07-01** (18 días desde 2026-06-13).  
+**Commit de Sesión 005 (15d478c):** corregido en este commit — no pushear el commit anterior por separado.
 
 ---
 
-*Generado en Sesión 005 — 2026-06-13 — Claude Code Sonnet.*  
-*Basado en AS_IS_UNDERSTANDING.md (VALIDADO_POR_USUARIO, 2026-06-10) y SERVER_CONTEXT_CHECK_READONLY (2026-06-10).*
+*Versión corregida generada en Sesión 005b — 2026-06-13 — Claude Code Sonnet.*  
+*Corrección de TARGET_OPTIONS v1 (Sesión 005): veredicto ampliado de "Quitar Elementor Pro → Gutenberg" a "A0 + B1 (Catenaccio Studio)".*  
+*Basado en AS_IS_UNDERSTANDING.md (VALIDADO_POR_USUARIO, 2026-06-10) y contexto operativo del operador.*

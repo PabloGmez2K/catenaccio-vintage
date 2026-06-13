@@ -9,22 +9,37 @@ Actualizar al cierre de cada sesión. Los ítems completados se mueven a DONE o 
 
 ## NOW — Esta semana / próxima sesión
 
-- [x] **TARGET_OPTIONS preparado** — 2026-06-13 (Sesión 005). Ver `docs/discovery/TARGET_OPTIONS.md`. Veredicto: APPROVE Opción A (WP+WC sin Elementor Pro). Pendiente de aprobación del operador.
-- [ ] **[BLOQUEANTE] Operador aprueba TARGET Opción A** — responder a la pregunta de la sección 9 de TARGET_OPTIONS.md. Si aprueba → generar RECOMMENDED_IMPLEMENTATION_PLAN.md + SEED.
-- [ ] **Auditoría Elementor Pro templates** — listar los 19 items en elementor_library y clasificar cuáles usan widgets Pro exclusivos. Paso 0 de la implementación de Opción A. Hacerlo en WP Admin (read-only).
-- [ ] Verificar páginas Carrito y Mi Cuenta en el front-end (PROB-13 — parte de la auditoría de Opción A).
-- [ ] Arreglar OPcache lleno (PROB-09) — aumentar `opcache.memory_consumption` en cPanel o solicitar a Raiola. Urgente: nuevos archivos PHP no se cachean.
+- [x] **TARGET_OPTIONS preparado y corregido** — 2026-06-13 (Sesión 005 + 005b). Veredicto: APPROVE A0 + B1. Ver `docs/discovery/TARGET_OPTIONS.md` sección 12.
+- [ ] **[BLOQUEANTE] Operador aprueba estrategia A0 + B1** — responder a la pregunta de sección 12 de TARGET_OPTIONS.md. Si aprueba → Sesión 006: Track 0 + arranque Studio.
+- [ ] **ROOT_CAUSE_FRICTION_MAP** — validar con el operador que los 5 bloqueantes identificados (Elementor, backoffice, catálogo, performance, visión) son correctos y completos.
+- [ ] **Auditoría Elementor Pro templates (Track 0)** — listar los 19 items en elementor_library y clasificar cuáles usan widgets Pro exclusivos. WP Admin read-only.
+- [ ] **WC_API_ACCESS_MODEL** — crear Application Password en WP Admin: usuario limitado (Editor de productos), copiar password para Studio. Guía paso a paso en sesión 006.
+- [ ] Verificar páginas Carrito y Mi Cuenta en el front-end (PROB-13 — parte del Track 0).
+- [ ] Arreglar OPcache (PROB-09) — solicitar a Raiola aumentar `opcache.memory_consumption`.
 
 ---
 
 ## NEXT — Próximo mes
 
-- [ ] Migrar Cart y Mi Cuenta a WooCommerce Blocks (parte de Opción A — tras aprobación del operador).
-- [ ] Reemplazar mini-cart override de Elementor Pro (PROB-11) — solución nativa WC.
-- [ ] Evaluar páginas de catálogo (shop, categorías, producto): identificar cuáles usan Loop Grid Pro y proponer alternativa con bloques WC o template PHP nativo.
+**Track 0 (continuidad Elementor):**
+- [ ] Migrar Cart y Mi Cuenta a WooCommerce Blocks si están en Elementor.
+- [ ] Reemplazar mini-cart override de Elementor Pro (PROB-11).
+- [ ] Evaluar catálogo (shop, categorías, producto): Loop Grid Pro → template PHP nativo si necesario.
 - [ ] Habilitar WPS Hide Login (PROB-12) — 10 minutos en WP Admin.
-- [ ] Investigar webhook de PayPal (PROB-14) — verificar en WC → PayPal → webhooks.
-- [ ] Subir 10-20 productos nuevos con workflow AI-first (foto → Claude → WP Admin). Objetivo: 50 productos en 30 días.
+- [ ] Investigar webhooks de PayPal (PROB-14).
+
+**Track 1 (Catenaccio Studio):**
+- [ ] **STUDIO_MVP_DESIGN** — diseñar formulario Studio con campos exactos de camiseta vintage. Decidir stack (Next.js + WC REST API). Scaffold inicial.
+- [ ] **PRODUCT_WORKFLOW_DESIGN** — documentar el flujo completo: foto → Studio → Claude → borrador WC → aprobación Pablo → publicado. Identificar pasos eliminables.
+- [ ] **WC_API_ACCESS_MODEL** — Application Password, usuario limitado, endpoints necesarios. Testar `POST /wp-json/wc/v3/products` con atributos custom (pa_liga, pa_equipo, etc.).
+- [ ] Publicar primeras 5 camisetas usando Studio (prueba real de velocidad).
+
+**Track 2 (catálogo SEO — después de Track 1):**
+- [ ] **ATTRIBUTE_TAXONOMY_SEO_ARCHITECTURE** — auditar archive templates de WooCommerce para pa_liga, pa_equipo. Configurar RankMath en archive pages. Rate limiting para crawlers en .htaccess.
+
+**Operación:**
+- [ ] **PERFORMANCE_CACHE_HOSTING_DECISION** — evaluar si Raiola Inicio SSD 2.0 es suficiente con 100+ productos. Revisar opciones de upgrade o cambio de plan.
+- [ ] Subir 10-20 productos usando workflow AI-first (paralelo al desarrollo de Studio).
 
 ---
 
@@ -52,3 +67,4 @@ Actualizar al cierre de cada sesión. Los ítems completados se mueven a DONE o 
 | AS_IS_UNDERSTANDING.md actualizado con datos reales del servidor (plugins, versiones, HPOS, OPcache, Elementor Pro deadline) | 2026-06-10 | Sesión 003 |
 | AS_IS_UNDERSTANDING.md validado por operador — estado cambiado a VALIDADO_POR_USUARIO | 2026-06-10 | Sesión 004 |
 | TARGET_OPTIONS.md preparado — comparativa A/B/C/D/E, veredicto APPROVE Opción A, plan 7/30/90 días | 2026-06-13 | Sesión 005 |
+| TARGET_OPTIONS.md corregido — Root Cause añadida, veredicto corregido a A0+B1 (Catenaccio Studio), modelo acceso API | 2026-06-13 | Sesión 005b |

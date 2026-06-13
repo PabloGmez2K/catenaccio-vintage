@@ -132,6 +132,27 @@ Cross-referencia con `agent_events.jsonl` para detalle de eventos.
 ---
 
 ---
+**Sesión 005b** — 2026-06-13  
+**Agente:** Claude Code (Sonnet)  
+**Modo:** DOCS_ONLY  
+**Tipo:** strategic / root-cause-reframe  
+**Tarea:** Revisión y corrección de TARGET_OPTIONS.md tras contexto adicional del operador sobre la fricción real de Catenaccio. Añadir Root Cause y corregir el veredicto de "Opción A (Gutenberg)" a "A0 + B1 (Studio)".
+
+**Decisiones clave:**
+- Root Cause documentada: 5 bloqueantes reales (Elementor, backoffice caótico, arquitectura catálogo, performance, visión de app/platform).
+- Veredicto corregido: APPROVE A0 + B1. A0 = continuidad WordPress (deadline 2026-07-01). B1 = Catenaccio Studio, backoffice/PIM AI-first (Next.js + WC REST API + Claude).
+- Insight estratégico: el cuello de botella no es el frontend — es el backoffice. Reemplazar Elementor por Gutenberg no cambia la dinámica de publicación. Studio sí la cambia.
+- Modelo de acceso sin SSH definido: Application Password, usuario limitado, modos READ_ONLY / DRAFT_ONLY / APPLY_WITH_APPROVAL.
+- Track 3 (storefront público moderno) DEFER hasta 100+ productos y evidencia de tráfico.
+- WooPayments como razón de STOP para headless: no soporta headless checkout en producción en 2026.
+
+**Qué se validó:** TARGET_OPTIONS.md reescrito con Root Cause + estrategia A0+B1 + modelo API + plan 7/30/90. DECISIONS.md con DEC-8 corregida. BACKLOG.md con nuevas tareas STUDIO_MVP_DESIGN, PRODUCT_WORKFLOW_DESIGN, WC_API_ACCESS_MODEL, ATTRIBUTE_TAXONOMY_SEO, PERFORMANCE_HOSTING_DECISION. CONTEXTO.md, HISTORIAL_SESIONES.md, agent_events.jsonl actualizados.  
+**Qué NO se tocó:** WordPress, WooCommerce, producción, credenciales, hosting, dominio, DNS, pagos, código, Elementor Pro. No se generó SEED ni plan de implementación. No se creó Application Password (solo se definió el modelo).  
+**Siguiente paso:** Operador aprueba A0 + B1 → Sesión 006: Track 0 (auditoría elementor_library + migración) + Track 1 (Application Password + scaffold Studio).  
+**agent_events ref:** 2026-06-13T13:00:00Z (target_options_reframed)
+---
+
+---
 **Sesión 005** — 2026-06-13  
 **Agente:** Claude Code (Sonnet)  
 **Modo:** DOCS_ONLY  

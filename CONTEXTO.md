@@ -40,7 +40,7 @@ Hipótesis no verificadas del SEED:
 
 ## Siguiente paso recomendado
 
-**Sesión 006 — Aprobación y SEED.** TARGET_OPTIONS EN_REVISIÓN (2026-06-13). El operador debe aprobar explícitamente la Opción A (WP+WC sin Elementor Pro) → generar RECOMMENDED_IMPLEMENTATION_PLAN.md + SEED. Si aprueba, la primera acción técnica es la auditoría de los 19 items de elementor_library en WP Admin (read-only). Deadline: ~2026-07-01.
+**Sesión 006 — Aprobación + arranque Track 0 + Track 1.** TARGET_OPTIONS v2 EN_REVISIÓN (2026-06-13). El operador aprueba estrategia A0+B1 → Track 0: auditoría elementor_library + migración Cart/Mi Cuenta/mini-cart. Track 1 (paralelo): Application Password + scaffold Studio + test WC REST API. Deadline Track 0: ~2026-07-01.
 
 ---
 
@@ -61,5 +61,7 @@ Sesión 004 (2026-06-10, Claude Code Sonnet): DOCS_ONLY / as-is-validation. **AS
 
 Sesión 004c (2026-06-13, Claude Code Sonnet): LITE / DOCS_ONLY / repo-os-sync. Transferencia de aprendizajes genéricos de Bijuymoda Suite al sistema operativo documental de Catenaccio. Actualizado ORCHESTRATOR.md (stack real, lectura proporcional +git step 0, guardrails de dominio, tabla de agentes, §16 WORKSTREAM_ANCHOR, §17 TARGET binario), AGENTS.md (tabla de superficies específica, guardrails de dominio, stop-loss con clasificación, microparches WP), CHATGPT_PROJECT_INSTRUCTIONS.md (estado actual, agentes, workstream anchor). No se tocó WordPress, producción, TARGET_OPTIONS ni Bijuymoda Suite.
 
-Sesión 005 (2026-06-13, Claude Code Sonnet): DOCS_ONLY / strategic / TARGET_OPTIONS. TARGET_OPTIONS.md completado con comparativa A/B/C/D/E, tabla comparativa, riesgos, plan 7/30/90 días. Veredicto: APPROVE Opción A — WP+WC sin Elementor Pro. Insight clave: el Checkout ya está en Gutenberg Blocks (migrado feb 2026) — la parte más crítica ya estaba hecha. BACKLOG.md, DECISIONS.md, HISTORIAL_SESIONES.md, agent_events.jsonl actualizados. Workflow: AS_IS_VALIDADO → TARGET_OPTIONS EN_REVISIÓN. Pendiente: operador aprueba Opción A explícitamente. No se tocó WordPress, producción, pagos ni código.
+Sesión 005 (2026-06-13, Claude Code Sonnet): DOCS_ONLY / strategic / TARGET_OPTIONS. TARGET_OPTIONS.md completado con comparativa A/B/C/D/E, tabla comparativa, riesgos, plan 7/30/90 días. Veredicto inicial: APPROVE Opción A — WP+WC sin Elementor Pro. [CORREGIDO en 005b]
+
+Sesión 005b (2026-06-13, Claude Code Sonnet): DOCS_ONLY / strategic / ROOT_CAUSE_AND_TARGET_REFRAME. TARGET_OPTIONS.md reescrito con causa raíz de la fricción real (5 bloqueantes: Elementor, backoffice, catálogo, performance, visión). Veredicto corregido: APPROVE A0 + B1 — Track 0 (continuidad Elementor antes del 2026-07-01) + Track 1 (Catenaccio Studio: backoffice/PIM AI-first con Next.js + WC REST API). Modelo de acceso sin SSH definido (Application Password, usuario limitado, DRAFT_ONLY). DECISIONS.md, BACKLOG.md, HISTORIAL_SESIONES.md, agent_events.jsonl actualizados. Workflow: AS_IS_VALIDADO → TARGET_OPTIONS EN_REVISIÓN (v2). Pendiente: operador aprueba A0+B1. No se tocó WordPress, producción, pagos ni código.
 
