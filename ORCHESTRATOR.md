@@ -3,8 +3,8 @@
 Sistema operativo del orquestador (ChatGPT). Define cómo leer el repo, clasificar tareas, preparar prompts y revisar outputs.
 
 **Proyecto:** Catenaccio Vintage  
-**Stack:** Pendiente de discovery, Pendiente de discovery, Preferencia inicial Vercel, pendiente de validar  
-**Última actualización:** 2026-06-06
+**Stack:** WordPress 7.0 + WooCommerce 10.8.1 (producción activa). Elementor Pro 3.35.1 expira ~2026-07-01, operador no renueva. LiteSpeed. Sin SSH (Raiola Inicio SSD 2.0). Stack TARGET pendiente de decisión.  
+**Última actualización:** 2026-06-13
 
 ---
 
@@ -17,10 +17,12 @@ El repo fue generado desde un `LAFABRICA_PROJECT_SEED.md` con `scripts/lafabrica
 El usuario / builder es el "orquestador del orquestador": decide qué proyectos abrir, valida el SEED, autoriza acciones de riesgo. ChatGPT (u otro LLM) actúa como **orquestador operativo** dentro de cada sesión: clasifica tareas, elige superficie, prepara prompts y revisa outputs. Antes de abrir cualquier agente se aplica el token economics gate (§3).
 
 Al inicio de cada sesión, leer en este orden exacto:
+0. `git status --short --branch` y `git log --oneline -5` — confirmar repo limpio y sincronizado con origin
 1. `CONTEXTO.md` — estado actual, experimento activo, riesgos
 2. `BACKLOG.md` — qué está en NOW y qué está BLOCKED
 3. `HISTORIAL_SESIONES.md` — últimas 2-3 entradas (no leer todo el archivo)
-4. El archivo específico relevante a la tarea (solo si es necesario)
+4. `AGENTS.md` — reglas de superficie si se va a abrir un agente
+5. El archivo específico relevante a la tarea (solo si es necesario)
 
 No leer más. La lectura proporcional al inicio es una regla, no una recomendación.
 
@@ -161,13 +163,18 @@ El orquestador emite veredictos binarios. No hay "quizás" ni "depende de":
 
 ## §9 — Guardrails del proyecto
 
-_(completar al primer cierre)_
-
 Guardrails genéricos (siempre aplican):
 - No tocar archivos fuera del scope de la tarea
 - No introducir dependencias nuevas sin decisión en DECISIONS.md
 - No deployar sin cerrar sesión limpia primero
 - No commitear con mensaje genérico ("update", "fix", "changes")
+
+Guardrails del dominio (Catenaccio Vintage):
+- WordPress/WooCommerce en producción: no tocar código, plugins, temas, DB ni wp-config.php sin autorización explícita en el prompt.
+- Sin SSH (Raiola Inicio SSD 2.0). WP Admin / WC Status / Site Health es la vía de discovery aceptada y permanente — no bloquear sesiones por falta de SSH.
+- Elementor Pro expira ~2026-07-01. Operador no renueva — decisión cerrada. No bloquear discovery por esto; sí tenerlo como driver de deadline en TARGET_OPTIONS.
+- No tomar decisiones de arquitectura sin escalar a Opus.
+- Validación visual: cualquier cambio con efecto visible en la web requiere OK de Pablo antes de commit/push/deploy.
 
 ---
 
@@ -181,27 +188,28 @@ Ejemplo genérico: "Si en duda sobre si implementar algo → no implementar. Val
 
 ## §11 — Roles de agentes en este proyecto
 
-| Rol | Modelo | Para qué en este proyecto |
-|-----|--------|--------------------------|
-| Orquestador | ChatGPT GPT-5 | Clasifica, prepara prompts, revisa outputs, **elige la superficie de ejecución** |
-| Estratégico | Opus | Validar decisiones estratégicas, veredictos APPROVE/STOP |
-| Synthesis | Sonnet | Documentación, síntesis, cierres LITE |
-| Implementation | Claude Code / Codex / Antigravity | Patches técnicos acotados |
+| Rol | Modelo | Cuándo |
+|-----|--------|--------|
+| Orquestador | ChatGPT | Siempre. Clasifica, prepara prompts, revisa outputs, elige la superficie. |
+| Discovery visual / propuestas UI | Antigravity (Gemini) | Browser, capturas WP Admin, análisis amplio, propuestas TARGET_OPTIONS. |
+| WP/WC legacy / patches frágiles | Sonnet (Claude Code) | PHP/CSS WordPress, debugging funcional, patches concretos, cierre documental preciso. |
+| Arquitectura / migración / TARGET | Opus (Claude Code) | TARGET_OPTIONS final, decisiones irreversibles, seguridad crítica, veredictos APPROVE/STOP. |
+| Scripts / validaciones técnicas | Codex | Scripts deterministas, checks técnicos, validaciones terminal-first. |
 
-**Superficies de ejecución soportadas:** Claude Code, Codex, Antigravity. La elige el orquestador según la tarea (ver `AGENTS.md` para criterios). Antigravity para UI / navegador / Google account / validación visual; Claude Code para docs y refactors; Codex para patches técnicos cortos.
+**Stop-loss:** si un agente no converge tras 1–2 iteraciones, parar. Clasificar el fallo: ¿superficie equivocada? ¿contexto insuficiente? ¿problema arquitectónico? Cambiar superficie o reformular según corresponda.
 
-**Regla de escalado:** Si un diagnóstico read-only deriva en decisión arquitectónica → cerrar diagnóstico, abrir Opus antes del patch.
+**Regla de escalado:** diagnóstico read-only que deriva en decisión arquitectónica → cerrar diagnóstico, escalar a Opus.
 
 ---
 
 ## §12 — Stack y entorno
 
-- **Lenguaje:** Pendiente de discovery
-- **Framework:** Pendiente de discovery
-- **Deploy:** Preferencia inicial Vercel, pendiente de validar
-- **Base de datos:** Pendiente de discovery
-- **Variables de entorno críticas:** _(completar)_
-- **Kill switch:** Sin deploy productivo en el arranque. Kill switch lógico: variable de entorno `PROJECT_DISABLED=1` en `.env` local que cualquier entrypoint debe respetar antes de tocar datos reales. Confirmar antes de cualquier sesión FULL.
+- **Plataforma:** WordPress 7.0 + WooCommerce 10.8.1 (producción activa en Raiola Networks)
+- **Frontend activo:** Elementor Pro 3.35.1 (expira ~2026-07-01, no se renueva) + hello-elementor-child
+- **Servidor:** LiteSpeed (sin acceso SSH en plan actual — WP Admin es la vía de acceso operativa)
+- **Base de datos:** MariaDB 11.4.10 (accesible solo vía phpMyAdmin o WP, no vía SSH)
+- **Stack TARGET:** pendiente de decisión en Sesión 005 TARGET_OPTIONS
+- **Kill switch:** Sin deploy productivo hasta TARGET aprobado. No hay entorno Vercel activo.
 
 ---
 
@@ -253,8 +261,34 @@ El pack completo está en `docs/orchestrator/discovery_intake_pack/`. Se activa 
 
 ---
 
+## §16 — SESSION_WORKSTREAM_ANCHOR
+
+Toda sesión operativa debe tener un ancla explícita:
+
+- `PROJECT` (Catenaccio Vintage)
+- `SUBSYSTEM` (repo-os / wordpress / discovery / target / implementation)
+- `BLOCK` (tarea concreta del BACKLOG)
+
+Si una petición cambia de proyecto, subsistema o bloque, el orquestador debe detectarlo antes de continuar: cerrar el bloque actual, aparcar la nueva petición, reanclar la conversación o preparar un handoff. El repo es la fuente durable — no mezclar sesiones silenciosamente.
+
+---
+
+## §17 — TARGET_OPTIONS: decisión binaria, no informe
+
+TARGET_OPTIONS no es un informe de opciones infinito. Termina en una recomendación clara con:
+- Opción recomendada + justificación concreta
+- Opción alternativa mínima si la recomendada tiene bloqueante
+- Criterio de elección explícito (deadline, coste, riesgo, reversibilidad)
+
+El operador aprueba o rechaza. No hay "depende de muchos factores".
+
+Si el análisis no llega a recomendación concreta → `DEFER_STOP` o escalar a Opus para forzar el veredicto.
+
+---
+
 ## Historial de cambios de este documento
 
 | Fecha | Cambio | Quién |
 |-------|--------|-------|
 | 2026-06-06 | Creado desde lafabrica-template | lafabrica_new.py |
+| 2026-06-13 | Stack real, lectura proporcional +git step 0, guardrails de dominio, tabla de agentes específica, §16 SESSION_WORKSTREAM_ANCHOR, §17 TARGET_OPTIONS binario | Claude Code (Sonnet) |

@@ -3,7 +3,7 @@
 Contrato corto para agentes de implementación (Claude Code / Codex / Antigravity). Equivalente operativo al ORCHESTRATOR.md pero para agentes directos.
 
 **Proyecto:** Catenaccio Vintage  
-**Stack:** Pendiente de discovery, Pendiente de discovery, Preferencia inicial Vercel, pendiente de validar
+**Stack:** WordPress 7.0 + WooCommerce 10.8.1 (producción activa). Elementor Pro expira ~2026-07-01, operador no renueva. Sin SSH (Raiola). Stack TARGET pendiente de decisión.
 
 ---
 
@@ -13,16 +13,17 @@ El orquestador (ChatGPT) elige la superficie según la tarea. El agente ejecuta 
 
 | Superficie | Cuándo es la mejor opción | Cuándo evitar |
 |------------|--------------------------|---------------|
-| **Claude Code (Sonnet)** | docs, refactors acotados, código sin UI, terminal-first, edición masiva de archivos | tareas con UI o validación visual |
-| **Claude Code (Opus)** | decisiones estratégicas, validación de SEED, arquitectura, veredictos APPROVE/FIX_BLOCKER | implementación rutinaria (over-spend) |
-| **Codex** | patches técnicos cortos, scripts de servidor, fixes de bug puntuales | tareas multi-paso con contexto amplio |
-| **Antigravity** | UI, navegador, capturas, validación visual, integración con cuenta Google, workflows web | patches puramente técnicos sin UI |
+| **Antigravity (Gemini)** | Discovery visual: capturas WP Admin, Site Health, análisis amplio; propuestas TARGET_OPTIONS; validación visual de UI; browser, integración Google | patches PHP/CSS sin UI |
+| **Sonnet (Claude Code)** | WordPress/WooCommerce legacy: PHP, CSS, plugins, templates, debugging funcional, patches frágiles, cierre documental preciso | decisiones arquitectónicas (→ escalar Opus) |
+| **Opus (Claude Code)** | TARGET_OPTIONS final, arquitectura core, migración, seguridad crítica, decisiones irreversibles, veredictos APPROVE/STOP | implementación rutinaria o docs (over-spend) |
+| **Codex** | Scripts deterministas, validaciones técnicas acotadas, checks de servidor | tareas con contexto amplio o UI |
 
 Reglas:
-- Sonnet por defecto para documentación.
-- Opus solo para decisiones estratégicas o validación de bloqueos.
-- Antigravity recomendado cuando "ver" el resultado importa (UI, navegador, Google account, capturas).
-- Codex para patches técnicos acotados sin UI.
+- Antigravity por defecto cuando el resultado requiere "ver" (browser, capturas, WP Admin, UI, validación visual).
+- Sonnet para WP/WC legacy y patches concretos en PHP/CSS/templates.
+- Opus solo para decisiones estratégicas o evaluación de bloqueos.
+- Codex para scripts y validaciones acotadas sin UI.
+- **Stop-loss:** si un agente no converge tras 1–2 iteraciones, parar. Clasificar el fallo: ¿superficie equivocada (→ cambiar agente)? ¿contexto insuficiente (→ reformular prompt)? ¿problema arquitectónico (→ escalar Opus)? No insistir con el mismo agente esperando resultado diferente.
 
 El prompt específico para cada superficie está en `prompts/`. Para Antigravity: `prompts/prompt_antigravity_impl.md`.
 
@@ -68,7 +69,13 @@ Si la tarea llega como read-only / ASK, no modificar archivos. Devolver diagnós
 
 ## Guardrails del dominio
 
-_(completar al primer cierre)_
+**Catenaccio Vintage — WordPress/WooCommerce activo:**
+- No tocar código WordPress, plugins, temas, DB ni wp-config.php sin autorización explícita en el prompt.
+- Sin SSH (Raiola Inicio SSD 2.0). WP Admin / WC Status / Site Health es la vía de acceso aceptada y permanente. No bloquear sesiones por falta de SSH.
+- Elementor Pro expira ~2026-07-01. Operador no renueva. No bloquear discovery por esto.
+- Validación visual: cualquier cambio con efecto visible en la web requiere OK de Pablo antes de commit/push/deploy. Lint y type-check no sustituyen validación visual.
+- Microparches WordPress (cuando lleguen): diagnóstico → contrato visual explícito → evidencia controlada (WP Admin / capturas) → cambio mínimo → OK visual Pablo → commit.
+- No tomar decisiones de arquitectura sin escalar a Opus.
 
 ---
 
@@ -133,7 +140,7 @@ Los siguientes guardrails se derivan de aprendizajes observados en proyectos rea
 Si la tarea tiene componentes de interfaz de usuario, no commitear hasta haber visto el resultado real en el navegador o la herramienta de destino. Los tests y el type-checking verifican corrección del código, no corrección de la experiencia de usuario.
 
 **Stop-loss tras 1–2 iteraciones fallidas en el mismo punto.**
-Si el agente falla dos veces seguidas en el mismo problema sin avance verificable, parar y reportar al orquestador con un diagnóstico claro. No continuar escalando el scope de los intentos. El orquestador decide si escalar a Opus, reformular la tarea o descartarla.
+Si el agente falla dos veces seguidas en el mismo problema sin avance verificable, parar y reportar al orquestador con diagnóstico claro. Clasificar el fallo: ¿superficie equivocada (→ cambiar agente)? ¿contexto insuficiente (→ reformular prompt)? ¿problema arquitectónico (→ escalar Opus)? No continuar escalando el scope de los intentos ni insistir con el mismo agente.
 
 **No crecer mientras el flujo crítico falla.**
 Si hay un bloqueo en el flujo principal del proyecto (la funcionalidad central no funciona), no implementar features secundarias ni mejoras de calidad hasta que el flujo crítico esté resuelto. El backlog refleja este orden de prioridades.
