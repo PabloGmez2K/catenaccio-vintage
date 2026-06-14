@@ -53,3 +53,9 @@ private/
 # Discovery Intake private/raw sources
 intake/
 
+
+# Local OAuth/API credentials - never commit
+.secrets/
+**/credentials*.json
+**/client_secret*.json
+**/token*.json

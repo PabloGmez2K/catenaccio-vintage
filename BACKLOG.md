@@ -15,7 +15,8 @@ Actualizar al cierre de cada sesión. Los ítems completados se mueven a DONE o 
 - [x] **ACCESS_MODEL_ACTIVATION_READONLY** — completado. Usuario `catenaccio-studio-agent` con rol `shop_manager`. `.env.local` configurado y verificado. Acceso WC REST API v3 confirmado.
 - [x] **WP_WC_API_READONLY_PROBE** — probe completo (público + autenticado). Sesiones 007/007b. Credenciales OK: `catenaccio-studio-agent`, rol `shop_manager`. 28 productos, 7 atributos WC, Elementor Pro `isExpired:false`, 14 templates listados. **Hallazgo crítico: productos usan ACF meta fields (no WC attributes[]).** Ver `docs/operations/API_READONLY_PROBE_RESULT.md`.
 - [x] **A0_ELEMENTOR_DEPENDENCY_AUDIT** — completado sesión 008. Widget-level audit completo: 17 templates + 2 páginas WC auditadas. 15/20 requieren migración. Ver `docs/operations/ELEMENTOR_DEPENDENCY_AUDIT.md`. Hallazgo: Carrito/Mi Cuenta usan Pro (no Blocks); Finalizar Compra SÍ está en Blocks ✅.
-- [ ] **SERVER_FILESYSTEM_READONLY_DISCOVERY** — mapear estructura real del servidor: child theme, plugins custom, archivos Elementor override. Prerequisito para A0_MIGRATION_PLAN. Requiere acceso cPanel File Manager (read-only) o FTP readonly. Sesión 009.
+- [x] **GSC_API_READONLY_CONNECTOR / SEARCH_CONSOLE_API_READONLY** — completado Sesión 009 (2026-06-14). Google Search Console API integrada en modo read-only. Script, requirements y docs versionados. `.secrets/` ignorado. Patrón reusable candidato para lafabrica: `LAFABRICA_TRANSFER_GSC_CONNECTOR_PATTERN`. Ver `docs/operations/SEARCH_CONSOLE_API_READONLY.md`.
+- [ ] **SERVER_FILESYSTEM_READONLY_DISCOVERY** — mapear estructura real del servidor: child theme, plugins custom, archivos Elementor override. Prerequisito para A0_MIGRATION_PLAN. Requiere acceso cPanel File Manager (read-only) o FTP readonly. Sesión 010.
 - [ ] **A0_MIGRATION_PLAN** — plan técnico PHP child theme para P1-A (header), P1-B (producto individual), P1-C (archivo productos). Bloqueado hasta SERVER_FILESYSTEM_READONLY_DISCOVERY. Sesión 009 o 010.
 - [ ] **CARRITO_MICUENTA_QUICKWIN** — Pablo reemplaza widgets Pro (`woocommerce-cart`, `woocommerce-my-account`) por shortcodes en Elementor. 10 min en WP Admin. Ver audit §6 P2-B/C. No requiere agente.
 - [ ] **Arreglar OPcache (PROB-09)** — Pablo abre ticket a Raiola para aumentar `opcache.memory_consumption`. Acción paralela, sin agente.
@@ -56,6 +57,7 @@ Actualizar al cierre de cada sesión. Los ítems completados se mueven a DONE o 
 - [ ] Generar SEED implementable final.
 - [ ] Iniciar implementación técnica.
 - [ ] **MARKETPLACE_NORTH_STAR_VALIDATION** — evaluar si Catenaccio tiene tracción suficiente para abrir a vendedores externos. Solo activar cuando se cumplan TODOS los gates de TARGET_OPTIONS.md §11: 100+ productos propios, workflow ≤10 min, tráfico orgánico, ventas recurrentes, propuesta de valor clara frente a Vinted, sistema de autenticidad definido. Ver DECISIONS.md PEND-2.
+- [ ] **LAFABRICA_TRANSFER_GSC_CONNECTOR_PATTERN** — transferir el conector `GOOGLE_SEARCH_CONSOLE_READONLY_CONNECTOR` a lafabrica como asset reutilizable. Prerequisito: validar en un segundo proyecto (Bijuymoda Suite). Ver `docs/operations/GOOGLE_SEARCH_CONSOLE_READONLY_CONNECTOR_PATTERN.md §8`.
 
 ---
 
@@ -73,6 +75,7 @@ _(sin otros bloqueos activos — TARGET aprobado, implementación desbloqueada, 
 
 | Ítem | Fecha | Sesión |
 |------|-------|--------|
+| GSC_API_READONLY_CONNECTOR validado — script, docs, patrón reusable. `.secrets/` ignorado. | 2026-06-14 | Sesión 009 |
 | Init desde lafabrica-template | 2026-06-06 | Sesión 0 |
 | SEC-001 resuelto — OAuth Google / Nextend Social Login rotado por operador | 2026-06-06 | Sesión 002 |
 | SEC-002 resuelto — WP secret keys rotadas en servidor por operador | 2026-06-06 | Sesión 002 |

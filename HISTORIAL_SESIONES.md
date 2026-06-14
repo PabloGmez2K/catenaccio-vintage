@@ -371,6 +371,33 @@ Cross-referencia con `agent_events.jsonl` para detalle de eventos.
 ---
 
 ---
+**Sesión 009** — 2026-06-14  
+**Agente:** Claude Code (Sonnet)  
+**Modo:** DOCS_ONLY  
+**Tipo:** integration-close / seo-connector  
+**Tarea:** Cerrar correctamente en el repo la integración local validada de Google Search Console API en modo read-only. Documentar el patrón reusable para lafabrica y Bijuymoda Suite.
+
+**Decisiones clave:**
+- GSC_API_READONLY_CONNECTOR marcado como validado localmente. No se abre sesión de implementación — el estado ya era funcional.
+- Script `scripts/seo/gsc_probe.py` revisado: correcto sin cambios necesarios (scope readonly, carga `.env.local`, `sites.list()` + `searchanalytics.query`, token en `.secrets/`).
+- `requirements-gsc.txt` correcto sin cambios.
+- `.gitignore`: las reglas para `.secrets/`, `**/token*.json`, `**/client_secret*.json`, `**/credentials*.json` ya estaban añadidas por Pablo (M en git status). Se versiona tal cual.
+- Patrón reusable documentado en `GOOGLE_SEARCH_CONSOLE_READONLY_CONNECTOR_PATTERN.md` con 9 pasos y checklist de seguridad.
+- Patrón registrado como candidato `LAFABRICA_TRANSFER_GSC_CONNECTOR_PATTERN` para lafabrica.
+- Instrucciones específicas para Bijuymoda Suite incluidas en el patrón (sin tocar el repo de Bijuymoda en esta sesión).
+- SERVER_FILESYSTEM_READONLY_DISCOVERY se mantiene como siguiente tarea principal de A0.
+
+**Qué se validó:**
+- `python scripts/seo/gsc_probe.py` ejecutado correctamente: propiedad `https://catenacciovintage.com/` detectada como siteOwner, datos reales devueltos (queries, páginas, clicks, impressions, CTR, posición).
+- `git status --short --ignored` confirmado: `.env.local` → `!!`, `.secrets/` → `!!`, `.venv/` → `!!`. Ningún secreto como `??` o `M`.
+- Búsqueda de señales de secretos en archivos versionables: solo referencias a nombres de archivo y patrones de código — sin valores reales.
+
+**Qué NO se tocó:** WordPress, WooCommerce, producción, Google Cloud (solo se documentó), Search Console (solo lectura ya validada por Pablo), Bijuymoda Suite, lafabrica, credenciales.  
+**Siguiente paso:** Sesión 010 — SERVER_FILESYSTEM_READONLY_DISCOVERY: mapear child theme, plugins custom, archivos Elementor override vía cPanel File Manager (read-only) o FTP readonly. Prerequisito para A0_MIGRATION_PLAN.  
+**agent_events ref:** 2026-06-14T12:00:00Z (gsc_readonly_connector_closed)
+---
+
+---
 **Sesión 008b** — 2026-06-13  
 **Agente:** Claude Code (Sonnet)  
 **Modo:** READ_ONLY  
