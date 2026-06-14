@@ -398,6 +398,27 @@ Cross-referencia con `agent_events.jsonl` para detalle de eventos.
 ---
 
 ---
+**Sesión 010A** — 2026-06-14  
+**Agente:** Claude Code (Sonnet)  
+**Modo:** READ_ONLY  
+**Tipo:** discovery / filesystem / blocked  
+**Tarea:** SERVER_FILESYSTEM_READONLY_DISCOVERY — conectar al filesystem real de WordPress vía Web Disk/WebDAV (read-only) y mapear child theme, plugins custom y overrides Elementor antes de A0_MIGRATION_PLAN.
+
+**Decisiones clave:**
+- Web Disk de cPanel configurado por Pablo (cv-readonly@catenacciovintage.com, directorio: public_html/wp-content, permisos: solo lectura). Credenciales presentes en `.env.local`.
+- **BLOCKED_WEBDAV_CONNECTION:** puertos 2077/2078 bloqueados por firewall de Raiola en planes compartidos. Subdominio `webdisk.catenacciovintage.com` sin entrada DNS. Puerto 443 devuelve 403 a PROPFIND (WebDAV no habilitado en el webserver del dominio).
+- No se ejecutó ninguna escritura (PUT/POST/DELETE/MKCOL) en ningún momento. Read-only no verificado por write attempt — asumido por configuración cPanel.
+- Script `scripts/filesystem/webdav_probe.py` creado y ejecutado — funcional, reutilizable si se desbloquea el acceso.
+- Mapa A0 documentado con datos disponibles de sesiones anteriores: riesgos de rewrite rules, Filtro Camisetas Pro vs loop-grid, Off-Canvas Menu widget dependency.
+- Veredicto: **FIX_BLOCKER_FIRST**. Ruta A (más rápida): Pablo pega 4 ficheros desde cPanel File Manager.
+- CARRITO_MICUENTA_QUICKWIN no bloqueado — Pablo puede hacerlo YA en WP Admin (10 min).
+
+**Qué se validó:** `docs/operations/SERVER_FILESYSTEM_READONLY_DISCOVERY.md` creado. BACKLOG.md, CONTEXTO.md, HISTORIAL_SESIONES.md, agent_events.jsonl actualizados. Script de probe en `scripts/filesystem/webdav_probe.py`. Ningún write al sitio. Ningún secreto impreso ni commiteado.  
+**Qué NO se tocó:** WordPress, WooCommerce, producción, credenciales, cPanel, Elementor, base de datos, archivos del servidor. Ningún método WebDAV de escritura ejecutado.  
+**Siguiente paso:** Pablo elige ruta de desbloqueo (ver `SERVER_FILESYSTEM_READONLY_DISCOVERY.md §5`): Ruta A (cPanel File Manager, 20-30 min) o Ruta B (corregir URL WebDAV en .env.local). Luego Sesión 010B: A0_MIGRATION_PLAN con código real.  
+**agent_events ref:** 2026-06-14T16:xx:xx (filesystem_discovery_blocked_webdav)
+
+---
 **Sesión 008b** — 2026-06-13  
 **Agente:** Claude Code (Sonnet)  
 **Modo:** READ_ONLY  
