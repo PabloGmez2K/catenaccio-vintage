@@ -4,10 +4,10 @@ Discovery de la estructura real del filesystem del servidor: child theme, plugin
 
 **Proyecto:** Catenaccio Vintage  
 **Fecha:** 2026-06-14  
-**Sesión:** 010A  
-**Modo:** READ_ONLY (PROPFIND / GET / HEAD únicamente)  
+**Sesión:** 010A (bloqueado) → **010B (completado)**  
+**Modo:** READ_ONLY — UAPI Fileman list_files + get_file_content (sin escritura)  
 **Agente:** Claude Code (Sonnet)  
-**Método intentado:** cPanel Web Disk / WebDAV (cv-readonly@catenacciovintage.com)  
+**Método final:** cPanel UAPI Token (Authorization: cpanel user:token)  
 **Prerequisito para:** A0_MIGRATION_PLAN
 
 ---
@@ -15,295 +15,424 @@ Discovery de la estructura real del filesystem del servidor: child theme, plugin
 ## 1. ESTADO GENERAL
 
 ```
-BLOCKED_WEBDAV_CONNECTION
+CPANEL_API_READONLY_DISCOVERY_COMPLETED
 ```
 
-El acceso WebDAV al servidor no pudo establecerse. El Web Disk fue configurado correctamente en cPanel por Pablo, pero los puertos WebDAV de cPanel están bloqueados por el firewall de Raiola desde redes externas.
+El acceso cPanel UAPI con token fue exitoso. Se listaron directorios y se leyeron los 4 archivos críticos en modo estrictamente read-only. Ninguna escritura ejecutada en ningún momento.
 
 **Veredicto final:**
 
 ```
-FIX_BLOCKER_FIRST
+APPROVE_A0_MIGRATION_PLAN_PREP
 ```
 
-El A0_MIGRATION_PLAN no puede escribirse sin conocer el contenido real de `functions.php` y los plugins custom. Ver §5 para las dos rutas de desbloqueo.
+La migración A0 es más viable de lo esperado:
+- Ambos plugins custom sobreviven la desactivación de Elementor Pro.
+- No hay template overrides de WooCommerce en el child theme.
+- El filtro de productos tiene lógica nativa WC que no depende de Elementor.
+- El menú Off-Canvas es un shortcode 100% independiente de Elementor.
 
 ---
 
-## 2. DIAGNÓSTICO DE CONEXIÓN
+## 2. HISTORIAL DE ACCESO
 
-### 2.1 Resultados del probe (2026-06-14)
+### 2.1 Sesión 010A — WebDAV (BLOCKED)
 
 | URL intentada | Resultado |
 |---------------|-----------|
-| `https://catenacciovintage.com:2078/` | **TIMEOUT** — puerto bloqueado por firewall |
-| `http://catenacciovintage.com:2077/` | **TIMEOUT** — puerto bloqueado por firewall |
+| `https://catenacciovintage.com:2078/` | **TIMEOUT** — puerto bloqueado firewall Raiola |
+| `http://catenacciovintage.com:2077/` | **TIMEOUT** — puerto bloqueado firewall Raiola |
 | `https://webdisk.catenacciovintage.com/` | **ConnectionError** — DNS no resuelve |
-| `https://webdisk.catenacciovintage.com:2078/` | **ConnectionError** — DNS no resuelve |
-| `https://catenacciovintage.com/` (HEAD) | **200 OK** — sitio web accesible |
-| `https://catenacciovintage.com/` (PROPFIND) | **403 Forbidden** — WebDAV no habilitado en puerto 443 |
+| `https://catenacciovintage.com/` (PROPFIND) | **403 Forbidden** — WebDAV no habilitado en 443 |
 
-### 2.2 Causa raíz
+### 2.2 Sesión 010B — cPanel UAPI Token (ÉXITO)
 
-Raiola Networks Inicio SSD 2.0 **bloquea los puertos 2077/2078 desde redes externas** en planes compartidos. El Web Disk de cPanel solo es accesible desde la red interna de Raiola o mediante VPN específica del proveedor. Comportamiento documentado y común en hosting compartido español.
-
-El subdominio `webdisk.catenacciovintage.com` tampoco tiene entrada DNS — cPanel lo genera pero el registro A/CNAME debe apuntar al servidor (normalmente lo hace automáticamente, pero puede no estar propagado o no estar habilitado en este plan).
+| Endpoint | Resultado |
+|----------|-----------|
+| `https://com1014.raiolanetworks.es:2083/execute/Fileman/list_files?dir=public_html/wp-content` | **200 OK** — 11 items listados |
+| `Fileman/list_files?dir=public_html/wp-content/plugins` | **200 OK** — 23 items (22 dirs + 1 file) |
+| `Fileman/list_files?dir=public_html/wp-content/themes/hello-elementor-child` | **200 OK** — 4 items |
+| `Fileman/get_file_content` → `style.css` | **200 OK** — 134 bytes leídos |
+| `Fileman/get_file_content` → `functions.php` | **200 OK** — 62.335 chars leídos |
+| `Fileman/get_file_content` → `filtro-camisetas.php` | **200 OK** — 38.765 chars leídos |
+| `Fileman/get_file_content` → `catenaccio-offcanvas-menu.php` | **200 OK** — 14.376 chars leídos |
+| `Fileman/list_files?dir=.../woocommerce` | **UAPI status 0** — directorio no existe (OK, esperado) |
+| `Fileman/list_files?dir=public_html/wp-content/mu-plugins` | **200 OK** — 0 items (mu-plugins vacío) |
 
 ### 2.3 Read-only verification
 
 ```
-READ_ONLY_NOT_VERIFIED — no se ejecutó ninguna escritura.
-La configuración read-only del Web Disk (cPanel) se asume por configuración del operador.
-No se intentó PUT/POST/DELETE/MKCOL/MOVE en ningún momento.
+READ_ONLY_VERIFIED — ningún método de escritura ejecutado.
+Solo UAPI list_files y get_file_content (ambos read-only).
+Ningún save_file_content, upload, mkdir, delete, rename, move, chmod.
 ```
 
 ---
 
-## 3. LO QUE YA SABEMOS — SIN FILESYSTEM
+## 3. INVENTARIO REAL DEL FILESYSTEM
 
-Aunque el acceso WebDAV está bloqueado, las sesiones anteriores aportaron información significativa sobre la estructura del servidor.
+### 3.1 wp-content/ — raíz
 
-### 3.1 Child theme: hello-elementor-child
+| Item | Tipo |
+|------|------|
+| `debug.log` | FILE — 2468 bytes |
+| `index.php` | FILE — 28 bytes (dummy de WP) |
+| `languages/` | DIR |
+| `litespeed/` | DIR — cache LiteSpeed |
+| `mu-plugins/` | DIR — **vacío** (Raiola no instala mu-plugins custom) |
+| `object-cache.php` | FILE — 13923 bytes (APCu object cache) |
+| `plugins/` | DIR |
+| `themes/` | DIR |
+| `upgrade/` | DIR |
+| `upgrade-temp-backup/` | DIR |
+| `uploads/` | DIR — 393216 bytes |
 
-**Fuentes:** AS_IS_UNDERSTANDING.md (SRC-02, SRC-04), API probe 007b, Elementor audit 008.
+### 3.2 plugins/ — listado completo (22 plugins activos/inactivos)
 
-| Hecho | Fuente | Confianza |
-|-------|--------|-----------|
-| Tema hijo activo: `hello-elementor-child` | AS_IS (SRC-02) | Alta |
-| Tiene `functions.php` con rewrite rules custom | AS_IS (SRC-02) | Alta |
-| URLs limpias WooCommerce via `add_rewrite_rule` + transients | AS_IS (SRC-02) | Alta |
-| IVA 21% calculado vía snippet en `functions.php` | AS_IS (SRC-02) | Alta |
-| Shop base URL: `/camisetas/` (no `/shop/`) | API probe 007b | Confirmado |
-| Checkout: `/finalizar-compra/` | API probe 007b | Confirmado |
-| ACF FREE v6.7.0 activo — 16 post types, 20 taxonomías | AS_IS (Server Check 003) | Confirmado |
-| No hay SSH ni acceso CLI al servidor | AS_IS, Raiola plan | Confirmado |
+| Directorio | Plugin |
+|------------|--------|
+| `advanced-custom-fields` | ACF FREE v6.7.0 |
+| `apcu-manager` | APCu Manager |
+| `catenaccio-offcanvas-menu` | **Plugin custom: Off-Canvas Menu v2.2.0** |
+| `classic-editor` | Classic Editor |
+| `complianz-gdpr` | Complianz GDPR |
+| `elementor` | Elementor FREE |
+| `elementor-pro` | Elementor Pro (expira ~2026-07-01) |
+| `filtro-camisetas` | **Plugin custom: Filtro Camisetas Personalizado Pro v3.0.0** |
+| `litespeed-cache` | LiteSpeed Cache |
+| `nextend-facebook-connect` | Nextend Social Login |
+| `seo-by-rank-math` | RankMath SEO |
+| `templately` | Templately |
+| `temporary-login` | Temporary Login Without Password |
+| `woo-update-manager` | WooCommerce Update Manager |
+| `woocommerce` | WooCommerce |
+| `woocommerce-payments` | WooPayments |
+| `woocommerce-paypal-payments` | PayPal Payments |
+| `wp-crontrol` | WP Crontrol |
+| `wp-debugging` | WP Debugging |
+| `wp-mail-logging` | WP Mail Logging |
+| `wp-mail-smtp` | WP Mail SMTP |
+| `wps-hide-login` | WPS Hide Login (instalado, ¿activo?) |
 
-**Ficheros probablemente presentes en `hello-elementor-child/`:**
-- `style.css` — obligatorio (header de tema hijo)
-- `functions.php` — confirmado con lógica de rewrite y WC hooks
-- Posiblemente: `header.php`, `footer.php`, `woocommerce/` (overrides WC templates)
+**Hallazgo relevante:** El plugin de off-canvas se llama `catenaccio-offcanvas-menu` (no `off-canvas-menu` como se asumía). El de filtro es `filtro-camisetas` (no `filtro-camisetas-pro`). Los nombres de directorio cambian el path real para futuras referencias.
 
-**Dependencias inferidas en `functions.php`:**
-- `add_rewrite_rule` / `flush_rewrite_rules` — URLs limpias `/camisetas/`
-- Hooks WooCommerce (IVA, envío, precios)
-- Posiblemente hooks ACF para meta fields `liga`, `equipo`, `ano_temporada`
-- Desconocido: ¿dependencias directas de Elementor? ¿shortcodes propios?
+### 3.3 Child theme: hello-elementor-child/
 
-### 3.2 Plugins custom
+| Item | Tipo | Tamaño |
+|------|------|--------|
+| `functions.php` | FILE | **62.501 bytes** (código activo extenso) |
+| `style.css` | FILE | 134 bytes (header mínimo) |
+| `img/` | DIR | (iconos de pago y UI) |
+| `js/` | DIR | `cv-search.js` (buscador AJAX) |
 
-Confirmados por AS_IS (SRC-02, SRC-04) y Server Context Check (sesión 003):
+**No existe** directorio `woocommerce/` — **sin template overrides de WooCommerce**. Confirmado.
 
-#### Filtro Camisetas Pro v3.0.0
+### 3.4 mu-plugins/
 
-| Atributo | Valor conocido |
-|----------|---------------|
-| Estado | Activo en producción |
-| Versión | 3.0.0 |
-| Origen | Vibe coding + Claude |
-| Rol en el sitio | Filtro de productos en shop/archive (page id=129) |
-| Widget Elementor | `off-canvas` en template 129 (probablemente el panel lateral del filtro) |
-| Loop | Interactúa con el loop-grid de Elementor (template 878) |
-| AJAX | Probable — filtros en frontend suelen usar `wp_ajax_` / `wp_ajax_nopriv_` |
-| Shortcode | Desconocido — requiere lectura del plugin |
-| ACF | Probable — filtra por meta fields `liga`, `equipo`, `ano_temporada`, `talla`, `condicion` |
-
-#### Off-Canvas Menu v2.2.0
-
-| Atributo | Valor conocido |
-|----------|---------------|
-| Estado | Activo en producción |
-| Versión | 2.2.0 |
-| Origen | Vibe coding + Claude |
-| Rol en el sitio | Menú móvil overlay — referenciado en header template 653 |
-| Widget Elementor | `off-canvas` en header 653 (posiblemente el plugin registra este widget) |
-| Shortcode | Desconocido |
-
-#### Buscador AJAX (incierto)
-
-Template 1471 "Elementos Buscador" y template 1468 "Buscador móvil" existen en Elementor. Podría ser un plugin propio o funcionalidad del tema. Requiere verificación.
-
-### 3.3 MU-plugins
-
-Desconocido. Raiola puede instalar mu-plugins propios (LiteSpeed Cache vive aquí en algunos setups). Requiere filesystem para confirmar.
-
-### 3.4 Elementor uploads/css
-
-El Elementor Pro activo genera CSS per-template en `uploads/elementor/css/`. Estos ficheros son compilados en runtime — no críticos para A0 (se regeneran al desactivar Pro). No bloquean la migración.
+**Vacío.** Raiola no instala mu-plugins en este plan. Confirmado.
 
 ---
 
-## 4. MAPA A0 — CON DATOS DISPONIBLES
+## 4. ANÁLISIS: style.css
 
-Basado en ELEMENTOR_DEPENDENCY_AUDIT.md + lo que ya sabemos, el mapa A0 actual es:
+```css
+/*
+Theme Name: Hello Elementor Child
+Template: hello-elementor
+Version: 1.0.0
+*/
+
+@import url("../hello-elementor/style.css");
+```
+
+Mínimo. Solo el header obligatorio de tema hijo y el import del padre. **Sin CSS custom en style.css.** El CSS personalizado está en Elementor (inline CSS por template) o en los plugins.
+
+---
+
+## 5. ANÁLISIS: functions.php
+
+**Tamaño real:** 62.501 bytes, ~1.712 líneas. Última revisión en código: 14/03/2026.
+
+### 5.1 Shortcodes definidos en functions.php
+
+| Shortcode | Función | Dep Elementor |
+|-----------|---------|---------------|
+| `[cv_product_meta]` | Talla, medidas, condición, defectos (ACF fields) | Ninguna |
+| `[cv_explorar]` | Links a colecciones relacionadas (equipo/liga/año/talla/jugador) | Ninguna |
+| `[cv_archive_title]` | H1 SEO dinámico en archivos de taxonomía | Ninguna |
+| `[cv_archive_intro]` | Intro SEO con toggle "Ver más/menos" | Ninguna |
+| `[cv_short_description]` | Descripción corta dinámica desde ACF | Ninguna |
+| `[cv_search_latest_products]` | Grid de 4 últimos productos para popup de búsqueda | Ninguna |
+
+### 5.2 AJAX handlers
+
+| Acción | Handler |
+|--------|---------|
+| `wp_ajax_cv_search_products` + `wp_ajax_nopriv_cv_search_products` | Buscador AJAX del header/popup |
+
+### 5.3 Sistema de URL clean (rewrite)
+
+- **Categorías:** URLs `/laliga/`, `/premier-league/` via `add_rewrite_rule('top')` con transient 12h
+- **Productos:** URLs `/camiseta-real-madrid-1999/` (sin prefijo /product/) via reglas individuales `top` + catch-all `bottom`
+- **Invalidación:** En `transition_post_status` (publicar producto) + `created/edited_product_cat`
+- **CDN:** `do_action('litespeed_purge_all')` al publicar producto
+- `flush_rewrite_rules_hard` retorna `false` (no regenera `.htaccess`)
+
+**Riesgo A0:** Las rewrite rules son 100% WP nativas. Sobreviven la desactivación de Elementor Pro. El riesgo es que al activar un tema nuevo (si fuese necesario) haya que hacer un flush manual — pero en A0 no se cambia el tema.
+
+### 5.4 Dependencias de Elementor en functions.php
+
+| Línea | Código | Tipo de dependencia |
+|-------|--------|---------------------|
+| L11 | `class_exists('\Elementor\Plugin')` → encola `frontend-lite.min.css` | CSS enqueue condicional |
+| L242 | `elementor/editor/before_enqueue_scripts` → compatibilidad editor | Solo en contexto admin/editor |
+| L1613-1675 | `cv_minicart_popup_enhancements()` usa `.elementor-menu-cart__footer-buttons`, `.elementor-button--view-cart`, `.elementor-button--checkout` | **Selectores Pro en JS** |
+
+**Evaluación riesgo A0 (mini-cart):** `cv_minicart_popup_enhancements()` mejora el mini-carrito de Elementor. Cuando se desactive Pro, el widget `woocommerce-menu-cart` del header 653 desaparecerá. Sin ese widget, los selectores JS nunca encontrarán elementos — la función se vuelve un no-op. **No rompe nada, pero deja de funcionar.** La funcionalidad del mini-carrito deberá reimplementarse con el widget WC nativo cuando se migre el header.
+
+### 5.5 Hooks WooCommerce en functions.php
+
+| Hook | Función | A0 status |
+|------|---------|-----------|
+| `woocommerce_package_rates` | IVA 21% en envío (precio incluido) | **Crítico — mantener** |
+| `woocommerce_get_breadcrumb` × 2 | Breadcrumbs con liga/equipo/selecciones | Mantener |
+| `woocommerce_product_post_type_args` | Remove `/product/` slug | **Crítico — mantener** |
+| `woocommerce_registration_privacy_policy_text` + form hooks | Registro con nombre, contraseña confirmada, newsletter | Mantener |
+| `template_redirect` | Redirigir `/mi-cuenta/` a `/acceder/` si no logueado | Mantener |
+| `user_register` | Nextend Social Login → Customer role | Mantener |
+| `pre_get_posts` | Carrusel home: solo productos en stock | Mantener |
+
+### 5.6 ACF fields referenciados en functions.php
+
+| Field | Función | Tipo dato |
+|-------|---------|-----------|
+| `talla` | `cv_product_meta`, `cv_short_description` | string |
+| `medida_axila` | `cv_product_meta`, `cv_short_description` | numeric |
+| `medida_largo` | `cv_product_meta`, `cv_short_description` | numeric |
+| `condicion` | `cv_product_meta`, `cv_short_description` | string |
+| `defectos` | `cv_product_meta`, `cv_short_description` | string |
+
+Todos son ACF FREE. No hay campos ACF Pro (repeaters, flexible content, etc.).
+
+### 5.7 Taxonomías usadas en functions.php
+
+`pa_equipo`, `pa_liga`, `pa_jugador`, `pa_ano`, `pa_talla`, `pa_marca`, `pa_condicion`
+
+---
+
+## 6. ANÁLISIS: Filtro Camisetas Personalizado Pro v3.0.0
+
+**Directorio real:** `plugins/filtro-camisetas/`  
+**Archivo principal:** `filtro-camisetas.php` (38.765 chars)
+
+### 6.1 Shortcodes registrados
+
+| Shortcode | Descripción |
+|-----------|-------------|
+| `[filtro_taxonomico slug="pa_liga" titulo="Liga"]` | Filtro individual por taxonomía |
+| `[filtro_camisetas_ui]` | UI completa: contador + ordenar + filtros activos + "limpiar" |
+| `[filtro_contador]` | Solo el contador de productos |
+
+### 6.2 AJAX handlers
+
+| Acción | Handler |
+|--------|---------|
+| `wp_ajax_filtro_contar_productos` + `wp_ajax_nopriv_filtro_contar_productos` | Contador vía AJAX |
+
+### 6.3 Hooks de Elementor en el plugin
+
+| Hook | Uso | Riesgo A0 |
+|------|-----|-----------|
+| `elementor/query/filtro_camisetas` | Integra con Loop Grid custom query de Elementor | Si se reemplaza el Loop Grid, este hook nunca se llama. **Sin efecto.** |
+| `did_action('elementor/loaded')` | Warning de dependencia en admin | Solo muestra aviso admin si Elementor no está. No rompe funcionalidad. |
+
+**Conclusión crítica:** La lógica core del filtro (shortcodes, query WC, AJAX) funciona **sin Elementor**. El warning de dependencia es cosmético. El hook de Loop Grid solo se dispara si hay un Loop Grid activo con query `filtro_camisetas` — al reemplazarlo, simplemente deja de usarse.
+
+### 6.4 Taxonomías registradas por el plugin
+
+El plugin hace `register_taxonomy()` para: `pa_talla`, `pa_marca`, `pa_equipo`, `pa_condicion`, `pa_liga`, `pa_jugador`, `pa_ano` (solo si no existen). WooCommerce también las registra como product attributes — no hay riesgo de conflicto ni de perder las taxonomías si el plugin se desactiva.
+
+---
+
+## 7. ANÁLISIS: Catenaccio Off-Canvas Menu v2.2.0
+
+**Directorio real:** `plugins/catenaccio-offcanvas-menu/`  
+**Archivo principal:** `catenaccio-offcanvas-menu.php` (14.376 chars)
+
+### 7.1 Shortcode registrado
+
+```
+[catenaccio_offcanvas_menu show_leagues="yes" show_sizes="yes" show_players="yes"]
+```
+
+Renderiza un menú `<nav>` con:
+- Acordeón liga → equipos (solo con stock)
+- Lista jugadores (solo con stock)
+- Tags de tallas (solo con stock)
+
+Todo via `get_terms()`, `wp_get_object_terms()`, transients (1h).
+
+### 7.2 Dependencias Elementor
+
+```
+NINGUNA
+```
+
+El plugin es 100% independiente de Elementor. No registra widgets. No usa `Elementor\Widget_Base`. No verifica `did_action('elementor/loaded')`. Solo usa `add_shortcode`, `wp_enqueue_scripts`, hooks WC de stock.
+
+**Conclusión crítica:** El widget `off-canvas` que aparecía en Elementor templates 653 y 129 NO es un widget registrado por este plugin. Es probablemente el toggle de un popup nativo de Elementor que abre un panel que contiene `[catenaccio_offcanvas_menu]` como shortcode. Al migrar esas templates, el menú puede mantenerse via shortcode en cualquier widget de texto/HTML.
+
+### 7.3 Assets propios
+
+- `assets/css/offcanvas-menu.css` — estilos del panel off-canvas
+- `assets/js/offcanvas-menu.js` — lógica acordeón + apertura/cierre del panel
+
+Estos assets son autocontenidos. No dependen de Elementor Pro.
+
+---
+
+## 8. RIESGOS A0 — ACTUALIZADOS CON DATOS REALES
+
+| Riesgo | Prob. anterior | Realidad | Riesgo actualizado |
+|--------|---------------|----------|-------------------|
+| Filtro Camisetas acoplado a Elementor Loop Grid | Media | El core es WC-nativo. Solo hay un hook `elementor/query/filtro_camisetas` que se ignora si no hay Loop | **BAJO** |
+| Off-Canvas Menu registra widget Elementor | Media | FALSE — es un shortcode independiente | **ELIMINADO** |
+| URL rewrite en functions.php rompe al cambiar tema | Alta | Sobrevive A0 (no cambiamos tema). Solo hay riesgo si se activa tema nuevo | **BAJO (A0)** |
+| Mini-cart JS usa clases Elementor Pro | Desconocido | CONFIRMADO — pero cuando Pro se desactive, el widget fuente desaparece. La función queda como no-op | **BAJO** |
+| Template overrides WooCommerce en child theme | Desconocido | CONFIRMADO: no existe `woocommerce/` en child theme | **ELIMINADO** |
+| ACF Pro dependency | Desconocido | CONFIRMADO: solo ACF FREE. `get_field()` estándar | **ELIMINADO** |
+| OPcache lleno interfiere con cambios PHP | Alta (conocido) | Persiste — flush manual de LiteSpeed Cache antes de cualquier cambio | **MEDIO** |
+| `flush_rewrite_rules` al activar/desactivar plugins | Alta (patrón WP) | Confirmado necesario. El plugin Filtro Camisetas lo hace en activation/deactivation hooks | **GESTIONADO** |
+
+---
+
+## 9. MAPA A0 ACTUALIZADO — CON CÓDIGO REAL
 
 ### P1-A Header (template 653) — CRÍTICO
 
-| Elemento | Estado conocido | Riesgo filesystem |
-|----------|----------------|-------------------|
-| `nav-menu` Pro | Reemplazar por WP native nav menu | Bajo — no depende de child theme |
-| `woocommerce-menu-cart` Pro | Reemplazar por shortcode `[woocommerce_cart_link]` | Bajo |
-| `off-canvas` (Off-Canvas Menu plugin) | Mantener si el plugin funciona sin Pro | **Alto** — necesito ver cómo el plugin registra el widget |
-| Menú móvil (popup 661) | Reemplazar nav-menu Pro | Bajo |
+| Elemento | Estrategia A0 | Complejidad |
+|----------|--------------|-------------|
+| `nav-menu` Pro | WP native `wp_nav_menu()` en template PHP o widget Free | Baja |
+| `woocommerce-menu-cart` Pro | Widget Free `woocommerce-menu-cart` (Elementor Free) o snippet PHP | Baja |
+| `off-canvas` toggle (panel offcanvas) | Reemplazar por botón + panel PHP con `[catenaccio_offcanvas_menu]` | Media |
+| `cv_minicart_popup_enhancements()` | Actualizar selectores CSS en functions.php para el widget nuevo | Baja |
+| Iconos pago en mini-carrito | Ya en `/img/payment/` del child theme. Solo actualizar selectores JS | Baja |
 
-**Riesgo A0-P1A principal:** si `off-canvas` en el header es un widget registrado por Elementor Pro (no por el plugin Off-Canvas Menu), desaparece al desactivar Pro. Si es el plugin propio, sobrevive.  
-**Necesito para resolver:** leer el archivo principal de Off-Canvas Menu plugin.
+**Riesgo residual:** El popup del menú off-canvas usa `#elementor-action:xxx` links para abrirse. Al migrar, hay que reemplazar ese mecanismo con CSS toggle puro o JS mínimo. El contenido del panel (`[catenaccio_offcanvas_menu]`) sobrevive sin cambios.
 
 ### P1-B Producto individual (template 100) — CRÍTICO
 
-| Elemento | Estado conocido | Riesgo filesystem |
-|----------|----------------|-------------------|
-| 5 widgets WC Pro | Reemplazar por WooCommerce Blocks o `do_action('woocommerce_*')` hooks | Medio |
-| URL limpia `/producto/{slug}` | Depende de `functions.php` — rewrite rule | **Alto** — tocar WP Rewrite puede romper URLs |
-| ACF meta fields en PDP | Desconocido — ¿se muestran via shortcode? ¿via template PHP? | **Alto** — sin ver template PHP ni funciones.php no sabemos |
+| Elemento | Estrategia A0 | Complejidad |
+|----------|--------------|-------------|
+| 5 widgets WC Pro | `do_action('woocommerce_single_product_summary')` hooks en template PHP | Media |
+| URL limpia `/producto-slug/` | Ya funciona via rewrite rules en functions.php | **Ninguna** |
+| `[cv_product_meta]` | Shortcode propio — 0 dependencia Elementor | **Ninguna** |
+| `[cv_explorar]` | Shortcode propio — 0 dependencia Elementor | **Ninguna** |
+| `[cv_short_description]` | Shortcode propio — 0 dependencia Elementor | **Ninguna** |
+| `[cv_archive_title/intro]` | Solo en archives, no en PDP | N/A |
 
-### P1-C Archivo productos (template 129) — CRÍTICO
+### P1-C Archivo productos / categorías (template 129) — CRÍTICO
 
-| Elemento | Estado conocido | Riesgo filesystem |
-|----------|----------------|-------------------|
-| `loop-grid` Pro + loop-item 878 | Reemplazar por `woocommerce_product_loop` PHP nativo o WC Blocks | Medio |
-| Filtro Camisetas Pro (`off-canvas` panel) | Mantener — el filtro es el plugin propio | **Muy alto** — sin código del plugin no sé si el panel lateral puede desacoplarse de Elementor |
-| URL `/camisetas/` + `/camisetas/liga/laliga/` | Depende de rewrite rules en functions.php | **Alto** |
+| Elemento | Estrategia A0 | Complejidad |
+|----------|--------------|-------------|
+| `loop-grid` Pro | `woocommerce_product_loop_start/end` + template PHP nativo o Elementor Free loop | Media |
+| `[filtro_camisetas_ui]` | Shortcode nativo — sobrevive sin Elementor | **Ninguna** |
+| `[filtro_taxonomico]` | Shortcode nativo | **Ninguna** |
+| `[catenaccio_offcanvas_menu]` en panel lateral | Shortcode nativo | **Ninguna** |
+| `[cv_archive_title]` | Shortcode nativo | **Ninguna** |
+| URL `/camisetas/laliga/` | Ya funciona via rewrite | **Ninguna** |
 
-### P2 Carrito / Mi Cuenta — ALTO
+### P2 Carrito / Mi Cuenta — QUICK WIN DISPONIBLE
 
-Quick win disponible (sin filesystem):
-- Carrito id=25: reemplazar `woocommerce-cart` Pro widget por `[woocommerce_cart]` shortcode en WP Admin
-- Mi Cuenta id=27: reemplazar `woocommerce-my-account` Pro widget por `[woocommerce_my_account]` shortcode en WP Admin
-- **Esta acción NO requiere filesystem y puede hacerse YA** (ver BACKLOG: CARRITO_MICUENTA_QUICKWIN)
-
----
-
-## 5. RUTAS DE DESBLOQUEO
-
-Hay dos caminos para obtener los ficheros necesarios. Recomendado: Ruta A (más rápido, sin configuración).
-
-### Ruta A — Pablo pega los ficheros manualmente (30-40 min, sin configuración)
-
-Pablo abre cPanel File Manager (funciona en cualquier plan Raiola) y copia el contenido de estos 4 ficheros:
-
-1. `public_html/wp-content/themes/hello-elementor-child/functions.php`
-2. `public_html/wp-content/themes/hello-elementor-child/style.css`
-3. `public_html/wp-content/plugins/filtro-camisetas-pro/[main-file].php`  
-   _(el nombre del directorio puede ser `filtro-camisetas-pro`, `filtro-camisetas`, o similar — buscar en `/plugins/`)_
-4. `public_html/wp-content/plugins/off-canvas-menu/[main-file].php`  
-   _(buscar en `/plugins/` por nombre similar)_
-
-Pasos en cPanel File Manager:
-1. cPanel → File Manager → navegar a `public_html/wp-content/`
-2. Para cada fichero: clic derecho → View o Edit → Seleccionar todo → Copiar
-3. Pegar en el chat en la próxima sesión (una sesión por fichero, o todos juntos)
-
-Con estos 4 ficheros, el agente puede:
-- Completar el análisis de dependencias
-- Escribir A0_MIGRATION_PLAN con riesgos reales
-- Identificar si Filtro Camisetas Pro puede sobrevivir sin Elementor Pro
-
-**Tiempo estimado para Pablo:** 20-30 min en File Manager.  
-**Tiempo agente post-ficheros:** 1 sesión (30 min) para A0_MIGRATION_PLAN completo.
-
-### Ruta B — Corregir acceso WebDAV (más setup, más potente)
-
-Requiere que Pablo compruebe en cPanel cuál es la URL exacta que muestra el cliente de Web Disk:
-
-1. cPanel → Web Disk → clic en la cuenta `cv-readonly`
-2. Botón "Client Configuration Scripts" o "Configure Client"
-3. Apuntar la URL exacta que muestra (puede ser una IP de servidor Raiola, no el dominio)
-4. Actualizar `CV_WEBDAV_URL` en `.env.local` con esa URL
-5. Reintentar probe
-
-También revisar en cPanel si hay un registro DNS `webdisk.catenacciovintage.com`:
-- cPanel → Zone Editor → buscar `webdisk`
-- Si no existe: añadir CNAME → `catenacciovintage.com` o A record → IP del servidor
-
-**Nota:** Raiola puede tener el WebDAV deshabilitado en el plan actual. Si la URL del cliente de cPanel apunta al mismo host:2078 y sigue bloqueado, el proveedor no lo permite externamente.
+- Carrito id=25: `[woocommerce_cart]` shortcode en widget Text de Elementor Free (o Gutenberg block)
+- Mi Cuenta id=27: `[woocommerce_my_account]` shortcode
+- **Acción Pablo, 10 min en WP Admin. No requiere agente.**
 
 ---
 
-## 6. RIESGOS IDENTIFICADOS — SIN FILESYSTEM
+## 10. INVENTARIO DE SHORTCODES
 
-Estos riesgos se identifican como probables aunque no podamos confirmarlos hasta leer el código:
+Todos los shortcodes custom son 100% propios y no dependen de Elementor:
 
-| Riesgo | Probabilidad | Impacto | Trigger |
-|--------|-------------|---------|---------|
-| URL rewrite en functions.php — tocar el child theme puede romper `/camisetas/` | Alta | Crítico | Cualquier modificación de tema activo |
-| Filtro Camisetas Pro acoplado a Elementor `loop-grid` | Media | Alto | Desactivar Elementor Pro |
-| Off-Canvas Menu registra widget Elementor Pro directamente | Media | Medio | Desactivar Elementor Pro |
-| OPcache lleno (16 bytes libres) — nuevo PHP no se cachea | Alta (conocido) | Medio | Cualquier cambio de código |
-| ACF meta fields referenciados en child theme (no via API) | Media | Medio | Si hay `get_field()` en functions.php |
-| `flush_rewrite_rules()` no ejecutado después de cambios de tema | Alta (patrón WP) | Alto | Activar tema nuevo o cambiar slug base |
-
----
-
-## 7. PLAN DE CONTINGENCIA — MIGRACIONES SIN SERVIDOR
-
-Mientras se resuelve el blocker de filesystem, hay acciones que NO requieren leer el servidor:
-
-### Inmediatas (Pablo, sin agente)
-- [ ] **CARRITO_MICUENTA_QUICKWIN** — reemplazar widgets Pro en páginas Carrito (id=25) y Mi Cuenta (id=27) por shortcodes `[woocommerce_cart]` y `[woocommerce_my_account]` en WP Admin → Elementor. 10 min.
-
-### Con filesystem (próxima sesión post-desbloqueo)
-- [ ] Leer `functions.php` → analizar rewrite rules, hooks WC, shortcodes registrados, dependencias ACF/Elementor
-- [ ] Leer plugin Filtro Camisetas Pro → shortcodes, AJAX endpoints, dependencia Elementor
-- [ ] Leer plugin Off-Canvas Menu → si widget Elementor registrado o plugin independiente
-- [ ] Revisar `themes/hello-elementor-child/woocommerce/` → si hay template overrides WC
-
-### Sin filesystem, con API (posible en esta sesión)
-La API WC ya está disponible (sesión 007b). Se podría enriquecer el análisis:
-- `GET /wc/v3/products?per_page=1` → confirmar que `meta_data` sigue siendo la fuente de atributos
-- `GET /wp/v2/pages/25` → confirmar estado actual de la página Carrito
+| Shortcode | Origen | Dónde se usa |
+|-----------|--------|--------------|
+| `[cv_product_meta]` | functions.php | Template producto 100 |
+| `[cv_explorar]` | functions.php | Template producto 100 |
+| `[cv_archive_title]` | functions.php | Templates archive 129 + categorías |
+| `[cv_archive_intro]` | functions.php | Templates archive 129 + categorías |
+| `[cv_short_description]` | functions.php | Template producto 100 (excerpt) |
+| `[cv_search_latest_products]` | functions.php | Template buscador 1468/1471 |
+| `[filtro_camisetas_ui]` | filtro-camisetas plugin | Template 129 (panel filtros) |
+| `[filtro_taxonomico slug="..."]` | filtro-camisetas plugin | Template 129 (filtros individuales) |
+| `[filtro_contador]` | filtro-camisetas plugin | Template 129 (contador) |
+| `[catenaccio_offcanvas_menu]` | catenaccio-offcanvas-menu plugin | Panel off-canvas en header 653 y archive 129 |
 
 ---
 
-## 8. ARCHIVOS PENDIENTES DE LEER
+## 11. DEPENDENCIAS CONFIRMADAS vs. DESMENTIDAS
 
-Lista exacta de lo que necesitamos para A0_MIGRATION_PLAN completo:
+### Confirmadas
 
-| Archivo | Importancia | Razón |
-|---------|-------------|-------|
-| `themes/hello-elementor-child/functions.php` | **Crítica** | Rewrite rules, WC hooks, shortcodes, ACF deps |
-| `plugins/filtro-camisetas-pro/[main].php` | **Crítica** | AJAX endpoints, shortcodes, dep Elementor |
-| `plugins/off-canvas-menu/[main].php` | **Alta** | Widget Elementor vs plugin independiente |
-| `themes/hello-elementor-child/style.css` | Media | Versión del tema hijo, parent theme reference |
-| `themes/hello-elementor-child/woocommerce/` | Media | Template overrides que podrían romperse |
-| Listado completo de `plugins/` | Media | Confirmar nombres exactos de directorios |
-| `mu-plugins/` contenido | Baja | Confirmar si Raiola instala mu-plugins |
+- ACF FREE: `get_field('talla')`, `get_field('medida_axila')`, `get_field('medida_largo')`, `get_field('condicion')`, `get_field('defectos')`
+- LiteSpeed Cache: `do_action('litespeed_purge_all')` al publicar producto
+- WooCommerce: hooks de IVA, breadcrumbs, rewrite, registro
+- Nextend Social Login: hook `user_register` → set Customer role
+- RankMath: `rank_math/frontend/description` filter + `rank_math/opengraph/image` filter
+
+### Desmentidas (riesgos eliminados)
+
+| Suposición previa | Realidad |
+|-------------------|----------|
+| Off-Canvas Menu registra widget Elementor | Plugin standalone con shortcode |
+| woocommerce/ override directory en child theme | **No existe** |
+| ACF Pro requerido | Solo ACF FREE |
+| Filtro Camisetas acoplado a Elementor | Core 100% WC-nativo |
+| mu-plugins de Raiola | mu-plugins vacío |
 
 ---
 
-## 9. HISTORIAL DE INTENTOS DE CONEXIÓN
+## 12. VEREDICTO FINAL
 
 ```
-2026-06-14T16:xx:xx — SESSION 010A
-Script:    scripts/filesystem/webdav_probe.py
-Método:    HEAD → https://catenacciovintage.com:2078/
-Resultado: ConnectTimeout (15s)
-
-Método:    HEAD → http://catenacciovintage.com:2077/
-Resultado: ConnectTimeout (8s)
-
-Método:    HEAD → https://webdisk.catenacciovintage.com/
-Resultado: ConnectionError (DNS not found)
-
-Método:    HEAD → https://catenacciovintage.com/
-Resultado: 200 OK (website, no WebDAV)
-
-Método:    PROPFIND → https://catenacciovintage.com/
-Resultado: 403 Forbidden (WebDAV no habilitado en 443)
-
-Conclusión: BLOCKED_WEBDAV_CONNECTION
-Causa:     Puertos 2077/2078 bloqueados por firewall Raiola (shared hosting)
-           webdisk subdomain DNS no configurado
-           Puerto 443 no sirve WebDAV
+CPANEL_API_READONLY_DISCOVERY_COMPLETED
+→ APPROVE_A0_MIGRATION_PLAN_PREP
 ```
+
+**Canal de acceso confirmado:** cPanel UAPI token. Script reutilizable: `scripts/filesystem/cpanel_uapi_probe.py`.
+
+**Siguiente sesión recomendada:** A0_MIGRATION_PLAN — escribir el plan técnico completo con el contexto real del código. Sesión estimada: 45-60 min.
+
+**Prerequisito para A0_MIGRATION_PLAN:** Ninguno nuevo. Pablo puede autorizar la próxima sesión.
+
+**Acción Pablo sin agente disponible:** CARRITO_MICUENTA_QUICKWIN — reemplazar widgets Pro en Carrito (id=25) y Mi Cuenta (id=27) por shortcodes en WP Admin → Elementor. 10 min.
 
 ---
 
-## 10. VEREDICTO FINAL
+## 13. HISTORIAL DE ACCESO
 
 ```
-BLOCKED_WEBDAV_CONNECTION → FIX_BLOCKER_FIRST
-```
+2026-06-14 — SESSION 010A
+Script: scripts/filesystem/webdav_probe.py
+Resultado: BLOCKED_WEBDAV_CONNECTION
 
-**Ruta más rápida:** Pablo pega manualmente 4 ficheros desde cPanel File Manager (§5 Ruta A).  
-**Bloqueante para:** A0_MIGRATION_PLAN, APPROVE_THEME_SHADOW_FLOW  
-**No bloqueante para:** CARRITO_MICUENTA_QUICKWIN (Pablo puede hacerlo ya en WP Admin)
+2026-06-14 — SESSION 010B
+Script: scripts/filesystem/cpanel_uapi_probe.py
+Auth: cPanel API Token (Authorization: cpanel {user}:{token})
+Endpoint base: com1014.raiolanetworks.es:2083
+Resultado: CPANEL_API_READONLY_DISCOVERY_COMPLETED
+
+Archivos leídos:
+  - public_html/wp-content/themes/hello-elementor-child/style.css (134 bytes)
+  - public_html/wp-content/themes/hello-elementor-child/functions.php (62335 chars)
+  - public_html/wp-content/plugins/filtro-camisetas/filtro-camisetas.php (38765 chars)
+  - public_html/wp-content/plugins/catenaccio-offcanvas-menu/catenaccio-offcanvas-menu.php (14376 chars)
+
+Directorios listados (read-only):
+  - public_html/wp-content/ (11 items)
+  - public_html/wp-content/plugins/ (23 items)
+  - public_html/wp-content/themes/hello-elementor-child/ (4 items)
+  - public_html/wp-content/mu-plugins/ (0 items — vacío)
+  - public_html/wp-content/themes/hello-elementor-child/woocommerce/ (no existe)
+
+Ninguna escritura ejecutada. Token no impreso. .env.local no commiteado.
+```

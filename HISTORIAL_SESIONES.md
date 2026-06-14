@@ -419,6 +419,28 @@ Cross-referencia con `agent_events.jsonl` para detalle de eventos.
 **agent_events ref:** 2026-06-14T16:xx:xx (filesystem_discovery_blocked_webdav)
 
 ---
+**Sesión 010B** — 2026-06-14  
+**Agente:** Claude Code (Sonnet)  
+**Modo:** READ_ONLY  
+**Tipo:** discovery / filesystem / cpanel-api  
+**Tarea:** SERVER_FILESYSTEM_READONLY_DISCOVERY vía cPanel API Token. Leer filesystem real del servidor en modo estrictamente read-only usando UAPI Fileman (list_files + get_file_content).
+
+**Decisiones clave:**
+- **Canal de acceso:** cPanel UAPI Token (`Authorization: cpanel {user}:{token}`) — exitoso donde WebDAV había fallado. Script reutilizable: `scripts/filesystem/cpanel_uapi_probe.py`.
+- **Off-Canvas Menu:** 100% independiente de Elementor. Es un shortcode (`[catenaccio_offcanvas_menu]`) con assets propios. NO registra widgets Elementor. Riesgo eliminado.
+- **Filtro Camisetas Pro v3.0.0:** Core WC-nativo. Hook `elementor/query/filtro_camisetas` solo se activa si hay Loop Grid activo — al reemplazarlo, este hook queda inerte. Riesgo reducido a BAJO.
+- **functions.php (62KB, ~1712 líneas):** Shortcodes custom (cv_product_meta, cv_explorar, cv_archive_title, cv_archive_intro, cv_short_description, cv_search_latest_products) — todos independientes de Elementor. URL rewrite system robusto con transients. Mini-cart JS usa selectores Elementor Pro que se vuelven no-op al desactivar Pro.
+- **Sin woocommerce/ override directory** en child theme — confirmado. Sin template overrides WC.
+- **mu-plugins vacío** — Raiola no instala mu-plugins en este plan.
+- **ACF solo FREE** — no hay dependencias ACF Pro.
+- **Veredicto:** APPROVE_A0_MIGRATION_PLAN_PREP.
+
+**Qué se validó:** `docs/operations/SERVER_FILESYSTEM_READONLY_DISCOVERY.md` actualizado con estado CPANEL_API_READONLY_DISCOVERY_COMPLETED, inventario completo, análisis de dependencias, riesgos actualizados y veredicto. BACKLOG.md: SERVER_FILESYSTEM_READONLY_DISCOVERY ✅, A0_MIGRATION_PLAN desbloqueado. CONTEXTO.md, HISTORIAL_SESIONES.md, agent_events.jsonl actualizados. Ninguna escritura al servidor. Token no impreso ni commiteado.  
+**Qué NO se tocó:** WordPress, WooCommerce, producción, configuración, credenciales, archivos del servidor. Ningún método de escritura UAPI ejecutado.  
+**Siguiente paso:** A0_MIGRATION_PLAN — plan técnico completo con el código real disponible. Estimado: 45-60 min sesión siguiente.  
+**agent_events ref:** 2026-06-14T21:30:00Z (cpanel_api_readonly_discovery_completed)
+
+---
 **Sesión 008b** — 2026-06-13  
 **Agente:** Claude Code (Sonnet)  
 **Modo:** READ_ONLY  
