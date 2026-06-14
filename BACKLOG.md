@@ -17,13 +17,21 @@ Actualizar al cierre de cada sesión. Los ítems completados se mueven a DONE o 
 - [x] **A0_ELEMENTOR_DEPENDENCY_AUDIT** — completado sesión 008. Widget-level audit completo: 17 templates + 2 páginas WC auditadas. 15/20 requieren migración. Ver `docs/operations/ELEMENTOR_DEPENDENCY_AUDIT.md`. Hallazgo: Carrito/Mi Cuenta usan Pro (no Blocks); Finalizar Compra SÍ está en Blocks ✅.
 - [x] **GSC_API_READONLY_CONNECTOR / SEARCH_CONSOLE_API_READONLY** — completado Sesión 009 (2026-06-14). Google Search Console API integrada en modo read-only. Script, requirements y docs versionados. `.secrets/` ignorado. Patrón reusable candidato para lafabrica: `LAFABRICA_TRANSFER_GSC_CONNECTOR_PATTERN`. Ver `docs/operations/SEARCH_CONSOLE_API_READONLY.md`.
 - [x] **SERVER_FILESYSTEM_READONLY_DISCOVERY** — **COMPLETADO** vía cPanel UAPI Token (Sesión 010B, 2026-06-14). 4 archivos leídos: `functions.php` (62KB), `style.css`, `filtro-camisetas.php` (39KB), `catenaccio-offcanvas-menu.php` (14KB). 22 plugins listados. Inventario completo en `docs/operations/SERVER_FILESYSTEM_READONLY_DISCOVERY.md`. **Veredicto: APPROVE_A0_MIGRATION_PLAN_PREP.** Script reutilizable: `scripts/filesystem/cpanel_uapi_probe.py`.
-- [ ] **A0_MIGRATION_PLAN** — plan técnico PHP child theme para P1-A (header), P1-B (producto individual), P1-C (archivo productos). **DESBLOQUEADO** — código real disponible. Próxima sesión: escribir plan con código real.
+- [ ] **CPANEL_TOKEN_REVOCATION** — Pablo revoca el token cPanel API usado en Sesión 010B. Acción manual sin agente. Prerequisito antes de cualquier siguiente acceso servidor. (Acción Pablo, sin agente)
+- [ ] **A0_MIGRATION_PLAN** — plan técnico PHP child theme para P1-A (header), P1-B (producto individual), P1-C (archivo productos). **DESBLOQUEADO** — código real disponible. Próxima sesión (011): escribir plan con código real. Sin acceso servidor.
 - [ ] **CARRITO_MICUENTA_QUICKWIN** — Pablo reemplaza widgets Pro (`woocommerce-cart`, `woocommerce-my-account`) por shortcodes en Elementor. 10 min en WP Admin. Ver audit §6 P2-B/C. No requiere agente.
 - [ ] **Arreglar OPcache (PROB-09)** — Pablo abre ticket a Raiola para aumentar `opcache.memory_consumption`. Acción paralela, sin agente.
 
 ---
 
 ## NEXT — Próximo mes
+
+**Shadow Release (flujo NO_SSH — después de A0_MIGRATION_PLAN):**
+- [ ] **THEME_SHADOW_SCAFFOLD** — diseño de superficie sombra `catenaccio-a0-child`: estructura de archivos, guardrails de path, token cPanel temporal para carpeta aislada. (Sesión 012)
+- [ ] **THEME_SHADOW_IMPLEMENT** — implementación local del tema paralelo o paquete exportable. (Sesión 013)
+- [ ] **THEME_SHADOW_SYNC** — sync controlado del paquete local a la carpeta sombra en servidor con acceso temporal. (Sesión 014)
+- [ ] **THEME_SHADOW_VISUAL_VALIDATION** — validación visual con Antigravity sobre tema sombra inactivo. (Sesión 015)
+- [ ] **RELEASE_MANUAL_PABLO** — Pablo activa tema sombra en WP Admin + verifica + rollback definido si falla.
 
 **Track 0 (continuidad Elementor) — después de A0_ELEMENTOR_DEPENDENCY_AUDIT:**
 - [ ] Migrar Cart y Mi Cuenta a WooCommerce Blocks si están en Elementor.

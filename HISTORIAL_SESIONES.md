@@ -419,6 +419,29 @@ Cross-referencia con `agent_events.jsonl` para detalle de eventos.
 **agent_events ref:** 2026-06-14T16:xx:xx (filesystem_discovery_blocked_webdav)
 
 ---
+**Sesión 010C** — 2026-06-15
+**Agente:** Claude Code (Sonnet)
+**Modo:** DOCS_ONLY
+**Tipo:** docs / operativa / decisión
+**Tarea:** Documentar la decisión operativa DEC-10 — NO_SSH_SHADOW_RELEASE_FLOW como patrón operativo para Catenaccio y candidato futuro para lafabrica.
+
+**Decisiones clave:**
+- DEC-10 registrada en DECISIONS.md: patrón shadow-release para Catenaccio sin SSH y sin staging dedicado.
+- Superficie sombra definida: tema paralelo inactivo `catenaccio-a0-child`. El agente NUNCA toca `hello-elementor-child` ni plugins activos.
+- Flujo aprobado: ventana temporal de acceso → sync a carpeta sombra aislada → validación visual Antigravity (solo lectura) → promoción manual por Pablo → rollback definido (reactivar tema anterior) → cierre de acceso (revocación token).
+- cPanel API Token aprobado para: READ_ONLY discovery + escritura en carpeta sombra aislada únicamente. Path guardrail a `public_html/wp-content/themes/catenaccio-a0-child`.
+- Antigravity es canal de validación visual, no de edición ni acceso a servidor.
+- Patrón NO extraído a lafabrica hasta validarlo con la migración A0 real (sesiones 011-015).
+- Prioridad Pablo: revocar token cPanel API de Sesión 010B antes de cualquier acceso siguiente.
+- Orden de próximas sesiones documentado: 011 A0_MIGRATION_PLAN → 012 THEME_SHADOW_SCAFFOLD → 013 implementación → 014 sync → 015 validación → RELEASE manual.
+
+**Qué se validó:** DECISIONS.md DEC-10 registrada. BACKLOG.md con CPANEL_TOKEN_REVOCATION (acción Pablo) y track shadow release (sesiones 012-015). CONTEXTO.md append con sesión 010C. HISTORIAL_SESIONES.md esta entrada. agent_events.jsonl con evento. git status limpio, .env.local no trackeado.
+**Qué NO se tocó:** Servidor, WordPress, WooCommerce, cPanel, token cPanel, .env.local, Elementor, código, plugins, producción. No se inició A0_MIGRATION_PLAN.
+**Siguiente paso:** (1) Pablo revoca token cPanel API de 010B. (2) Sesión 011 — A0_MIGRATION_PLAN — plan técnico PHP child theme (sin acceso servidor).
+**agent_events ref:** 2026-06-15T10:00:00Z (no_ssh_shadow_release_decision)
+---
+
+---
 **Sesión 010B** — 2026-06-14  
 **Agente:** Claude Code (Sonnet)  
 **Modo:** READ_ONLY  

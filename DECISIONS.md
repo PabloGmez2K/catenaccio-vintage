@@ -233,6 +233,54 @@ Sin SSH (Raiola Inicio SSD 2.0), la única vía controlada y segura para que un 
 
 ---
 
+### DEC-10 — NO_SSH_SHADOW_RELEASE_FLOW como patrón operativo para Catenaccio
+**Fecha:** 2026-06-15 (Sesión 010C)
+**Tipo:** operativa / proceso de release
+**Quién aprobó:** Operador (definición y restricciones dictadas explícitamente)
+**Estado:** ACTIVA — en validación con la migración A0 real (sesiones 011-015)
+
+**Decisión:**
+Adoptar el flujo NO_SSH_SHADOW_RELEASE_FLOW como patrón operativo estándar para liberar cambios en Catenaccio Vintage en ausencia de SSH y de entorno de staging dedicado.
+
+**Descripción del flujo:**
+1. **Ventana temporal de acceso** — el agente solicita acceso solo cuando lo necesita (cPanel API Token u otro canal aprobado). El acceso se revoca al cerrar la sesión.
+2. **Superficie sombra** — los cambios se desarrollan contra un recurso WordPress inactivo:
+   - Tema paralelo inactivo: `catenaccio-a0-child` (o equivalente) — nunca el tema activo `hello-elementor-child`.
+   - Plugin paralelo inactivo si aplica en tareas futuras.
+3. **El agente nunca toca el tema activo** (`hello-elementor-child`) ni plugins activos en producción.
+4. **Validación visual con Antigravity** — Antigravity se usa exclusivamente para ver/comparar el resultado en el tema sombra inactivo. No edita archivos ni accede a cPanel.
+5. **Promoción manual por Pablo** — Pablo activa el tema sombra en WP Admin y verifica en producción.
+6. **Rollback definido** — Pablo reactiva `hello-elementor-child` si algo falla. Sin acción del agente.
+7. **Cierre de acceso** — Pablo revoca el token cPanel API (u otro) al finalizar la sesión de sync.
+
+**Canal de acceso autorizado para escritura:**
+- Solo carpeta/recurso aislado e inactivo (tema o plugin sombra).
+- Acceso cPanel API aprobado para READ_ONLY discovery: token temporal, TLS activo por defecto, path guardrail a `public_html/wp-content/themes/catenaccio-a0-child` (o equivalente), revocación posterior.
+- NO escribir en tema activo `hello-elementor-child`, NO tocar plugins activos, NO modificar wp-config.php, NO operar pasarelas de pago.
+
+**Restricción de extrapolación:**
+El patrón NO se extrae como candidato reutilizable para lafabrica hasta validarlo con la migración A0 completa.
+
+**Razonamiento:**
+Catenaccio Vintage no tiene SSH (Raiola Inicio SSD 2.0) ni entorno de staging dedicado. El flujo convencional de staging → deploy → rollback no existe. El patrón shadow-release permite iterar con código real en el servidor sin riesgo para el tema activo ni para la tienda en producción. El token cPanel API demostró funcionalidad real en Sesión 010B (read-only), lo que valida el canal para escritura controlada en carpeta aislada.
+
+**Prioridad operativa de próximas sesiones:**
+1. Pablo revoca el token cPanel API usado en 010B.
+2. SESSION 011 — A0_MIGRATION_PLAN (sin acceso servidor).
+3. SESSION 012 — THEME_SHADOW_SCAFFOLD: diseño de superficie sombra `catenaccio-a0-child`.
+4. SESSION 013 — implementación local o paquete del tema paralelo.
+5. SESSION 014 — sync controlado a superficie sombra (acceso temporal).
+6. SESSION 015 — validación visual con Antigravity sobre tema sombra.
+7. RELEASE manual por Pablo + rollback definido.
+8. Solo después: evaluar extracción del patrón a lafabrica.
+
+**Alternativas descartadas:**
+- WebDAV: BLOCKED — puertos 2077/2078 cerrados por firewall Raiola (Sesión 010A).
+- FTP anónimo: DESCARTADO — sin credenciales FTP separadas aprobadas.
+- Subir archivos manualmente por Pablo en cada iteración: funciona como fallback de último recurso, pero no es un flujo de agente.
+
+---
+
 ### PEND-2 — Marketplace multi-vendor (NORTH_STAR / DEFER)
 **Fecha:** 2026-06-13 (Sesión 005c)  
 **Tipo:** estratégica / visión largo plazo  
