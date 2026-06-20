@@ -1,0 +1,10 @@
+/*
+Theme Name: Catenaccio A0 Child
+Template: hello-elementor
+Version: 0.1.0-shadow
+Description: Tema sombra A0 — elimina dependencias Elementor Pro. Mantiene WooCommerce, plugins y shortcodes activos.
+Author: Catenaccio Vintage
+Text Domain: catenaccio-a0-child
+*/
+
+@import url("../hello-elementor/style.css");

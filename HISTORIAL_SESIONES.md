@@ -419,6 +419,27 @@ Cross-referencia con `agent_events.jsonl` para detalle de eventos.
 **agent_events ref:** 2026-06-14T16:xx:xx (filesystem_discovery_blocked_webdav)
 
 ---
+**Sesión 013** — 2026-06-20
+**Agente:** Claude Code (Sonnet)
+**Modo:** LOCAL_CODE_ONLY / IMPLEMENT_SHADOW_THEME / NO_SERVER
+**Tipo:** impl / tema sombra / local
+**Tarea:** THEME_SHADOW_IMPLEMENT — crear localmente el tema sombra `catenaccio-a0-child/` con los 9 archivos del árbol aprobado en Sesión 012. Sin acceso al servidor.
+
+**Decisiones clave:**
+- Gate de fuente exacta (TAREA 1): functions.php del activo no está en el repo — solo análisis. Shortcodes `cv_*` implementados en versión MINIMAL con campos ACF documentados (talla, medida_axila, medida_largo, condicion, defectos) y taxonomías conocidas (pa_equipo, pa_liga, pa_ano). Comportamiento exacto puede diferir del activo — validar en Sesión 015.
+- 4 BLOCKERS identificados para sesión 013b: (A) IVA 21% en envío — CRÍTICO, no inventar lógica fiscal; (B) URLs limpias de producto — sistema de rewrite complejo, no inventar; (C) Breadcrumbs personalizados — WC nativo es suficiente para validación visual; (D) Carrusel home en stock — no bloqueante de ventas.
+- Veredicto parcial: APPROVE_READY_FOR_SYNC para estructura y layout visual. FIX_BLOCKER_FIRST para activación en producción (especialmente BLOCKER-A IVA).
+- content-product.php mantiene clases WC estándar (`products > li.product`) para compatibilidad con AJAX del plugin filtro-camisetas.
+- cv-a0.js implementa trampa de foco en el panel off-canvas (accesibilidad A11y).
+- Para desbloquear 013b: Pablo sube functions.php del activo al repo (rama/carpeta reference/), pega los fragmentos en el chat, o solicita nuevo token cPanel para re-leerlo.
+
+**Qué se validó:** 9 archivos creados: style.css (header correcto, Template: hello-elementor), functions.php (enqueue + menus + shortcodes MINIMAL + BLOCKERS documentados), header.php (logo + nav + mini-cart + off-canvas), footer.php, woocommerce/single-product.php, woocommerce/archive-product.php, woocommerce/content-product.php, assets/css/cv-a0.css (layout completo responsive), assets/js/cv-a0.js (toggle off-canvas + trampa de foco + archive-intro toggle). `git diff --check` limpio. Sin secretos, tokens ni credenciales. docs/operations/THEME_SHADOW_IMPLEMENT.md creado con veredicto, blockers, checklist visual y próximos pasos.
+**Qué NO se tocó:** Servidor, WordPress, WooCommerce, cPanel, Elementor, plugins activos, tema activo `hello-elementor-child`, functions.php real, wp-config.php, pasarelas de pago, SEO, credenciales, `.env.local`. No se hizo deploy, no se activó ningún tema, no se hizo flush de caché ni de permalinks.
+**Siguiente paso:** Sesión 013b — THEME_SHADOW_COMPLETE_BLOCKERS: Pablo aporta fragments exactos de functions.php del activo (IVA, rewrite rules, breadcrumbs). Luego Sesión 014 — THEME_SHADOW_SYNC con nuevo token cPanel.
+**agent_events ref:** 2026-06-20T14:00:00Z (theme_shadow_implement_complete)
+---
+
+---
 **Sesión 012** — 2026-06-20
 **Agente:** Claude Code (Sonnet)
 **Modo:** DOCS_ONLY / SCAFFOLD_PLAN / READ_ONLY
