@@ -286,6 +286,40 @@ Si el análisis no llega a recomendación concreta → `DEFER_STOP` o escalar a 
 
 ---
 
+## §18 — SESSION_LEARNING_TRANSFER al cierre
+
+Al cerrar cualquier sesión relevante, el orquestador evalúa si existe aprendizaje transferible
+antes de emitir el reporte final. La evaluación es obligatoria; el bloque es opcional y proporcional.
+
+**Criterio de inclusión:** incluir el bloque `SESSION_LEARNING_TRANSFER` si la sesión generó
+al menos uno de los siguientes:
+- un patrón, workflow, criterio o guardrail reutilizable → destino `lafabrica`
+- evidencia profesional, skill demostrada, ángulo de servicio/contenido/portfolio → destino `brain`
+- insight para un producto futuro (Cauvera u otro vertical) → destino `future_product`
+
+**Criterio de omisión:** omitir si todo es microajuste, corrección de texto, smoke test
+o cierre técnico sin aprendizaje nuevo. No inventar transferencias artificiales.
+
+**Destinos:**
+- `lafabrica` → mejora el sistema operativo madre (patrones, metodología, prompts, guardrails).
+- `brain` → capitaliza la experiencia como evidencia, skills, servicios vendibles, contenido, portfolio.
+
+**Flujo estándar (sin `DIRECT_BRAIN_WRITE_ALLOWED`):**
+1. El agente incluye el bloque `SESSION_LEARNING_TRANSFER` en el reporte de cierre.
+2. Si el aprendizaje merece persistencia local, se añade en `docs/meta/SESSION_LEARNING_TRANSFER_QUEUE.md`.
+3. El Brain absorbe la cola de forma controlada cuando Pablo lo pida explícitamente.
+
+Escritura directa al Brain solo con autorización literal `DIRECT_BRAIN_WRITE_ALLOWED` en el prompt.
+
+**Regla de privacidad:** nunca incluir credenciales, datos de clientes, pedidos, precios privados,
+proveedores sensibles ni nada que comprometa a terceros. Ver `DATA_AND_PRIVACY_BOUNDARIES.md`.
+
+**No en microajustes.** El bloque no es obligatorio en toda sesión — es proporcional al valor real.
+
+Formato completo definido en `AGENTS.md §Formato de reporte al orquestador`.
+
+---
+
 ## Historial de cambios de este documento
 
 | Fecha | Cambio | Quién |

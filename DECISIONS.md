@@ -281,6 +281,44 @@ Catenaccio Vintage no tiene SSH (Raiola Inicio SSD 2.0) ni entorno de staging de
 
 ---
 
+### DEC-11 — SESSION_LEARNING_TRANSFER como estándar único de transferencia de aprendizaje
+**Fecha:** 2026-06-20
+**Tipo:** proceso / metodología
+**Quién aprobó:** Pablo (vía instalación del estándar)
+**Estado:** ACTIVA
+
+**Decisión:**
+`SESSION_LEARNING_TRANSFER` es el estándar único para capitalizar aprendizajes de sesiones
+relevantes en este proyecto. Tiene dos destinos explícitos:
+1. `lafabrica` — mejora el sistema operativo madre: patrones, workflows, guardrails, metodología, prompts.
+2. `pablo-operating-brain` — capitaliza experiencia profesional de Pablo: evidencia, skills,
+   servicios vendibles, contenido, portfolio, autoridad.
+
+El bloque es **opcional y proporcional**: se usa solo cuando hay aprendizaje real que transferir.
+No aplica en microajustes rutinarios, correcciones de texto ni cierres sin aprendizaje nuevo.
+
+**Alias legacy:**
+- `BRAIN_TRANSFER`: nombre anterior del bloque en el Brain. Compatible; se migra oportunistamente.
+- `DOBLE_ROI`: nombre anterior de este concepto en lafabrica. Compatible; se migra oportunistamente.
+No existe en este repo ninguno de los dos alias — la instalación se hace directamente en el estándar actual.
+
+**Flujo estándar sin autorización explícita:**
+El repo genera el bloque en el cierre de sesión → si merece persistencia, se añade en
+`docs/meta/SESSION_LEARNING_TRANSFER_QUEUE.md` → el Brain absorbe cuando Pablo lo pida.
+Escritura directa al Brain solo con `DIRECT_BRAIN_WRITE_ALLOWED` en el prompt.
+
+**Razonamiento:**
+Un único concepto por función evita duplicar esfuerzo entre `BRAIN_TRANSFER` y `DOBLE_ROI`.
+El estándar unificado es más portable entre proyectos y captura los dos destinos de valor.
+
+**Implicaciones:**
+- AGENTS.md incluye el formato completo en `§Formato de reporte al orquestador`.
+- ORCHESTRATOR.md incluye la regla de evaluación en §18.
+- `docs/meta/SESSION_LEARNING_TRANSFER_QUEUE.md` es la cola local de candidatos.
+- BACKLOG.md incluye `SESSION_LEARNING_TRANSFER_REVIEW_LOOP` como tarea transversal.
+
+---
+
 ### PEND-2 — Marketplace multi-vendor (NORTH_STAR / DEFER)
 **Fecha:** 2026-06-13 (Sesión 005c)  
 **Tipo:** estratégica / visión largo plazo  

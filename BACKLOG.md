@@ -63,6 +63,7 @@ Actualizar al cierre de cada sesión. Los ítems completados se mueven a DONE o 
 
 ## LATER — Sin fecha comprometida
 
+- [ ] **SESSION_LEARNING_TRANSFER_REVIEW_LOOP** — revisar `docs/meta/SESSION_LEARNING_TRANSFER_QUEUE.md` periódicamente y decidir qué entradas promover a lafabrica o Brain. Ejecutar cuando Pablo active `DIRECT_BRAIN_WRITE_ALLOWED` o cuando se acumulen 3+ entradas `CANDIDATE`. Ver DEC-11.
 - [ ] Generar SEED implementable final.
 - [ ] Iniciar implementación técnica.
 - [ ] **MARKETPLACE_NORTH_STAR_VALIDATION** — evaluar si Catenaccio tiene tracción suficiente para abrir a vendedores externos. Solo activar cuando se cumplan TODOS los gates de TARGET_OPTIONS.md §11: 100+ productos propios, workflow ≤10 min, tráfico orgánico, ventas recurrentes, propuesta de valor clara frente a Vinted, sistema de autenticidad definido. Ver DECISIONS.md PEND-2.

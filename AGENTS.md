@@ -119,6 +119,45 @@ QUÉ NO SE TOCÓ: [explícito — no "nada fuera del scope"]
 SIGUIENTE PASO: [una acción concreta o DEFER_STOP]
 ```
 
+**SESSION_LEARNING_TRANSFER (opcional — incluir solo si hay aprendizaje genuinamente transferible):**
+
+```
+SESSION_LEARNING_TRANSFER:
+  project_value:
+    [qué valor deja para este proyecto — o "No aplica"]
+
+  lafabrica:
+    [qué patrón, workflow, criterio, prompt, guardrail o metodología mejora el sistema operativo — o "No aplica"]
+
+  brain:
+    evidence:
+      [qué evidencia profesional deja — o "No aplica"]
+    skills:
+      [qué capacidad demuestra — o "No aplica"]
+    service_angle:
+      [qué servicio podría alimentar — o "No aplica"]
+    content_angle:
+      [qué post, reflexión o narrativa pública podría salir — o "No aplica"]
+    portfolio_asset:
+      [qué caso, prueba o activo de portfolio puede crear — o "No aplica"]
+
+  future_product:
+    [insight para producto futuro — o "No aplica"]
+
+  no_copy:
+    [qué NO debe transferirse ni publicarse — obligatorio si hay riesgo; poner la categoría, nunca el dato privado]
+
+  privacy_level:
+    [PUBLIC_SAFE / INTERNAL_ONLY / PRIVATE_DO_NOT_EXPORT]
+```
+
+Omitir el bloque si no hay aprendizaje real. No usar en microajustes rutinarios, correcciones de texto o cierres técnicos sin aprendizaje nuevo.
+Si hay algo para `lafabrica`, añadirlo también a `docs/meta/SESSION_LEARNING_TRANSFER_QUEUE.md` del proyecto.
+
+> **Alias legacy:** `BRAIN_TRANSFER` era el nombre anterior de este bloque en el Brain.
+> `DOBLE_ROI` era el nombre de este bloque en lafabrica. Ambos alias son válidos en repos que aún no migraron.
+> El estándar actual es `SESSION_LEARNING_TRANSFER`.
+
 ---
 
 ## Patrón de Workflow "Antigravity 2.0"
