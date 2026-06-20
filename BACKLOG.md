@@ -27,8 +27,8 @@ Actualizar al cierre de cada sesión. Los ítems completados se mueven a DONE o 
 ## NEXT — Próximo mes
 
 **Shadow Release (flujo NO_SSH — después de A0_MIGRATION_PLAN):**
-- [ ] **THEME_SHADOW_SCAFFOLD** — diseño de superficie sombra `catenaccio-a0-child`: estructura de archivos, guardrails de path, token cPanel temporal para carpeta aislada. (Sesión 012)
-- [ ] **THEME_SHADOW_IMPLEMENT** — implementación local del tema paralelo o paquete exportable. (Sesión 013)
+- [x] **THEME_SHADOW_SCAFFOLD** — contrato técnico del tema sombra `catenaccio-a0-child` completado. Árbol de archivos aprobado, inventario de hooks/shortcodes a portar, estrategia functions.php (APPROVE_MINIMAL_PORT), scaffolds de header/single-product/archive con HTML de referencia, clases CSS/JS propuestas, auditoría DOM/JS pendiente, 12 riesgos documentados. Ver `docs/operations/THEME_SHADOW_SCAFFOLD.md`. (Sesión 012, 2026-06-20)
+- [ ] **THEME_SHADOW_IMPLEMENT** — implementar localmente `catenaccio-a0-child/` basándose en `THEME_SHADOW_SCAFFOLD.md`. Crear los 9 archivos del árbol aprobado. Prerequisito: auditoría DOM/JS del sitio activo (DevTools — lectura pública). Sin sync al servidor en esta sesión. (Sesión 013)
 - [ ] **THEME_SHADOW_SYNC** — sync controlado del paquete local a la carpeta sombra en servidor con acceso temporal. (Sesión 014)
 - [ ] **THEME_SHADOW_VISUAL_VALIDATION** — validación visual con Antigravity sobre tema sombra inactivo. (Sesión 015)
 - [ ] **RELEASE_MANUAL_PABLO** — Pablo activa tema sombra en WP Admin + verifica + rollback definido si falla.

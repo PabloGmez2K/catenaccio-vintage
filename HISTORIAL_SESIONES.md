@@ -419,6 +419,28 @@ Cross-referencia con `agent_events.jsonl` para detalle de eventos.
 **agent_events ref:** 2026-06-14T16:xx:xx (filesystem_discovery_blocked_webdav)
 
 ---
+**Sesión 012** — 2026-06-20
+**Agente:** Claude Code (Sonnet)
+**Modo:** DOCS_ONLY / SCAFFOLD_PLAN / READ_ONLY
+**Tipo:** docs / contrato técnico / scaffold
+**Tarea:** THEME_SHADOW_SCAFFOLD — diseñar la estructura completa del tema sombra `catenaccio-a0-child` como contrato técnico para Sesión 013. Sin implementar código. Sin acceso al servidor.
+
+**Decisiones clave:**
+- APPROVE_MINIMAL_PORT aprobado como estrategia de functions.php del tema sombra: portar solo las 7 categorías críticas (register_nav_menus, rewrite rules producto, breadcrumbs, IVA envío, pre_get_posts, enqueue assets, shortcodes propios). No copiar functions.php completo del activo (62KB, 1712 líneas). No usar require_once del activo. Guards `!shortcode_exists()` como defensa contra doble registro.
+- Árbol de archivos aprobado: 9 archivos bajo `catenaccio-a0-child/` (style.css, functions.php, header.php, footer.php, woocommerce/{single-product, archive-product, content-product}.php, assets/{css/cv-a0.css, js/cv-a0.js}).
+- Clases CSS propias definidas: `.cv-header`, `.cv-mini-cart`, `.cv-offcanvas-*`, `.cv-product-*`, `.cv-archive-*`, `.cv-product-card`. Reemplazan `.elementor-menu-cart__*` y `.elementor-button--*`.
+- Estado JS off-canvas definido: `body.cv-offcanvas-open`, `aria-hidden`, `aria-expanded`. Toggle propio en cv-a0.js sin dependencia Elementor.
+- 10 shortcodes mapeados a templates. Todos conservados sin cambios. Shortcodes de plugins (offcanvas, filtro-camisetas) activos independientemente del tema.
+- 12 riesgos documentados con mitigación. Blocker principal identificado: JS de filtro-camisetas puede buscar clases Elementor — auditar antes de Sesión 013.
+- Auditoría DOM/JS definida: 9 páginas a inspeccionar, selectores críticos a observar, estados de breakpoint a registrar.
+
+**Qué se validó:** `docs/operations/THEME_SHADOW_SCAFFOLD.md` creado (13 secciones). Árbol de archivos aprobado. Inventario de funciones/hooks clasificado (CRÍTICO/IMPORTANTE/NO PORTAR). Estrategia functions.php con veredicto APPROVE_MINIMAL_PORT. Scaffolds HTML/PHP de referencia para header, single-product, archive-product, content-product. Clases CSS/JS propuestas. Checklist auditoría DOM (9 páginas). Checklist auditoría JS (5 módulos). 12 riesgos con mitigación. Checklist visual para Sesión 015. Criterios de aceptación Sesión 013 definidos. BACKLOG.md actualizado. CONTEXTO.md appendeado. agent_events.jsonl appendeado. git status limpio antes del commit.
+**Qué NO se tocó:** Servidor, WordPress, WooCommerce, cPanel, Elementor, plugins, tema activo `hello-elementor-child`, functions.php real, wp-config.php, pasarelas de pago, SEO, credenciales, `.env.local`. No se creó carpeta `catenaccio-a0-child`. No se implementó ningún archivo PHP/CSS/JS. No se hizo deploy ni flush de caché. DECISIONS.md no modificado (no hay decisión nueva — la sesión desarrolla DEC-10 y DEC-8 existentes).
+**Siguiente paso:** Sesión 013 — THEME_SHADOW_IMPLEMENT: (1) auditoría DOM/JS del sitio activo con DevTools read-only; (2) crear localmente `catenaccio-a0-child/` con los 9 archivos del árbol aprobado siguiendo el contrato técnico de THEME_SHADOW_SCAFFOLD.md.
+**agent_events ref:** 2026-06-20T12:00:00Z (theme_shadow_scaffold_complete)
+---
+
+---
 **Sesión 011** — 2026-06-20
 **Agente:** Claude Code (Sonnet)
 **Modo:** DOCS_ONLY / PLAN_ONLY
