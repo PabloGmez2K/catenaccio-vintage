@@ -419,6 +419,28 @@ Cross-referencia con `agent_events.jsonl` para detalle de eventos.
 **agent_events ref:** 2026-06-14T16:xx:xx (filesystem_discovery_blocked_webdav)
 
 ---
+**Sesión 011** — 2026-06-20
+**Agente:** Claude Code (Sonnet)
+**Modo:** DOCS_ONLY / PLAN_ONLY
+**Tipo:** docs / plan técnico
+**Tarea:** A0_MIGRATION_PLAN — crear plan técnico completo para migrar dependencias críticas de Elementor Pro manteniendo WP+WC. Sin implementación. Sin acceso al servidor.
+
+**Decisiones clave:**
+- No se toma ninguna decisión nueva. El plan desarrolla DEC-10 (NO_SSH_SHADOW_RELEASE_FLOW) y la estrategia A0+B1 (DEC-8). DECISIONS.md no se modifica.
+- Enfoque técnico confirmado para P1-A: `header.php` en tema sombra con `wp_nav_menu()`, `woocommerce_mini_cart()`, toggle off-canvas CSS/JS mínimo + `[catenaccio_offcanvas_menu]`.
+- Enfoque técnico confirmado para P1-B: `woocommerce/single-product.php` con hooks WC nativos + shortcodes propios conservados.
+- Enfoque técnico confirmado para P1-C: `woocommerce/archive-product.php` + `content-product.php` con `woocommerce_product_loop_start/end` + shortcodes filtro conservados.
+- P2 (Carrito/Mi Cuenta): acción manual Pablo en WP Admin. Sin sesión de agente.
+- 12 riesgos técnicos documentados y con mitigación definida.
+- Plan de sesiones 012-015 + RELEASE_MANUAL_PABLO con objetivos explícitos.
+
+**Qué se validó:** `docs/operations/A0_MIGRATION_PLAN.md` creado con 11 secciones. Checklist de aceptación incluido — todos los ítems verificados. Todos los shortcodes conservados. Estrategia respeta DEC-10. BACKLOG.md: A0_MIGRATION_PLAN marcado [x]. CONTEXTO.md, HISTORIAL_SESIONES.md, agent_events.jsonl actualizados. git diff --check limpio.
+**Qué NO se tocó:** Servidor, WordPress, WooCommerce, cPanel, Elementor, plugins, tema activo `hello-elementor-child`, `functions.php` real, wp-config.php, pasarelas de pago, SEO, credenciales, `.env.local`. No se creó carpeta `catenaccio-a0-child`. No se implementó ningún archivo PHP/CSS/JS. No se hizo deploy ni flush de caché. No se mezcló con Bijuymoda Suite, lafabrica ni otros proyectos.
+**Siguiente paso:** (1) Pablo ejecuta CARRITO_MICUENTA_QUICKWIN (~10 min en WP Admin — opcional, independiente). (2) Sesión 012 — THEME_SHADOW_SCAFFOLD: diseñar estructura de `catenaccio-a0-child`, auditar JS de filtro-camisetas, capturar CSS breakpoints con Antigravity.
+**agent_events ref:** 2026-06-20T00:00:00Z (a0_migration_plan_complete)
+---
+
+---
 **Sesión 010C** — 2026-06-15
 **Agente:** Claude Code (Sonnet)
 **Modo:** DOCS_ONLY
