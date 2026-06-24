@@ -546,3 +546,24 @@ Cross-referencia con `agent_events.jsonl` para detalle de eventos.
 **Siguiente paso:** Sesión 009 — SERVER_FILESYSTEM_READONLY_DISCOVERY: mapear child theme, plugins custom, archivos override del servidor (vía cPanel File Manager read-only o FTP readonly). Luego A0_MIGRATION_PLAN con contexto real.  
 **agent_events ref:** 2026-06-13T23:00:00Z (admin_window_closed_role_verified)
 ---
+
+---
+**Sesión 013b** (2026-06-24, Claude Code Sonnet)
+
+**Modo:** CPANEL_UAPI_READONLY + LOCAL_PATCH / NO_SERVER_WRITE  
+**Tipo:** close / blockers / patch  
+**Tarea:** Completar los 4 BLOCKERS del tema sombra A0 con código exacto del functions.php activo vía UAPI read-only.
+
+**Decisiones clave:**
+- Nuevo token cPanel UAPI activo. Probe OK: `list_files` + `get_file_content` en `hello-elementor-child/functions.php` (1711 líneas, 62501 bytes).
+- BLOCKER-A portado: `woocommerce_package_rates` — IVA 21% (riesgo fiscal crítico resuelto).
+- BLOCKER-B portado: sistema completo de URLs limpias (13 funciones/hooks: transient 12h categorías + transient 12h productos + reglas top + catch-all bottom + flush diferido + CDN purge + Elementor compat + after_switch_theme + flush_rewrite_rules_hard).
+- BLOCKER-C portado: `cv_woo_breadcrumbs_fix_tax_labels` + `cv_custom_single_product_breadcrumb` — lógica Leyendas / Selecciones / Liga+Equipo / Fallback.
+- BLOCKER-D portado: `pre_get_posts` carrusel home solo en stock.
+- Extras portados: rank_math SEO (description + og:image), búsqueda header (AJAX + shortcode cv_search_latest_products + script enqueue).
+
+**Qué se validó:** `git diff --check` OK. Solo `catenaccio-a0-child/functions.php` modificado (+538 líneas). Sin secretos en archivos. BACKLOG.md THEME_SHADOW_COMPLETE_BLOCKERS marcado ✅. THEME_SHADOW_IMPLEMENT.md §13 añadido.  
+**Qué NO se tocó:** servidor, WordPress, wp-config.php, .htaccess, DB, tema activo remoto, plugins activos remotos, hello-elementor-child, .env.local.  
+**Siguiente paso:** Sesión 014 — THEME_SHADOW_SYNC: subir `catenaccio-a0-child/` al servidor vía cPanel UAPI write (Fileman/save_file_content) o ZIP manual Pablo.  
+**agent_events ref:** 2026-06-24T00:00:00Z (theme_shadow_complete_blockers)
+---

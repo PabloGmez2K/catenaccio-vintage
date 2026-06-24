@@ -297,3 +297,51 @@ RELEASE_MANUAL_PABLO
 *Documento creado en modo LOCAL_CODE_ONLY / IMPLEMENT_SHADOW_THEME / NO_SERVER.*  
 *9 archivos creados. 4 BLOCKERS documentados para sesión 013b.*  
 *Fecha: 2026-06-20 — Sesión 013 — Claude Code (Sonnet).*
+
+---
+
+## 13. SESIÓN 013b — BLOCKERS RESUELTOS (2026-06-24)
+
+**Modo:** CPANEL_UAPI_READONLY + LOCAL_PATCH / NO_SERVER_WRITE
+
+**Probe UAPI:**
+- Token nuevo creado por Raiola/Pablo: activo.
+- `Fileman/list_files` en `public_html/wp-content`: OK.
+- `Fileman/get_file_content` en `hello-elementor-child/functions.php`: OK.
+- 1711 líneas, 62501 bytes leídos.
+
+**Fragmentos portados:**
+
+| Blocker | Hook/función | Estado |
+|---------|-------------|--------|
+| BLOCKER-A | `woocommerce_package_rates` — IVA 21% | ✅ Portado |
+| BLOCKER-B | URL rewrite system completo (transients + top + catch-all + flush + CDN) | ✅ Portado |
+| BLOCKER-C | `cv_woo_breadcrumbs_fix_tax_labels` + `cv_custom_single_product_breadcrumb` | ✅ Portado |
+| BLOCKER-D | `pre_get_posts` — carrusel home solo en stock | ✅ Portado |
+| EXTRA | `rank_math/frontend/description` + `rank_math/opengraph/image` | ✅ Portado |
+| EXTRA | `cv_ajax_search_products` + `cv_search_latest_products` + `cv_enqueue_search_script` | ✅ Portado |
+
+**Funciones helper portadas (BLOCKER-B):**
+`get_woocommerce_special_pages`, `custom_remove_category_base`, `custom_rewrite_product_cat_slug`, `cv_invalidate_product_cat_cache`, `remove_product_slug`, `custom_remove_product_slug_rewrite_rules`, `cv_invalidate_product_slugs_cache`, `custom_remove_product_base_from_links`, `ensure_elementor_compatibility`, `custom_flush_rewrite_rules`, `delayed_flush_rewrite_rules`, `transition_post_status` hook, `flush_rewrite_rules_hard` filter.
+
+**Validaciones:**
+- `git diff --check`: OK (sin errores de whitespace)
+- Solo `catenaccio-a0-child/functions.php` modificado (+538 líneas)
+- Sin secretos/tokens en archivos modificados
+- PHP CLI no disponible en shell — sintaxis revisada manualmente
+
+**Confirmaciones sesión 013b:**
+- No se escribió en el servidor.
+- No se tocó WordPress.
+- No se tocó `wp-config.php`.
+- No se tocó `.htaccess`.
+- No se tocó la base de datos.
+- No se tocó el tema activo remoto (`hello-elementor-child`).
+- No se tocaron plugins activos remotos.
+- No se realizó deploy.
+- No se activó ningún tema.
+- Token/password/.env.local: no impreso, no commiteado.
+
+**Veredicto:** `APPROVE_READY_FOR_SYNC_REAL`
+
+**Siguiente paso:** SESIÓN 014 — THEME_SHADOW_SYNC: subir `catenaccio-a0-child/` al servidor vía Fileman/save_file_content (archivos uno por uno) o vía ZIP upload manual Pablo.
