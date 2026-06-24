@@ -36,6 +36,7 @@ Leer en este orden. No leer más de lo necesario:
 1. `CONTEXTO.md` — fase actual y experimento activo (primeras 50 líneas)
 2. `BACKLOG.md` — ítem específico asignado en este prompt
 3. El archivo relevante a la tarea (solo el necesario)
+4. `docs/meta/AGENT_EXPERIENCE_LEDGER.md` — si la tarea es de tipo registrado (CSS_THEME_CHILD, SHADOW_RELEASE, WC_API, WC_EMAIL_FLOW, WOOCOMMERCE_HOOK_PATCH)
 
 Si hace falta más contexto del repo para ejecutar la tarea → **parar y pedir al orquestador que reformule el prompt**. El contexto debe estar en el prompt; no es trabajo del agente descubrirlo.
 
@@ -76,6 +77,18 @@ Si la tarea llega como read-only / ASK, no modificar archivos. Devolver diagnós
 - Validación visual: cualquier cambio con efecto visible en la web requiere OK de Pablo antes de commit/push/deploy. Lint y type-check no sustituyen validación visual.
 - Microparches WordPress (cuando lleguen): diagnóstico → contrato visual explícito → evidencia controlada (WP Admin / capturas) → cambio mínimo → OK visual Pablo → commit.
 - No tomar decisiones de arquitectura sin escalar a Opus.
+
+**Email transaccional WooCommerce — PRODUCTION_ONLY_VALIDATION:**
+- Cualquier tarea que involucre emails de WooCommerce (confirmación de pedido, activación de cuenta, recuperación de contraseña, notificaciones de estado) debe declararse `PRODUCTION_ONLY_VALIDATION` antes de abrirse.
+- Staging sin SMTP real no puede validar recepción. Declarar la limitación antes de la primera sesión, no después de 3 intentos fallidos. (RULE-03 / DEC-PABLO-03 del Operating Brain; PATTERN-08 de lafabrica)
+- TEST B obligatorio: pedido o cuenta nueva real → verificar recepción en bandeja real. El bloque no se cierra como PASS sin TEST B. (DEC-PABLO-02)
+- Antes de cualquier tarea de email: verificar si WP Mail SMTP está instalado y configurado.
+
+**WooCommerce hooks — usar estado del objeto, nunca contexto de ejecución:**
+- Para discriminar dentro de un hook WC, usar siempre estado persistente del objeto (Order/Customer), no request params, controller class ni URL path. (PATTERN-09 / ORCHESTRATOR.md §19)
+- Ejemplo estable: `$order->get_customer_id() > 0 && !$order->get_meta('_guest_checkout')`.
+- Ejemplo frágil (evitar): `is_checkout()`, `$_SERVER['REQUEST_URI']`.
+- Si el approach de detección de contexto falla 3 veces con el mismo síntoma → STOP_AND_REPLAN (RULE-01 / PATTERN-07).
 
 ---
 
@@ -168,6 +181,23 @@ Al usar la superficie Antigravity para integraciones web o manipulación de UI, 
 - **Iteración:** Usa la misma conversación para corrección, validación y cierre de ese bloque. No abras sesiones nuevas para microcorrecciones.
 - **New Worktree:** Usa directorios paralelos (New Worktree) solo para trabajo paralelo o ramas experimentales.
 - **Implementación y validación:** Utiliza el IDE para la implementación local, el terminal para scripts, y la UI del navegador para validaciones visuales obligatorias.
+
+---
+
+## STOP_AND_REPLAN — cuándo activar en Catenaccio
+
+Activar STOP_AND_REPLAN (PATTERN-07 lafabrica) cuando:
+- 3 o más microparches sobre el mismo approach fallan con el mismo síntoma.
+- TEST B (validación funcional real) falla consistentemente aunque el código parezca correcto.
+- El código se vuelve más complejo con cada intento, no más simple.
+- El agente lleva ≥3 sesiones sobre el mismo issue sin convergencia.
+
+**Protocolo:**
+1. STOP — declarar explícitamente que el approach está agotado.
+2. COLD_REVIEW — agente diferente, sin contexto del intento anterior.
+3. SIMPLIFY — buscar el discriminador más estable y directo disponible.
+4. REPLAN — documentar el nuevo approach antes de implementarlo; registrar callejones en `docs/meta/AGENT_EXPERIENCE_LEDGER.md`.
+5. TEST_PLAN — identificar si la validación requiere producción real; declararlo antes de gastar sesiones en staging.
 
 ---
 

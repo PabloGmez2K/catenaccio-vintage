@@ -319,6 +319,62 @@ El estándar unificado es más portable entre proyectos y captura los dos destin
 
 ---
 
+### DEC-12 — Absorción de reglas del Operating Brain y patrones de lafabrica en Catenaccio
+**Fecha:** 2026-06-24 (Sesión 014 — meta-alineación)
+**Tipo:** proceso / metodología
+**Quién aprobó:** Pablo (prompt de sesión ALIGN_WITH_OPERATING_BRAIN_AND_LAFABRICA_V1)
+**Estado:** ACTIVA
+
+**Decisión:**
+Absorber en los documentos operativos de Catenaccio:
+
+1. Reglas personales de orquestación de Pablo (Operating Brain §13):
+   - RULE-01: Revisión fría tras 3 sesiones sin convergencia
+   - RULE-02: PABLO_VISUAL_OK como único gate visual
+   - RULE-03: Staging es sintaxis; producción valida comportamiento
+   - RULE-04: No ampliar mientras falla el flujo crítico
+   - RULE-05: Cambiar de agente es decisión de gestión
+   - DEC-PABLO-01: Cadena de agentes por tipo de tarea
+   - DEC-PABLO-02: No PASS sin TEST B real
+   - DEC-PABLO-03: Staging sin SMTP — declararlo antes
+
+2. Patrones del sistema operativo madre (lafabrica PATTERN-05 a PATTERN-09):
+   - PATTERN-05: AI_FIRST_LAYERED_DOCUMENTATION — activar cuando sesiones >30
+   - PATTERN-06: AGENT_EXPERIENCE_LEDGER — instanciado en `docs/meta/AGENT_EXPERIENCE_LEDGER.md`
+   - PATTERN-07: STOP_AND_REPLAN_MICROPATCH_PROTOCOL
+   - PATTERN-08: TRANSACTIONAL_EMAIL_PRODUCTION_GATE
+   - PATTERN-09: ECOMMERCE_HOOK_STATE_GUARD
+
+3. Equivalencias técnicas PrestaShop → WooCommerce del Incident Playbook de lafabrica.
+
+**Archivos modificados en esta sesión:**
+- `ORCHESTRATOR.md` — §19 añadido (reglas + patrones + equivalencias)
+- `AGENTS.md` — guardrails de email y hooks WC; protocolo STOP_AND_REPLAN; referencia al Ledger
+- `docs/meta/AGENT_EXPERIENCE_LEDGER.md` — CREADO (6 entradas: 4 de sesiones pasadas + 2 placeholders)
+- `DECISIONS.md` — DEC-12 añadido
+- `BACKLOG.md` — tareas de alineación añadidas
+- `CONTEXTO.md` — fase y sesión 014 appendeadas
+
+**Razonamiento:**
+Catenaccio tiene 14 sesiones activas y está entrando en la fase de implementación técnica real
+(shadow release, hooks WC, emails). Sin estas reglas absorbidas, la próxima sesión de implementación
+podría repetir errores ya documentados en Bijuymoda Suite (microparches infinitos, staging sin SMTP,
+validación visual omitida). La absorción es documental; no requiere código.
+
+**Qué NO se absorbió:**
+- Lógica específica de Bijuymoda (PrestaShop hooks, b2bregister, OPC, B2B)
+- Datos privados de ningún tipo (clientes, pedidos, credenciales, rutas de servidor)
+- Estrategia comercial de Bijuymoda
+- Código PHP específico de Bijuymoda
+
+**Implicaciones:**
+- Toda tarea futura de email transaccional WC → declarar PRODUCTION_ONLY_VALIDATION antes de abrir.
+- Toda tarea de hook WC → usar estado del objeto, no contexto de ejecución.
+- Si un agente lleva 3 sesiones sin convergencia → STOP_AND_REPLAN obligatorio.
+- `docs/meta/AGENT_EXPERIENCE_LEDGER.md` — consultar al inicio de tareas de tipo registrado.
+
+---
+
 ### PEND-2 — Marketplace multi-vendor (NORTH_STAR / DEFER)
 **Fecha:** 2026-06-13 (Sesión 005c)  
 **Tipo:** estratégica / visión largo plazo  

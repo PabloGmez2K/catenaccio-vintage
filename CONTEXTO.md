@@ -58,6 +58,22 @@ Hipótesis no verificadas del SEED:
 <!-- APPEND AQUÍ — no editar entradas anteriores -->
 <!-- Formato: Sesión N (YYYY-MM-DD, Agente): MODO / tipo. [Qué se hizo]. [Qué se validó]. [Qué NO se tocó]. -->
 
+Sesión 014 (2026-06-24, Claude Code Sonnet): LITE / docs — meta-alineación. Absorbidas reglas RULE-01 a RULE-05 y DEC-PABLO-01 a DEC-PABLO-03 del Operating Brain; patrones PATTERN-05 a PATTERN-09 de lafabrica. Creado AGENT_EXPERIENCE_LEDGER.md. Actualizados ORCHESTRATOR.md §19, AGENTS.md, DECISIONS.md DEC-12, BACKLOG.md, CONTEXTO.md. No se tocó producción, WordPress, hosting, código PHP ni ningún archivo de datos privados. Siguiente: THEME_SHADOW_SYNC (Sesión 015) — sesión técnica de sync con acceso cPanel temporal.
+
+---
+
+## Fase actual (actualizado 2026-06-24)
+
+**Fase:** Implementación — Shadow Release en progreso
+**Desde:** 2026-06-20
+**Descripción:** Tema sombra `catenaccio-a0-child` implementado localmente (Sesión 013). Pendiente sync a servidor (Sesión 014) y validación visual con Antigravity (Sesión 015). El sync requiere token cPanel temporal — Pablo controla la ventana de acceso.
+
+**Bloqueos activos:**
+- Pablo pendiente de revocar token cPanel de Sesión 010B (CPANEL_TOKEN_REVOCATION)
+- THEME_SHADOW_COMPLETE_BLOCKERS: Pablo debe aportar fragmentos de functions.php del tema activo (IVA 21% en envío, rewrite rules, breadcrumb, carrusel home)
+
+**Operativo activo:** RELEASE_MANUAL_PABLO cuando Sesión 015 valide visualmente el tema sombra.
+
 Sesión 0 (YYYY-MM-DD, lafabrica-template): LITE / init. Template aplicado desde SEED. Docs base generados. No se tocó código del proyecto.
 
 Sesión 1 (2026-06-06, Claude Code Sonnet): DOCS_ONLY / strategic. Registrado nuevo driver estratégico: suscripción de Elementor Pro cancelada. La dependencia de Elementor Pro pasa a ser un factor a evaluar en AS-IS y TARGET. No se decide migración ni arquitectura. Próximo bloque recomendado: revisar AS-IS con el impacto de Elementor incluido, luego preparar TARGET_OPTIONS.

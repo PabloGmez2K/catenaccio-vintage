@@ -26,6 +26,11 @@ Actualizar al cierre de cada sesión. Los ítems completados se mueven a DONE o 
 
 ## NEXT — Próximo mes
 
+**Alineación Operating Brain + Lafabrica (completado sesión 014 — referencia para próximas sesiones):**
+- [x] **ALIGN_WITH_OPERATING_BRAIN_AND_LAFABRICA_V1** — absorbidas RULE-01 a RULE-05, DEC-PABLO-01 a DEC-PABLO-03, PATTERN-05 a PATTERN-09. Archivos modificados: ORCHESTRATOR.md §19, AGENTS.md, DECISIONS.md DEC-12, BACKLOG.md, CONTEXTO.md. Creado: `docs/meta/AGENT_EXPERIENCE_LEDGER.md`. (Sesión 014, 2026-06-24)
+- [ ] **ACTIVE_CONTEXT_PACK_AND_READING_RECIPES** — crear `docs/meta/ACTIVE_CONTEXT_PACK.md` y `docs/meta/READING_RECIPES.md` (PATTERN-05). Activar cuando el proyecto supere 25-30 sesiones o cuando el arranque consuma >20% del presupuesto de tokens. No urgente ahora.
+- [ ] **WP_MAIL_SMTP_GATE_SETUP** — antes de cualquier tarea de email transaccional WooCommerce (confirmaciones de pedido, activación de cuenta): verificar si WP Mail SMTP está instalado y configurado en producción. Si no → esa es la primera tarea. Prerequisito de PRODUCTION_ONLY_VALIDATION. (DEC-12 / RULE-03)
+
 **Shadow Release (flujo NO_SSH — después de A0_MIGRATION_PLAN):**
 - [x] **THEME_SHADOW_SCAFFOLD** — contrato técnico del tema sombra `catenaccio-a0-child` completado. Árbol de archivos aprobado, inventario de hooks/shortcodes a portar, estrategia functions.php (APPROVE_MINIMAL_PORT), scaffolds de header/single-product/archive con HTML de referencia, clases CSS/JS propuestas, auditoría DOM/JS pendiente, 12 riesgos documentados. Ver `docs/operations/THEME_SHADOW_SCAFFOLD.md`. (Sesión 012, 2026-06-20)
 - [x] **THEME_SHADOW_IMPLEMENT** — implementado localmente (Sesión 013, 2026-06-20). 9 archivos creados en `catenaccio-a0-child/`. Veredicto: APPROVE_READY_FOR_SYNC (layout) + FIX_BLOCKER_FIRST (producción). Ver `docs/operations/THEME_SHADOW_IMPLEMENT.md`.
@@ -63,6 +68,7 @@ Actualizar al cierre de cada sesión. Los ítems completados se mueven a DONE o 
 
 ## LATER — Sin fecha comprometida
 
+- [ ] **AGENT_EXPERIENCE_LEDGER_REVIEW** — revisar `docs/meta/AGENT_EXPERIENCE_LEDGER.md` periódicamente: promover entradas de PROVISIONAL a CONFIRMED_BY_REUSE cuando se reusen con éxito; añadir nuevas entradas al cerrar tareas recurrentes. Sin fecha — se hace al cierre de sesiones relevantes.
 - [ ] **SESSION_LEARNING_TRANSFER_REVIEW_LOOP** — revisar `docs/meta/SESSION_LEARNING_TRANSFER_QUEUE.md` periódicamente y decidir qué entradas promover a lafabrica o Brain. Ejecutar cuando Pablo active `DIRECT_BRAIN_WRITE_ALLOWED` o cuando se acumulen 3+ entradas `CANDIDATE`. Ver DEC-11.
 - [ ] Generar SEED implementable final.
 - [ ] Iniciar implementación técnica.

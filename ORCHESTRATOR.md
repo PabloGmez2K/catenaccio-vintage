@@ -320,9 +320,120 @@ Formato completo definido en `AGENTS.md §Formato de reporte al orquestador`.
 
 ---
 
+## §19 — Reglas de orquestación del Operating Brain (adaptadas a WordPress/WooCommerce)
+
+Absorbidas desde `pablo-operating-brain/docs/profile/PABLO_OPERATING_MODEL.md §13`
+(RULE-01 a RULE-05, DEC-PABLO-01 a DEC-PABLO-03). Sesión 2026-06-24.
+
+Estas son reglas de cómo Pablo orquesta — no reglas de WooCommerce.
+
+### RULE-01 — Revisión fría como desbloqueador
+
+Si un bloque técnico no converge en 3+ sesiones con el mismo approach, activar revisión fría:
+agente diferente, sin contexto del intento anterior. No continuar el mismo ciclo esperando resultado distinto.
+
+**Señal:** el agente lleva ≥3 sesiones sobre el mismo issue sin TEST B pass.
+**Acción:** STOP_AND_REPLAN (ver PATTERN-07 en lafabrica). Cambiar agente y approach, no solo el parámetro.
+
+### RULE-02 — PABLO_VISUAL_OK como único gate visual
+
+Ningún cambio con efecto visual en la tienda se cierra sin la revisión de Pablo.
+El agente prepara; Pablo aprueba; el commit cierra. No se invierte el orden.
+
+**Aplica a:** cambios en tema hijo, widgets WooCommerce, CSS, templates de producto/archivo/checkout.
+
+### RULE-03 — Staging es sintaxis; producción valida comportamiento
+
+Flujos con email transaccional WooCommerce, hooks de checkout, activación de cuenta,
+o configuración productiva deben declararse `PRODUCTION_ONLY_VALIDATION` antes de abrir la tarea.
+
+**Aplica a (WooCommerce):**
+- `woocommerce_created_customer` / confirmación de pedido / recuperación de contraseña
+- Hooks de checkout (Blocks vs Classic vs shortcode)
+- Configuración de pasarela de pago
+- WP Mail SMTP / emails transaccionales
+
+No gastar sesiones en staging para validar lo que solo producción puede confirmar.
+
+### RULE-04 — No ampliar mientras falla el flujo crítico
+
+Si el flujo principal de la tienda está roto o no validado, no abrir sesiones de mejora,
+polish ni documentación de ese módulo. El checkout, el catálogo y el acceso de cliente son
+los flujos críticos de Catenaccio.
+
+### RULE-05 — Cambiar de agente es una decisión de gestión, no técnica
+
+El agente implementador señala que está atascado; el orquestador decide si cambiar de agente,
+de approach o de superficie. Inacción no es opción: tras 3 intentos sin convergencia, cambiar algo.
+
+---
+
+### DEC-PABLO-01 — Cadena de agentes por tipo de tarea (Catenaccio)
+
+| Fase | Agente preferido | Razón |
+|------|-----------------|-------|
+| Diagnóstico amplio, lectura de docs, navegación WP Admin | Antigravity / Gemini | Contexto amplio, económico para lectura |
+| Debugging quirúrgico PHP/CSS WC, hooks, lógica raíz | Claude Sonnet | Más preciso en código específico |
+| Revisión fría / STOP_AND_REPLAN | Claude Sonnet (sin contexto previo) | Cold review sin peso emocional del intento anterior |
+| Arquitectura, seguridad, migración, decisiones irreversibles | Claude Opus | Solo para riesgo real e irreversible |
+| Scripts, validaciones deterministas, syncs controlados | Codex | Cuando disponible para la tarea |
+| Documentación, cierres, orquestación | ChatGPT u otro bajo coste | No necesita capacidad de implementación |
+
+**Antipatrón:** usar Opus para polish visual, microfix o iteraciones de diagnóstico rutinario.
+
+### DEC-PABLO-02 — No cerrar un bloque como PASS sin TEST B real
+
+Ningún bloque con flujo de email WooCommerce, hook de checkout, activación de cuenta o integración
+externa se cierra como PASS sin TEST B en el entorno productivo real.
+
+"El log no tiene errores" y "en staging funciona" no son criterios de cierre para estos flujos.
+
+**TEST B en WooCommerce:**
+- Email: realizar pedido/registro real con cuenta nueva → verificar recepción en bandeja real.
+- Checkout: completar un pedido real de prueba → verificar estado en WC Orders.
+- Hook: verificar estado del objeto WC Order/Customer en BD, no solo el log del servidor.
+
+### DEC-PABLO-03 — Staging sin SMTP: declararlo antes, no al cuarto intento
+
+Si el entorno no tiene WP Mail SMTP configurado o Mailtrap/captura de emails funcionando,
+declarar esa limitación antes de abrir la tarea y planificar TEST B en producción desde el inicio.
+
+**Aplica a Catenaccio:** verificar WP Mail SMTP antes de cualquier tarea de email transaccional.
+Si no hay SMTP de producción configurado → esa es la primera tarea, no el cuarto intento fallido.
+
+---
+
+### Patrones de lafabrica aplicables a WooCommerce (referencia)
+
+Estos patrones del sistema operativo madre aplican por defecto. Ver definición completa en
+`lafabrica-template/docs/orchestrator/ECOSYSTEM_LEARNING_PATTERNS.md`.
+
+| Patrón | Aplica a WooCommerce como... |
+|--------|------------------------------|
+| PATTERN-07 STOP_AND_REPLAN | Activar tras 3 microparches fallidos en hook/email/checkout |
+| PATTERN-08 TRANSACTIONAL_EMAIL_PRODUCTION_GATE | Declarar PRODUCTION_ONLY_VALIDATION en toda tarea de email WC |
+| PATTERN-09 ECOMMERCE_HOOK_STATE_GUARD | Usar estado del objeto Order/Customer, nunca contexto de ejecución |
+| PATTERN-06 AGENT_EXPERIENCE_LEDGER | Ver `docs/meta/AGENT_EXPERIENCE_LEDGER.md` — consultar antes de tarea registrada |
+| PATTERN-05 AI_FIRST_LAYERED_DOCUMENTATION | Activar ACTIVE_CONTEXT_PACK + READING_RECIPES cuando sesiones >30 |
+
+### Equivalencias PrestaShop → WooCommerce (para adaptar ejemplos del Playbook)
+
+| PrestaShop | WooCommerce equivalente |
+|-----------|------------------------|
+| `hookActionCustomerAccountAdd` | `woocommerce_created_customer` / `user_register` |
+| `$customer->is_guest` | `!$order->get_customer_id()` o `!get_user_by('email', $email)` |
+| `PS_configuration` | `get_option('woocommerce_*')` / `wp_options` |
+| Caché Symfony | OPcache + LiteSpeed Cache / Transients |
+| `custom.css` en tema PrestaShop | `child-theme/style.css` en tema hijo WooCommerce |
+| `Mail::Send` | `wp_mail` / clases de email WooCommerce / WP Mail SMTP |
+| `php -l` remoto | Validación PHP en local + backup antes de sync |
+
+---
+
 ## Historial de cambios de este documento
 
 | Fecha | Cambio | Quién |
 |-------|--------|-------|
 | 2026-06-06 | Creado desde lafabrica-template | lafabrica_new.py |
 | 2026-06-13 | Stack real, lectura proporcional +git step 0, guardrails de dominio, tabla de agentes específica, §16 SESSION_WORKSTREAM_ANCHOR, §17 TARGET_OPTIONS binario | Claude Code (Sonnet) |
+| 2026-06-24 | §19 — reglas RULE-01 a RULE-05, DEC-PABLO-01 a DEC-PABLO-03 absorbidas del Operating Brain; patrones PATTERN-05 a 09 de lafabrica; equivalencias PrestaShop→WooCommerce; referencia al AGENT_EXPERIENCE_LEDGER | Claude Code (Sonnet) |
