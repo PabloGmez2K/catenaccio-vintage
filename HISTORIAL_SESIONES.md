@@ -718,3 +718,21 @@ Cross-referencia con `agent_events.jsonl` para detalle de eventos.
 ---
 
 SesiÃ³n 020B (2026-06-27, Codex): CODEX_CONTROLLED_PRODUCTION_TEST / DRAFT_ONLY / NO_CONFIG_CHANGE / WC_API_WRITE_ACCESS_TEST. **Test controlado de escritura WooCommerce completado por API.** Precheck: `.env.local` presente, `WP_SITE_URL`, `WP_APP_USER`, `WP_APP_PASSWORD` presentes sin imprimir valores; `GET /wp-json/wp/v2/users/me?context=edit` HTTP 200 con `catenaccio-studio-agent` y rol/capacidad WooCommerce validos. Term IDs: `pa_liga` id=5 con LaLiga=72, `pa_equipo` id=4 con Francia=129, `pa_ano` id=7 con 2014-15=139. Write: se ejecuto exactamente 1 `POST /wp-json/wc/v3/products`, HTTP 201, producto ID 1853, `status=draft`, nombre `[STUDIO TEST]...`, `regular_price="1"` y `meta_data` requerida confirmada. Post-write: `GET /wp-json/wc/v3/products/1853` HTTP 200 confirmo `status=draft` y `meta_data` completa. No se ejecuto DELETE ni cleanup automatico. Veredicto: APPROVE_WC_API_WRITE_ACCESS_TEST_PASSED. Pendiente: Pablo verifica en WP Admin -> Productos -> Borradores y elimina manualmente el producto test ID 1853 antes de S021. No se tocaron WordPress settings, WooCommerce settings, pagos, pedidos, clientes, productos reales, plugins, temas, cPanel, Supabase remoto, Vercel, `.env.local` ni credenciales.
+
+---
+**Sesión 020C** — 2026-06-27
+**Agente:** Codex
+**Modo:** SUPABASE_SCHEMA_APPLY_MVP / CONTROLLED_REMOTE_DB_WRITE / NO_APP_CODE
+**Tipo:** gate / remote-db-apply-precheck
+**Tarea:** Aplicar de forma controlada el schema MVP de Catenaccio Studio en Supabase o parar si no existe vía segura sin secretos.
+
+**Resultado:** BLOCKED — STOP_MANUAL_APPLY_REQUIRED.
+
+**Qué se hizo:** Se validó estáticamente `docs/studio/STUDIO_SUPABASE_SCHEMA_MVP.sql`: 7 enums, 6 tablas, 18 índices, 1 vista (`inventory_margins`), 6 `ENABLE ROW LEVEL SECURITY`, 6 policies owner; sin SQL destructivo activo ni secretos reales. Se creó `scripts/studio/verify_supabase_schema_mvp.sql` para verificación read-only post-apply y `docs/studio/SUPABASE_SCHEMA_APPLY_MVP_RESULT.md`.
+
+**Qué se validó:** repo limpio y sincronizado al inicio (`main`, 0 ahead/0 behind, HEAD `5216896`); Supabase CLI ausente; `psql` ausente; `.env.local` no leído ni modificado; cleanup del producto test ID 1853 documentado como completado por confirmación manual de Pablo; `agent_events.jsonl` parseable.
+
+**Qué NO se tocó:** WordPress, WooCommerce, productos reales, pedidos, clientes, pagos, plugins, temas, cPanel, Vercel, app Next.js, `.env.local`, credenciales, `docs/studio/STUDIO_SUPABASE_SCHEMA_MVP.sql`.
+
+**Siguiente paso:** Pablo aplica manualmente `docs/studio/STUDIO_SUPABASE_SCHEMA_MVP.sql` en Supabase SQL Editor y devuelve success/error; si success, ejecuta `scripts/studio/verify_supabase_schema_mvp.sql` y devuelve solo PASS/FAIL.
+**agent_events ref:** 2026-06-27T23:00:00Z (supabase_schema_apply_mvp_manual_required)
