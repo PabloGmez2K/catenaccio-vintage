@@ -626,3 +626,23 @@ Cross-referencia con `agent_events.jsonl` para detalle de eventos.
 **Siguiente paso:** Resync a servidor de 3 archivos modificados (Codex) → Pablo repite preview manual → si PASS → RELEASE_MANUAL_PABLO.  
 **agent_events ref:** 2026-06-27T16:00:00Z (theme_shadow_visual_blockers_fix)
 ---
+
+---
+**Sesión 017** — 2026-06-27
+**Agente:** Codex
+**Modo:** CPANEL_UAPI_WRITE_TO_SHADOW_ONLY / 3_FILE_RESYNC / NO_ACTIVE_SITE_WRITE
+**Tipo:** server-sync / shadow-theme / visual-fix-resync
+**Tarea:** THEME_SHADOW_VISUAL_FIX_RESYNC — resincronizar al servidor solo los 3 archivos modificados por la Sesión 016 dentro del tema sombra `catenaccio-a0-child`.
+
+**Decisiones clave:**
+- Gate Git exacto confirmado tras `git fetch`: rama `main`, working tree limpio, `main...origin/main [ahead 2]`, commits pendientes `8816843` y `4b10102`, `origin/main` inicial en `9789693`.
+- Push inicial OK: `origin/main` quedo en `4b10102`.
+- Sync remoto limitado a `public_html/wp-content/themes/catenaccio-a0-child/` y a 3 archivos: `header.php`, `assets/css/cv-a0.css`, `assets/js/cv-a0.js`.
+- Variables cPanel presentes sin imprimir valores; `CPANEL_ALLOWED_ROOT` validado como `public_html/wp-content`.
+- Se uso API2 `Fileman::savefile` y UAPI `Fileman/get_file_content` para read-back hash.
+
+**Qué se validó:** hashes local/remoto OK para los 3 archivos (`11217427cc76`, `95e766686d5f`, `07ce8a905e4a`); `style.css` remoto mantiene `Theme Name: Catenaccio A0 Child` y `Template: hello-elementor`; `hello-elementor-child` intacto por nombres, tamaños y mtime.
+**Qué NO se tocó:** tema activo `hello-elementor-child`, activación de tema, WP Admin, DB, plugins, WooCommerce settings, pagos, `wp-config.php`, `.htaccess`, uploads, `.env.local`.
+**Siguiente paso:** Pablo repite preview manual en Customizer con tema `catenaccio-a0-child`.
+**agent_events ref:** 2026-06-27T17:00:00Z (theme_shadow_visual_fix_resync)
+---
