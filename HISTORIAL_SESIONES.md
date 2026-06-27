@@ -797,3 +797,22 @@ SesiÃ³n 020B (2026-06-27, Codex): CODEX_CONTROLLED_PRODUCTION_TEST / DRAFT_ONL
 **Siguiente paso:** S022 - STUDIO_CREATE_AND_PUBLISH.
 **agent_events ref:** 2026-06-27T23:59:30Z (studio_visual_review_and_rls_grants_closed)
 ---
+
+---
+**Sesion 021C** - 2026-06-27
+**Agente:** Codex
+**Modo:** DOCS_ONLY / MANUAL_SEED_CLOSE / NO_REMOTE_WRITE
+**Tipo:** close-gate / manual-seed / docs-only
+**Tarea:** WORKSPACE_SEED_MANUAL_CLOSE - registrar el PASS manual del seed de workspace sin pedir ni registrar auth.uid.
+
+**Resultado:** COMPLETED - APPROVE_READY_FOR_S022_CREATE_AND_PUBLISH.
+
+**Que se hizo:** Se registro `WORKSPACE_SEED_MANUAL = PASS`, se creo `docs/studio/WORKSPACE_SEED_MANUAL_RESULT.md`, se marco `WORKSPACE_SEED_MANUAL` como completado en BACKLOG y se dejo S022 como NEXT / UNBLOCKED.
+
+**Que se valido:** preflight git limpio y sincronizado en `main`, HEAD `b7ea49f`; `git diff --check` PASS; `agent_events.jsonl` parseable; secret scan CLEAN; scope check CLEAN; no auth.uid real registrado.
+
+**Que NO se toco:** Supabase remoto por agente, SQL ejecutado por agente, app code, WordPress, WooCommerce, Vercel, cPanel, `.env.local`, credenciales, auth.uid.
+
+**Siguiente paso:** S022 - STUDIO_CREATE_AND_PUBLISH.
+**agent_events ref:** 2026-06-27T23:59:45Z (workspace_seed_manual_closed)
+---
