@@ -105,3 +105,24 @@ precios, pedidos, proveedores sensibles). Solo señales saneadas. Ver `DATA_AND_
 - privacy_level: INTERNAL_ONLY
 - Estado: CANDIDATE
 - Siguiente acción: El patrón es candidato a lafabrica solo después de validar el shadow release completo (A0 RELEASE exitoso).
+
+---
+
+### SLT-004 — cPanel shadow sync write path quirks
+
+- Fecha: 2026-06-27
+- Proyecto: catenaccio-vintage
+- Sesion/bloque: Sesion 014-sync — THEME_SHADOW_SYNC
+- project_value: Tema sombra A0 sincronizado en servidor con verificacion hash local/remoto y sin tocar el tema activo.
+- lafabrica: En cPanel Fileman, no asumir que todos los endpoints de escritura son equivalentes. `save_file_content` puede normalizar contenido PHP/HTML en read-back y `upload_files` puede no sobrescribir archivos existentes; para shadow sync archivo-a-archivo, validar endpoint con hash read-back y mantener allowlist de path antes de escribir.
+- brain:
+  - evidence: Sync real de tema WordPress en hosting compartido sin SSH, con recuperacion de un mismatch de hash sin rollback destructivo.
+  - skills: Operacion segura de APIs de hosting, guardrails de filesystem, verificacion determinista por hash y manejo de fallos parciales.
+  - service_angle: Servicio de migracion/estabilizacion WordPress en hosting compartido sin SSH.
+  - content_angle: "Deploy seguro de un tema WordPress sin SSH: hashes, carpeta sombra y guardrails".
+  - portfolio_asset: Caso de estudio de shadow release A0 con cPanel API y zero-write al tema activo.
+- future_product: Checklist reusable para conectores de deploy en hosting compartido dentro de lafabrica/Cauvera.
+- no_copy: Credenciales cPanel, valores de entorno, dominio/hosting especifico, rutas privadas locales.
+- privacy_level: INTERNAL_ONLY
+- Estado: CANDIDATE
+- Siguiente accion: Revisar tras THEME_SHADOW_VISUAL_VALIDATION; si el release completo pasa, promover a patron operacional reusable.

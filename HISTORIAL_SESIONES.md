@@ -567,3 +567,23 @@ Cross-referencia con `agent_events.jsonl` para detalle de eventos.
 **Siguiente paso:** Sesión 014 — THEME_SHADOW_SYNC: subir `catenaccio-a0-child/` al servidor vía cPanel UAPI write (Fileman/save_file_content) o ZIP manual Pablo.  
 **agent_events ref:** 2026-06-24T00:00:00Z (theme_shadow_complete_blockers)
 ---
+
+---
+**Sesión 014-sync** — 2026-06-27
+**Agente:** Codex
+**Modo:** CPANEL_UAPI_WRITE_TO_SHADOW_ONLY / NO_ACTIVE_SITE_WRITE
+**Tipo:** AGENT_REQUIRED / server-sync / shadow-theme
+**Tarea:** THEME_SHADOW_SYNC — sincronizar el paquete local `catenaccio-a0-child/` al servidor como tema sombra inactivo.
+
+**Decisiones clave:**
+- Se ejecuto el sync solo bajo `public_html/wp-content/themes/catenaccio-a0-child/`.
+- No se activo el tema y no se uso WordPress Admin.
+- `HEAD == origin/main` al inicio, con `e634a4a` como commit vigente. El prompt esperaba `cb8703a`, pero la diferencia era un commit documental posterior (`docs/meta/LAFABRICA_ADOPTION.md`) ya sincronizado en `origin/main`, sin divergencia.
+- `save_file_content` produjo mismatch determinista en `header.php` por normalizacion del `<meta charset>` en read-back; `upload_files` no sobrescribio existentes. El sync final verificado uso API2 `Fileman::savefile` y hash read-back.
+- Se ajusto localmente `header.php` a `<meta charset="utf-8">` para hash determinista. Cambio limitado al tema sombra inactivo.
+
+**Qué se validó:** repo limpio/sin divergencia antes del sync; paquete local con exactamente 9 archivos; `style.css` local/remoto con `Theme Name: Catenaccio A0 Child` y `Template: hello-elementor`; `.env.local` ignorado y no trackeado; variables cPanel presentes sin imprimir valores; UAPI read-only OK; 9 archivos remotos con hashes local/remoto OK; `hello-elementor-child` intacto (nombres, tamaños y mtime iguales).
+**Qué NO se tocó:** tema activo `hello-elementor-child`, WordPress Admin, activacion de tema, DB, plugins, `wp-config.php`, `.htaccess`, uploads, WooCommerce settings, pagos, `.env.local`. No se hicieron deletes, chmod, rename ni move.
+**Siguiente paso:** THEME_SHADOW_VISUAL_VALIDATION con Antigravity.
+**agent_events ref:** 2026-06-27T00:00:00Z (theme_shadow_sync_completed)
+---
