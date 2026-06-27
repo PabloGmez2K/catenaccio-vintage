@@ -736,3 +736,21 @@ SesiÃ³n 020B (2026-06-27, Codex): CODEX_CONTROLLED_PRODUCTION_TEST / DRAFT_ONL
 
 **Siguiente paso:** Pablo aplica manualmente `docs/studio/STUDIO_SUPABASE_SCHEMA_MVP.sql` en Supabase SQL Editor y devuelve success/error; si success, ejecuta `scripts/studio/verify_supabase_schema_mvp.sql` y devuelve solo PASS/FAIL.
 **agent_events ref:** 2026-06-27T23:00:00Z (supabase_schema_apply_mvp_manual_required)
+
+---
+**Sesión 020D** — 2026-06-27
+**Agente:** Codex
+**Modo:** DOCS_ONLY / MANUAL_APPLY_CLOSE / NO_REMOTE_WRITE
+**Tipo:** close-gate / operator-confirmed-manual-apply
+**Tarea:** Cerrar documentalmente `SUPABASE_SCHEMA_APPLY_MVP` tras aplicación manual por Pablo en Supabase SQL Editor.
+
+**Resultado:** COMPLETED — APPROVE_READY_FOR_S021_MVP_SCAFFOLD.
+
+**Qué se hizo:** Se registró que Pablo aplicó manualmente `docs/studio/STUDIO_SUPABASE_SCHEMA_MVP.sql` en Supabase SQL Editor con resultado SUCCESS y ejecutó manualmente `scripts/studio/verify_supabase_schema_mvp.sql` con resultado `OPERATOR_CONFIRMED_PASS`. Se actualizó `docs/studio/SUPABASE_SCHEMA_APPLY_MVP_RESULT.md`, BACKLOG, CONTEXTO, HISTORIAL y `agent_events.jsonl`.
+
+**Qué se validó:** preflight git limpio en `main`, 0 ahead/0 behind, HEAD `c9f78f7`; `git fetch --dry-run` sin divergencia; agent_events JSONL parseable; secret scan sobre diff sin secretos reales; scope limitado a los archivos permitidos.
+
+**Qué NO se tocó:** Supabase remoto por agente, SQL ejecutado por agente, Supabase CLI, psql, WordPress, WooCommerce, productos WC, pedidos, clientes, pagos, Vercel, cPanel, app Next.js, `.env.local`, credenciales, SQL canónico y script verificador.
+
+**Siguiente paso:** S021 — STUDIO_MVP_SCAFFOLD.
+**agent_events ref:** 2026-06-27T23:30:00Z (supabase_schema_apply_mvp_manual_confirmed)

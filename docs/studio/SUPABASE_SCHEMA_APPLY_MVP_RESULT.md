@@ -108,3 +108,17 @@ No realizada:
 Pablo aplica manualmente `docs/studio/STUDIO_SUPABASE_SCHEMA_MVP.sql` en Supabase SQL Editor y devuelve el resultado visible.
 
 Si el apply y la verificacion read-only pasan, cerrar el gate con `APPROVE_READY_FOR_S021_MVP_SCAFFOLD` y abrir S021 - `STUDIO_MVP_SCAFFOLD`.
+
+---
+
+## Manual apply confirmation - 2026-06-27
+
+- Applied by: Pablo, manually in Supabase SQL Editor.
+- Canonical SQL: `docs/studio/STUDIO_SUPABASE_SCHEMA_MVP.sql`.
+- Apply result: SUCCESS.
+- Verify script: `scripts/studio/verify_supabase_schema_mvp.sql`.
+- Verify result: OPERATOR_CONFIRMED_PASS.
+- Evidence: Pablo reported "Todo ha pasado"; screenshot showed apply success and indexes check `18 / PASS`.
+- Secrets shared: NO.
+- Agent executed SQL: NO.
+- Status: APPROVE_READY_FOR_S021_MVP_SCAFFOLD.
