@@ -587,3 +587,22 @@ Cross-referencia con `agent_events.jsonl` para detalle de eventos.
 **Siguiente paso:** THEME_SHADOW_VISUAL_VALIDATION con Antigravity.
 **agent_events ref:** 2026-06-27T00:00:00Z (theme_shadow_sync_completed)
 ---
+
+---
+**Sesión 015** — 2026-06-27  
+**Agente:** Antigravity  
+**Modo:** ANTIGRAVITY_VISUAL_READONLY  
+**Tipo:** READ_ONLY / shadow-theme-validation  
+**Tarea:** Validar visualmente el tema sombra inactivo `catenaccio-a0-child` ya sincronizado en servidor, sin activarlo.
+
+**Decisiones clave:**
+- El Customizer de WordPress (`wp-admin/customize.php?theme=catenaccio-a0-child`) no se pudo cargar desde el navegador headless por bloqueo del firewall del proveedor de hosting Raiola Networks (error de seguridad por petición de login incorrecta).
+- El parámetro de preview en la URL del frontend `?theme=catenaccio-a0-child` es ignorado por WordPress para usuarios no autenticados, sirviendo el tema activo por defecto (`hello-elementor-child`).
+- Se confirmó mediante llamadas directas HTTPS (200 OK) que los archivos del tema sombra (`style.css` y `assets/css/cv-a0.css`) están correctamente subidos e intactos en el servidor.
+- Veredicto: **STOP**. El agente no puede previsualizar de forma segura el tema sombra sin activarlo. La validación visual final debe ser realizada manualmente por el operador (Pablo) desde su navegador autenticado.
+
+**Qué se validó:** El repositorio local está limpio (HEAD esperado `9789693`). Los archivos del tema sombra existen y se acceden en el servidor. Capturadas capturas de pantalla de la denegación del Customizer y de la home.
+**Qué NO se tocó:** tema activo, activación de tema, WordPress Admin settings, Elementor, plugins, WooCommerce settings, pagos, DB, cPanel, archivos servidor, .env.local.
+**Siguiente paso:** Pablo realiza la validación visual manualmente usando customize URL en su navegador y procede al release manual.
+**agent_events ref:** 2026-06-27T13:30:00Z (theme_shadow_validation_blocked)
+---

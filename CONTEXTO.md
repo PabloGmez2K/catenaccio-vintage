@@ -58,6 +58,8 @@ Hipótesis no verificadas del SEED:
 <!-- APPEND AQUÍ — no editar entradas anteriores -->
 <!-- Formato: Sesión N (YYYY-MM-DD, Agente): MODO / tipo. [Qué se hizo]. [Qué se validó]. [Qué NO se tocó]. -->
 
+Sesión 015 (2026-06-27, Antigravity): ANTIGRAVITY_VISUAL_READONLY / shadow-theme-validation. [Intentado validar visualmente el tema sombra catenaccio-a0-child en el servidor; el Customizer/admin fue bloqueado por firewall de Raiola y el preview frontend fue ignorado por WP para visitantes no autenticados]. [Se validó que el repositorio local está limpio, los archivos del tema sombra existen y responden correctamente en el servidor bajo el path del child theme]. [No se tocó el tema activo, configuración de WordPress, base de datos, cPanel ni plugins].
+
 Sesión 014 (2026-06-24, Claude Code Sonnet): LITE / docs — meta-alineación. Absorbidas reglas RULE-01 a RULE-05 y DEC-PABLO-01 a DEC-PABLO-03 del Operating Brain; patrones PATTERN-05 a PATTERN-09 de lafabrica. Creado AGENT_EXPERIENCE_LEDGER.md. Actualizados ORCHESTRATOR.md §19, AGENTS.md, DECISIONS.md DEC-12, BACKLOG.md, CONTEXTO.md. No se tocó producción, WordPress, hosting, código PHP ni ningún archivo de datos privados. Siguiente: THEME_SHADOW_SYNC (Sesión 015) — sesión técnica de sync con acceso cPanel temporal.
 
 ---
