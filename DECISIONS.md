@@ -397,3 +397,46 @@ Incluir `owner_id` en el modelo de producto de Studio (aunque sea siempre Pablo 
 
 **No activar PEND-2 sin revisión explícita con evidencia de las gates.** Ver BACKLOG.md → LATER → MARKETPLACE_NORTH_STAR_VALIDATION.
 
+---
+
+### DEC-13 — RUTA D Híbrida: Catenaccio Studio primero + WooCommerce bridge + frontend nuevo posterior
+**Fecha:** 2026-06-27 (Sesión 018 — STRATEGIC_ROADMAP_OPUS)
+**Tipo:** estratégica
+**Quién aprobó:** Agente (Opus 4.8) — pendiente confirmación literal de Pablo
+**Estado:** APROBADA POR EL AGENTE — gate de confirmación de Pablo abierto
+**Veredicto:** `APPROVE_ROUTE_HYBRID_STUDIO_WOO_BRIDGE`
+
+**Decisión:**
+Reorientar la hoja de ruta de Catenaccio Vintage a la RUTA D: construir primero **Catenaccio Studio** (backoffice/PIM propio sobre Supabase + Next.js/Vercel) que publica a **WooCommerce** como borrador vía REST API (puente DEC-9). La tienda pública y el checkout siguen en WooCommerce/WooPayments. El storefront público en Next.js queda diferido hasta tracción.
+
+**Qué mata/pausa:**
+- Línea de release A0 (tema sombra `catenaccio-a0-child`) → **CONGELADA** (confirma `KILL_CURRENT_A0_RELEASE_LINE` del orquestador). No se borra: referencia/aprendizaje. No se vuelve a sincronizar ni a iterar.
+- Inversión en reemplazar Elementor a corto plazo → **PAUSADA**.
+
+**Qué mantiene:**
+- WooCommerce + WooPayments (tienda + checkout + SEO + dominio). Tema activo `hello-elementor-child` intacto.
+- DEC-9 (acceso sin SSH, Application Password, DRAFT_ONLY) como canal del puente.
+
+**Qué construye primero:**
+- MVP de Catenaccio Studio (track B1 de DEC-8, nunca construido). Ver `docs/strategy/CATENACCIO_STUDIO_TARGET.md`.
+
+**Razonamiento:**
+1. La causa raíz de la fricción de Pablo es el **backoffice** (declarada en Sesión 005b), no el frontend. Las sesiones 011–017 invirtieron ~7 ciclos en el frontend A0 — se pulió lo que no dolía.
+2. **Elementor Pro caduca pero NO rompe la tienda** (los widgets ya colocados siguen renderizando; solo se pierden updates/soporte). El "deadline 2026-07-01" es blando, no de rotura → pausar A0 es seguro.
+3. Es la única ruta que no toca producción, ataca la causa raíz, arranca el stack propio por la capa de menor riesgo (herramienta interna), es acumulativa hacia el sistema propio y evita el big bang.
+
+**Alternativas descartadas:**
+- RUTA A (reparar A0): frontend ≠ causa raíz; KILL ya emitido; sin urgencia real.
+- RUTA C (Supabase+Vercel directo): big bang; mata SEO/checkout; WooPayments no soporta headless.
+- RUTA E (parar): su espíritu (vender manual como puente) se absorbe, pero "parar todo" no construye el sistema propio.
+- RUTA B (WC "temporal"): subsumida en D con semántica corregida (WC se mantiene como raíl de pago, no es de quita inminente).
+
+**Implicaciones:**
+- Supabase = fuente de verdad del inventario. WooCommerce = destino de publicación.
+- Vercel entra YA para la app interna (Studio); el storefront público es DIFERIDO (gates de tracción).
+- Próximas sesiones: S019 (modelo datos Supabase), S020 (contrato puente WC), S021 (scaffold MVP), S022 (alta+publicación).
+- Gate de tokens: revisión fría (RULE-01) a 3 sesiones de impl. sin publicar 1 camiseta E2E; STOP_AND_REPLAN a ~4 sesiones sin MVP usable.
+- DEC-8 no se contradice: se ejecuta su track B1 y se reclasifica A0 de release a referencia.
+
+**Documentos:** `docs/strategy/CATENACCIO_STRATEGIC_ROADMAP.md`, `docs/strategy/CATENACCIO_STUDIO_TARGET.md`, `docs/strategy/MIGRATION_OPTIONS_WORDPRESS_SUPABASE_VERCEL.md`.
+

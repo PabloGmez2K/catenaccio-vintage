@@ -58,6 +58,18 @@ Hipótesis no verificadas del SEED:
 <!-- APPEND AQUÍ — no editar entradas anteriores -->
 <!-- Formato: Sesión N (YYYY-MM-DD, Agente): MODO / tipo. [Qué se hizo]. [Qué se validó]. [Qué NO se tocó]. -->
 
+## Fase actual (actualizado 2026-06-27 — Sesión 018 / DEC-13)
+
+**Fase:** Redirección estratégica → Studio-first
+**Desde:** 2026-06-27
+**Descripción:** Sesión 018 (Opus) emite `APPROVE_ROUTE_HYBRID_STUDIO_WOO_BRIDGE` (RUTA D). Se construye **Catenaccio Studio** (backoffice propio: Supabase + Next.js/Vercel) que publica a WooCommerce como borrador vía API. WooCommerce/WooPayments se mantienen como tienda+checkout. La línea A0 (tema sombra) se **congela** como referencia (no se borra, no se activa). Elementor Pro se deja caducar (deadline blando: no rompe la tienda). Ver `docs/strategy/CATENACCIO_STRATEGIC_ROADMAP.md`.
+
+**Siguiente paso recomendado (2026-06-27):** Pablo confirma DEC-13 (gate RULE-02). Tras confirmación: S019 STUDIO_DATA_MODEL (esquema Supabase). En paralelo Pablo: revocar token cPanel S017, crear cuentas Supabase+Vercel, seguir vendiendo manual por WP Admin como puente.
+
+**Gate de tokens:** revisión fría (RULE-01) a 3 sesiones de impl. sin publicar 1 camiseta E2E; STOP_AND_REPLAN a ~4 sesiones sin MVP usable.
+
+Sesión 018 (2026-06-27, Claude Code Opus 4.8): STRATEGIC / DOCS_ONLY — STRATEGIC_ROADMAP_OPUS. [Decidida la hoja de ruta 30/60/90: RUTA D híbrida. Creados `docs/strategy/CATENACCIO_STRATEGIC_ROADMAP.md`, `CATENACCIO_STUDIO_TARGET.md`, `MIGRATION_OPTIONS_WORDPRESS_SUPABASE_VERCEL.md`. DEC-13 registrada. A0 congelado. Studio = producto a construir primero (track B1 de DEC-8, nunca construido). Insight clave: la fricción real es el backoffice, no el frontend; Elementor Pro caduca pero no rompe la tienda]. [Se validó: repo limpio, sin divergencia remota (0/0), lectura proporcional del repo, 5 rutas evaluadas]. [No se tocó WordPress, WP Admin, cPanel, servidor, DB, plugins, temas, pagos, código del tema sombra ni `.env.local`; no se hizo deploy ni se creó código de Studio].
+
 Sesión 015 (2026-06-27, Antigravity): ANTIGRAVITY_VISUAL_READONLY / shadow-theme-validation. [Intentado validar visualmente el tema sombra catenaccio-a0-child en el servidor; el Customizer/admin fue bloqueado por firewall de Raiola y el preview frontend fue ignorado por WP para visitantes no autenticados]. [Se validó que el repositorio local está limpio, los archivos del tema sombra existen y responden correctamente en el servidor bajo el path del child theme]. [No se tocó el tema activo, configuración de WordPress, base de datos, cPanel ni plugins].
 
 Sesión 014 (2026-06-24, Claude Code Sonnet): LITE / docs — meta-alineación. Absorbidas reglas RULE-01 a RULE-05 y DEC-PABLO-01 a DEC-PABLO-03 del Operating Brain; patrones PATTERN-05 a PATTERN-09 de lafabrica. Creado AGENT_EXPERIENCE_LEDGER.md. Actualizados ORCHESTRATOR.md §19, AGENTS.md, DECISIONS.md DEC-12, BACKLOG.md, CONTEXTO.md. No se tocó producción, WordPress, hosting, código PHP ni ningún archivo de datos privados. Siguiente: THEME_SHADOW_SYNC (Sesión 015) — sesión técnica de sync con acceso cPanel temporal.

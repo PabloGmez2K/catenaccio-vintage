@@ -646,3 +646,24 @@ Cross-referencia con `agent_events.jsonl` para detalle de eventos.
 **Siguiente paso:** Pablo repite preview manual en Customizer con tema `catenaccio-a0-child`.
 **agent_events ref:** 2026-06-27T17:00:00Z (theme_shadow_visual_fix_resync)
 ---
+
+---
+**Sesión 018** — 2026-06-27
+**Agente:** Claude Code (Opus 4.8)
+**Modo:** STRATEGIC / DOCS_ONLY — STRATEGIC_ROADMAP_OPUS
+**Tipo:** strategic
+**Tarea:** Decidir la hoja de ruta estratégica 30/60/90 días de Catenaccio Vintage tras el `KILL_CURRENT_A0_RELEASE_LINE` del orquestador y la renovación de hosting/dominio.
+
+**Decisiones clave:**
+- **Veredicto: `APPROVE_ROUTE_HYBRID_STUDIO_WOO_BRIDGE` (RUTA D).** Construir Catenaccio Studio (backoffice propio Supabase + Next.js/Vercel) primero; WooCommerce/WooPayments se mantienen como tienda+checkout; Studio publica borradores vía WC API (puente DEC-9). Storefront público en Next.js diferido hasta tracción. DEC-13 registrada.
+- **A0 CONGELADO** (no borrado): `catenaccio-a0-child` queda como referencia/aprendizaje y contingencia. Bucle de validación visual detenido (consumió ~7 sesiones sin converger — RULE-01).
+- **Insight 1:** la causa raíz de la fricción de Pablo es el **backoffice** (Sesión 005b), no el frontend. Las sesiones 011–017 pulieron el frontend que no dolía.
+- **Insight 2:** Elementor Pro caduca pero **no rompe la tienda** (los widgets ya colocados siguen renderizando; deadline blando). Esto des-urgentiza y hace segura la pausa de A0. No se renueva.
+- **Arquitectura:** Supabase = fuente de verdad del inventario; WooCommerce = destino de publicación; Vercel = app interna YA, storefront público DESPUÉS.
+- **Token budget:** Opus (estrategia/arquitectura/gates), Sonnet (grueso impl. + docs), Codex (código mecánico con spec), Antigravity (QA visual del Studio — ahora viable en Vercel, sin firewall Raiola). Gate duro: revisión fría a 3 sesiones sin publicar 1 camiseta E2E; STOP_AND_REPLAN a ~4 sesiones sin MVP usable.
+
+**Qué se validó:** repo limpio, sin divergencia remota (`0/0` ahead/behind tras `git fetch`); lectura proporcional (CONTEXTO, DECISIONS, BACKLOG, STOCK_OPERATIONS_MODEL, LAFABRICA_ADOPTION, THEME_SHADOW_VISUAL_FIX_RESYNC, HISTORIAL tail); 5 rutas (A–E) evaluadas y descartadas las 4 alternativas con razón explícita.
+**Qué NO se tocó:** WordPress, WP Admin, cPanel, servidor, DB, plugins, temas (`catenaccio-a0-child` y `hello-elementor-child` intactos), WooCommerce settings, pagos, `.env.local`; no deploy; no se creó código de Studio (solo documentación estratégica); no se creó Supabase ni Vercel.
+**Siguiente paso:** Pablo confirma DEC-13 → S019 STUDIO_DATA_MODEL (esquema Supabase). Push pendiente de OK explícito de Pablo (cierre documental).
+**agent_events ref:** 2026-06-27T19:00:00Z (strategic_roadmap_opus_route_d)
+---

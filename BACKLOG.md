@@ -9,6 +9,26 @@ Actualizar al cierre de cada sesión. Los ítems completados se mueven a DONE o 
 
 ## NOW — Esta semana / próxima sesión
 
+### 🧭 REDIRECCIÓN ESTRATÉGICA — Sesión 018 (2026-06-27, Opus) — DEC-13
+
+**Veredicto: `APPROVE_ROUTE_HYBRID_STUDIO_WOO_BRIDGE` (RUTA D).** Se construye Catenaccio Studio primero; WooCommerce se mantiene como tienda/checkout; A0 se congela. Ver `docs/strategy/CATENACCIO_STRATEGIC_ROADMAP.md`. **Pendiente: confirmación literal de Pablo.**
+
+- [ ] **PABLO_CONFIRM_ROUTE_D** — Pablo confirma o corrige el veredicto DEC-13 (gate RULE-02). Sin confirmación, las sesiones S019+ no arrancan. (Acción Pablo)
+- [ ] **A0_FREEZE_FORMAL** — congelar formalmente la línea A0: tag de git en el estado actual de `catenaccio-a0-child`, nota de FREEZE en sus docs, mover tareas A0 a § FROZEN. No volver a sincronizar. (Agente Sonnet, 1 sesión corta)
+- [ ] **CPANEL_TOKEN_REVOCATION** — Pablo revoca el token cPanel de Sesión 017. Ya no hace falta acceso al servidor para la nueva dirección. (Acción Pablo, sin agente)
+- [ ] **SUPABASE_VERCEL_ACCOUNTS** — Pablo crea cuenta Supabase + proyecto Vercel (tier gratuito, coste $0 MVP). Prerequisito de S019/S021. (Acción Pablo)
+- [ ] **S019 — STUDIO_DATA_MODEL** — esquema Supabase del modelo de `STOCK_OPERATIONS_MODEL.md §3`: tablas, enums 11 estados, RLS, bucket imágenes, `owner_id`. (Sonnet, review Opus)
+- [ ] **S020 — STUDIO_WC_BRIDGE_CONTRACT** — contrato Studio→WooCommerce: endpoints, mapeo `meta_data`, resolución term IDs, plan `WC_API_WRITE_ACCESS_TEST`. Reusa DEC-9. (Opus/Sonnet)
+- [ ] **S021 — STUDIO_MVP_SCAFFOLD** — app Next.js + Supabase en Vercel; auth Pablo; vista inventario. (Sonnet/Codex)
+- [ ] **S022 — STUDIO_CREATE_AND_PUBLISH** — formulario alta `§3` + "Sugerir con Claude" + botón "Crear borrador en WC". (Sonnet/Codex)
+- [ ] **GATE_STUDIO_MVP** — Pablo publica 1 camiseta real E2E por Studio → luego 5–10. Revisión fría (RULE-01). STOP_AND_REPLAN si no hay MVP usable a ~4 sesiones.
+
+> **Mientras tanto:** Pablo sigue vendiendo manualmente por WP Admin como ahora (puente operativo inmediato). No esperar a Studio para vender.
+
+---
+
+### Histórico NOW previo (track A0+B1 original — referencia)
+
 - [x] **TARGET_OPTIONS APROBADO** — 2026-06-13 (Sesión 005d). Operador aprueba A0 + B1. Marketplace = NORTH_STAR / DEFER. Ver `docs/discovery/TARGET_OPTIONS.md`.
 - [x] **CMS_API_ACCESS_MODEL_READONLY** — modelo de acceso sin SSH definido en `docs/operations/ACCESS_MODEL_NO_SSH.md` (Sesión 006). Guía paso a paso lista en §6.
 - [x] **B1_STOCK_OPERATIONS_MODEL** — modelo operativo de stock definido en `docs/operations/STOCK_OPERATIONS_MODEL.md` (Sesión 006c). Contexto capturado para B1 — no bloquea A0 ni la activación del acceso.
@@ -64,6 +84,17 @@ Actualizar al cierre de cada sesión. Los ítems completados se mueven a DONE o 
 **Operación:**
 - [ ] **PERFORMANCE_CACHE_HOSTING_DECISION** — evaluar si Raiola Inicio SSD 2.0 es suficiente con 100+ productos. Revisar opciones de upgrade o cambio de plan.
 - [ ] Subir 10-20 productos usando workflow AI-first (paralelo al desarrollo de Studio).
+
+---
+
+## FROZEN — Congelado por DEC-13 (Sesión 018) — no borrar, no iterar
+
+> La línea A0 (tema sombra) se congela como referencia/aprendizaje, **no** como release activable. Confirma `KILL_CURRENT_A0_RELEASE_LINE`. Se descongela solo si Elementor Pro rompe algo real en producción. Ver `docs/strategy/CATENACCIO_STRATEGIC_ROADMAP.md §3`.
+
+- [~] **THEME_SHADOW_VISUAL_VALIDATION** — CONGELADO. El bucle de preview manual + resync consumió ~7 sesiones sin converger (RULE-01).
+- [~] **RELEASE_MANUAL_PABLO** (activación del tema sombra) — CONGELADO. No se activa `catenaccio-a0-child`.
+- [~] **Track 0 (continuidad Elementor)** — CONGELADO en su mayor parte. Elementor Pro caduca pero no rompe la tienda (deadline blando). Excepciones que siguen siendo quickwins independientes de A0 y que Pablo puede hacer cuando quiera: habilitar WPS Hide Login (PROB-12), investigar webhooks PayPal (PROB-14), ticket OPcache a Raiola (PROB-09).
+- [x] **catenaccio-a0-child** — conservado en el repo y en el servidor (carpeta sombra inactiva). Es la librería ya capturada de la lógica crítica del tema activo (IVA 21%, URLs limpias, breadcrumbs, carrusel, RankMath, buscador AJAX) y la contingencia escrita si A0 hace falta.
 
 ---
 
