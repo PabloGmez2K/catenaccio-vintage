@@ -402,8 +402,8 @@ Incluir `owner_id` en el modelo de producto de Studio (aunque sea siempre Pablo 
 ### DEC-13 — RUTA D Híbrida: Catenaccio Studio primero + WooCommerce bridge + frontend nuevo posterior
 **Fecha:** 2026-06-27 (Sesión 018 — STRATEGIC_ROADMAP_OPUS)
 **Tipo:** estratégica
-**Quién aprobó:** Agente (Opus 4.8) — pendiente confirmación literal de Pablo
-**Estado:** APROBADA POR EL AGENTE — gate de confirmación de Pablo abierto
+**Quién aprobó:** Pablo (confirmación literal 2026-06-27) + Agente Opus 4.8 (emisor)
+**Estado:** ✅ APROBADA — confirmación literal de Pablo 2026-06-27
 **Veredicto:** `APPROVE_ROUTE_HYBRID_STUDIO_WOO_BRIDGE`
 
 **Decisión:**

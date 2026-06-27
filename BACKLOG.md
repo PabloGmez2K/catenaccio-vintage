@@ -13,11 +13,11 @@ Actualizar al cierre de cada sesión. Los ítems completados se mueven a DONE o 
 
 **Veredicto: `APPROVE_ROUTE_HYBRID_STUDIO_WOO_BRIDGE` (RUTA D).** Se construye Catenaccio Studio primero; WooCommerce se mantiene como tienda/checkout; A0 se congela. Ver `docs/strategy/CATENACCIO_STRATEGIC_ROADMAP.md`. **Pendiente: confirmación literal de Pablo.**
 
-- [ ] **PABLO_CONFIRM_ROUTE_D** — Pablo confirma o corrige el veredicto DEC-13 (gate RULE-02). Sin confirmación, las sesiones S019+ no arrancan. (Acción Pablo)
+- [x] **PABLO_CONFIRM_ROUTE_D** — ✅ COMPLETADO 2026-06-27. Pablo confirma DEC-13 `APPROVE_ROUTE_HYBRID_STUDIO_WOO_BRIDGE`. S019+ desbloqueado. DEC-13 actualizada a APROBADA. (Acción Pablo)
 - [ ] **A0_FREEZE_FORMAL** — congelar formalmente la línea A0: tag de git en el estado actual de `catenaccio-a0-child`, nota de FREEZE en sus docs, mover tareas A0 a § FROZEN. No volver a sincronizar. (Agente Sonnet, 1 sesión corta)
 - [ ] **CPANEL_TOKEN_REVOCATION** — Pablo revoca el token cPanel de Sesión 017. Ya no hace falta acceso al servidor para la nueva dirección. (Acción Pablo, sin agente)
 - [ ] **SUPABASE_VERCEL_ACCOUNTS** — Pablo crea cuenta Supabase + proyecto Vercel (tier gratuito, coste $0 MVP). Prerequisito de S019/S021. (Acción Pablo)
-- [ ] **S019 — STUDIO_DATA_MODEL** — esquema Supabase del modelo de `STOCK_OPERATIONS_MODEL.md §3`: tablas, enums 11 estados, RLS, bucket imágenes, `owner_id`. (Sonnet, review Opus)
+- [x] **S019 — STUDIO_DATA_MODEL** — ✅ COMPLETADO 2026-06-27 (Sonnet). Schema Supabase MVP definido: 6 tablas, 7 enums, índices, triggers, vista de márgenes, RLS. Capa genérica (reutilizable lafabrica) + extensión Catenaccio separadas. AI-first model documentado. WC bridge preparado. Ver `docs/studio/STUDIO_DATA_MODEL.md` + `STUDIO_SUPABASE_SCHEMA_MVP.sql`. Veredicto: `APPROVE_READY_FOR_S020_WC_BRIDGE_CONTRACT`.
 - [ ] **S020 — STUDIO_WC_BRIDGE_CONTRACT** — contrato Studio→WooCommerce: endpoints, mapeo `meta_data`, resolución term IDs, plan `WC_API_WRITE_ACCESS_TEST`. Reusa DEC-9. (Opus/Sonnet)
 - [ ] **S021 — STUDIO_MVP_SCAFFOLD** — app Next.js + Supabase en Vercel; auth Pablo; vista inventario. (Sonnet/Codex)
 - [ ] **S022 — STUDIO_CREATE_AND_PUBLISH** — formulario alta `§3` + "Sugerir con Claude" + botón "Crear borrador en WC". (Sonnet/Codex)

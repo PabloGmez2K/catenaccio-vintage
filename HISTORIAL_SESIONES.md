@@ -32,6 +32,32 @@ Cross-referencia con `agent_events.jsonl` para detalle de eventos.
 <!-- APPEND ENTRADAS AQUÍ — no modificar lo de arriba -->
 
 ---
+**Sesión 019** — 2026-06-27  
+**Agente:** Claude Code (Sonnet)  
+**Modo:** LOCAL_SCHEMA_DESIGN_ONLY / DOCS_AND_SQL_PLAN / NO_REMOTE_WRITE  
+**Tipo:** strategic / data-model-design  
+**Tarea:** Diseñar el modelo de datos MVP de Catenaccio Studio en Supabase/Postgres. Separar capa genérica (reutilizable por lafabrica) de extensión específica Catenaccio. AI-first model. Preparar bridge WooCommerce.
+
+**Decisiones clave:**
+- Schema Supabase MVP definido: 6 tablas, 7 enums, 15 índices, triggers updated_at, vista inventory_margins, RLS completo.
+- Capa genérica: workspaces, inventory_items, ai_suggestions, item_lifecycle_events, media_assets.
+- Capa específica Catenaccio: football_shirt_details (1:1 con inventory_items), con term IDs de WC y display cache.
+- AI-first: ai_suggestions versionadas (versión 1, 2… tras rechazos), item_lifecycle_events con triggered_by ('pablo'/'agente'/'sistema'), input_context JSONB en ai_suggestions para reproducibilidad.
+- Imágenes MVP: Opción A (carpeta_local + photo_status). Supabase Storage diferido (Opción C).
+- WC bridge preparado: campos wc_product_id, wc_status, wc_error, wc_payload_snapshot en inventory_items. Mapeo meta_data documentado (liga/equipo/temporada → term IDs; talla/condicion → strings directos).
+- Margenes calculados en vista, no columnas (evita inconsistencias).
+- RLS MVP: `auth.uid() = owner_id` (simple, correcto para single-user). workspace_members diferido.
+- Sin variantes (cada camiseta vintage es única — 1 item = 1 fila).
+- DEC-13 actualizada a APROBADA — confirmación literal de Pablo 2026-06-27.
+- PABLO_CONFIRM_ROUTE_D cerrado.
+
+**Qué se validó:** git status limpio. git diff --check OK. Sin secretos. Sin llamadas remotas. SQL estático revisado (PKs, owner_id en todas las tablas, FK, enums, índices, RLS). Markdown sin bloques rotos. 5 documentos creados, 4 docs operativos actualizados.  
+**Qué NO se tocó:** WordPress, WP Admin, cPanel, APIs externas, Supabase remoto, Vercel, DB producción, plugins, temas activos, pagos, .env.local. No se creó app Next.js. No se hizo deploy.  
+**Siguiente paso:** S020 — STUDIO_WC_BRIDGE_CONTRACT. Prerequisitos: Pablo crea cuenta Supabase + Vercel (tier gratuito). Pablo revoca token cPanel de S017.  
+**agent_events ref:** 2026-06-27T20:00:00Z (studio_data_model_designed)
+---
+
+---
 **Sesión 0** — 2026-06-06  
 **Agente:** lafabrica-template  
 **Modo:** LITE  
