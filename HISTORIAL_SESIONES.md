@@ -58,6 +58,29 @@ Cross-referencia con `agent_events.jsonl` para detalle de eventos.
 ---
 
 ---
+**Sesión 020** — 2026-06-27  
+**Agente:** Claude Code (Sonnet)  
+**Modo:** DOCS_ONLY / CONTRACT_DESIGN / NO_REMOTE_WRITE  
+**Tipo:** strategic / contract-design  
+**Tarea:** Diseñar el contrato técnico completo del puente Catenaccio Studio → WooCommerce. Definir autenticación, endpoints, payload exacto, mapeo meta_data, resolución de term IDs, idempotencia, error handling y plan de test controlado. Registrar DEC-14.
+
+**Decisiones clave:**
+- DEC-14 registrada: DRAFT_ONLY hardcoded, Application Password / Basic Auth / shop_manager, meta_data ACF (no attributes[]), idempotencia por wc_product_id IS NULL, PATTERN-08 activo, cPanel token DEFERRED_BY_OPERATOR.
+- Payload exacto definido: status="draft" fijo, meta_data con liga/equipo/ano_temporada (term IDs) + talla/condicion (strings directos) + descripcion_del_producto.
+- Term IDs confirmados del probe S007: pa_liga id=5 (LaLiga=72, Premier=95, Serie A=51, Eredivisie=177), pa_equipo id=4 (Francia=129), pa_ano id=7 (2014-15=139). Resto pendiente de resolución en WC_API_WRITE_ACCESS_TEST.
+- Imágenes diferidas: MVP no sube fotos. Pablo añade manualmente en WP Admin.
+- Test plan WC_API_WRITE_ACCESS_TEST diseñado con producto dummy inequívoco: "[STUDIO TEST] Catenaccio Bridge Draft — DELETE ME", precio €1, cleanup manual por Pablo.
+- CPANEL_TOKEN_REVOCATION marcado DEFERRED_BY_OPERATOR / RISK_ACCEPTED.
+- SUPABASE_VERCEL_ACCOUNTS marcado completado (Pablo creó ambas cuentas).
+- S020 cerrado en BACKLOG.md. WC_API_WRITE_ACCESS_TEST añadido como gate antes de S021.
+
+**Qué se validó:** git status limpio (0 ahead/0 behind, HEAD en c4544bd antes de S020). git diff --check OK. Sin secretos. Sin llamadas remotas. Sin código ejecutable. 5 docs creados, 5 archivos operativos actualizados. Markdown sin bloques rotos.  
+**Qué NO se tocó:** WordPress, WP Admin, cPanel, Supabase remoto, Vercel, APIs externas, DB producción, plugins, temas activos, pagos, productos WC, .env.local. No se creó app Next.js. No se ejecutó ninguna llamada WC API.  
+**Siguiente paso:** WC_API_WRITE_ACCESS_TEST — ejecutar test controlado de 1 producto dummy con Pablo presente; si PASS → S021 desbloqueado.  
+**agent_events ref:** 2026-06-27T21:00:00Z (studio_wc_bridge_contract_designed)
+---
+
+---
 **Sesión 0** — 2026-06-06  
 **Agente:** lafabrica-template  
 **Modo:** LITE  

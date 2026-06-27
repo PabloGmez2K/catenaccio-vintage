@@ -15,11 +15,12 @@ Actualizar al cierre de cada sesión. Los ítems completados se mueven a DONE o 
 
 - [x] **PABLO_CONFIRM_ROUTE_D** — ✅ COMPLETADO 2026-06-27. Pablo confirma DEC-13 `APPROVE_ROUTE_HYBRID_STUDIO_WOO_BRIDGE`. S019+ desbloqueado. DEC-13 actualizada a APROBADA. (Acción Pablo)
 - [ ] **A0_FREEZE_FORMAL** — congelar formalmente la línea A0: tag de git en el estado actual de `catenaccio-a0-child`, nota de FREEZE en sus docs, mover tareas A0 a § FROZEN. No volver a sincronizar. (Agente Sonnet, 1 sesión corta)
-- [ ] **CPANEL_TOKEN_REVOCATION** — Pablo revoca el token cPanel de Sesión 017. Ya no hace falta acceso al servidor para la nueva dirección. (Acción Pablo, sin agente)
-- [ ] **SUPABASE_VERCEL_ACCOUNTS** — Pablo crea cuenta Supabase + proyecto Vercel (tier gratuito, coste $0 MVP). Prerequisito de S019/S021. (Acción Pablo)
+- [ ] **CPANEL_TOKEN_REVOCATION** — DEFERRED_BY_OPERATOR / RISK_ACCEPTED. Token cPanel de Sesión 017 sigue activo por decisión explícita de Pablo. No bloqueante. Pablo revocará cuando sea conveniente. No usar en sesiones Studio. (Acción Pablo, sin agente)
+- [x] **SUPABASE_VERCEL_ACCOUNTS** — ✅ COMPLETADO. Pablo creó cuenta Supabase (organization: Catenaccio Vintage, project: catenaccio-studio, region: West EU / Ireland) + cuenta Vercel conectada a GitHub. Prerequisito de S021 desbloqueado.
 - [x] **S019 — STUDIO_DATA_MODEL** — ✅ COMPLETADO 2026-06-27 (Sonnet). Schema Supabase MVP definido: 6 tablas, 7 enums, índices, triggers, vista de márgenes, RLS. Capa genérica (reutilizable lafabrica) + extensión Catenaccio separadas. AI-first model documentado. WC bridge preparado. Ver `docs/studio/STUDIO_DATA_MODEL.md` + `STUDIO_SUPABASE_SCHEMA_MVP.sql`. Veredicto: `APPROVE_READY_FOR_S020_WC_BRIDGE_CONTRACT`.
-- [ ] **S020 — STUDIO_WC_BRIDGE_CONTRACT** — contrato Studio→WooCommerce: endpoints, mapeo `meta_data`, resolución term IDs, plan `WC_API_WRITE_ACCESS_TEST`. Reusa DEC-9. (Opus/Sonnet)
-- [ ] **S021 — STUDIO_MVP_SCAFFOLD** — app Next.js + Supabase en Vercel; auth Pablo; vista inventario. (Sonnet/Codex)
+- [x] **S020 — STUDIO_WC_BRIDGE_CONTRACT** — ✅ COMPLETADO 2026-06-27 (Sonnet). Contrato Studio→WooCommerce completo: autenticación (Application Password / Basic Auth / DEC-9), endpoints WC REST API v3, DRAFT_ONLY blindado, payload exacto, mapeo meta_data campo por campo, resolución term IDs, idempotencia, error handling, test plan. 5 documentos creados. DEC-14 registrada. Veredicto: `APPROVE_READY_FOR_WC_API_WRITE_ACCESS_TEST`. Ver `docs/studio/STUDIO_WC_BRIDGE_CONTRACT.md`. (Sonnet)
+- [ ] **WC_API_WRITE_ACCESS_TEST** — gate antes de S021: ejecutar el test controlado del plan `STUDIO_WC_WRITE_ACCESS_TEST_PLAN.md`. 1 producto dummy, verificación Pablo en WP Admin, cleanup manual. PASS → S021 desbloqueado.
+- [ ] **S021 — STUDIO_MVP_SCAFFOLD** — app Next.js + Supabase en Vercel; auth Pablo; vista inventario. Prerequisito: WC_API_WRITE_ACCESS_TEST PASS + schema Supabase aplicado. (Sonnet/Codex)
 - [ ] **S022 — STUDIO_CREATE_AND_PUBLISH** — formulario alta `§3` + "Sugerir con Claude" + botón "Crear borrador en WC". (Sonnet/Codex)
 - [ ] **GATE_STUDIO_MVP** — Pablo publica 1 camiseta real E2E por Studio → luego 5–10. Revisión fría (RULE-01). STOP_AND_REPLAN si no hay MVP usable a ~4 sesiones.
 

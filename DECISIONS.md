@@ -375,6 +375,42 @@ validación visual omitida). La absorción es documental; no requiere código.
 
 ---
 
+### DEC-14 — Studio→WooCommerce Bridge: DRAFT_ONLY, Application Password, meta_data ACF, sin auto-publicación
+**Fecha:** 2026-06-27 (Sesión 020 — STUDIO_WC_BRIDGE_CONTRACT)
+**Tipo:** técnica / operativa / seguridad
+**Quién aprobó:** Pablo (por contrato aceptado al iniciar S020) + Agente Sonnet (emisor)
+**Estado:** ✅ ACTIVA — APPROVE_READY_FOR_WC_API_WRITE_ACCESS_TEST
+
+**Decisión:**
+El puente Catenaccio Studio → WooCommerce opera con las siguientes reglas absolutas:
+
+1. **DRAFT_ONLY:** `status=draft` hardcoded en el bridge service. Nunca `status=publish`. Pablo publica manualmente desde WP Admin.
+2. **Autenticación:** Application Password / Basic Auth, usuario `catenaccio-studio-agent` (rol `shop_manager`), DEC-9. Variables `WP_APP_*` solo en Vercel server-side env vars. Nunca `NEXT_PUBLIC_*`.
+3. **meta_data ACF, no attributes[]:** el hallazgo crítico del probe S007 confirmó que todos los productos usan ACF meta fields. El bridge escribe en `meta_data`, no en `attributes[]`. `liga`, `equipo`, `ano_temporada`, `jugador` son term IDs como strings. `talla` y `condicion` son strings directos.
+4. **Idempotencia:** si `wc_product_id IS NOT NULL`, no crear duplicado. STOP con mensaje `draft_already_exists`.
+5. **Sin auto-publicación:** ningún mecanismo del bridge puede publicar. No hay botón, no hay flag, no hay ruta.
+6. **PATTERN-08:** si una tarea futura toca configuración WC o emails → STOP y resolver email gate primero.
+7. **cPanel token:** DEFERRED_BY_OPERATOR / RISK_ACCEPTED. Token activo temporalmente por decisión explícita de Pablo. No usar en sesiones Studio. No pedir revocación en sesiones Studio.
+
+**Gate inmediato:** `WC_API_WRITE_ACCESS_TEST` — test controlado con 1 producto dummy antes de S021.
+
+**Documentos:**
+- `docs/studio/STUDIO_WC_BRIDGE_CONTRACT.md` — contrato completo
+- `docs/studio/STUDIO_WC_PAYLOAD_SPEC.md` — payload exacto
+- `docs/studio/STUDIO_WC_TERM_ID_RESOLUTION_PLAN.md` — resolución term IDs
+- `docs/studio/STUDIO_WC_WRITE_ACCESS_TEST_PLAN.md` — plan de test
+- `docs/studio/STUDIO_WC_BRIDGE_ERROR_HANDLING.md` — error handling
+
+**Razonamiento:**
+El probe S007 demostró que el contrato real de WC en Catenaccio Vintage usa ACF meta fields, no WC product attributes. El bridge debe respetar ese contrato para ser compatible con el Filtro Camisetas Pro y los templates Elementor existentes. DRAFT_ONLY es la única ruta segura para que un agente opere el catálogo sin riesgo de publicación accidental.
+
+**Alternativas descartadas:**
+- Escribir en `attributes[]` de WC: incompatible con el modelo existente (Filtro Camisetas Pro no lo leerá).
+- Auto-publicar: viola DEC-9 y la política de Pablo de revisar antes de publicar.
+- Crear términos WC automáticamente: puede producir duplicados y romper la taxonomía.
+
+---
+
 ### PEND-2 — Marketplace multi-vendor (NORTH_STAR / DEFER)
 **Fecha:** 2026-06-13 (Sesión 005c)  
 **Tipo:** estratégica / visión largo plazo  
