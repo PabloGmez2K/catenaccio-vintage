@@ -754,3 +754,27 @@ SesiÃ³n 020B (2026-06-27, Codex): CODEX_CONTROLLED_PRODUCTION_TEST / DRAFT_ONL
 
 **Siguiente paso:** S021 — STUDIO_MVP_SCAFFOLD.
 **agent_events ref:** 2026-06-27T23:30:00Z (supabase_schema_apply_mvp_manual_confirmed)
+
+---
+**Sesión 021** — 2026-06-27  
+**Agente:** Claude Code (Sonnet)  
+**Modo:** LOCAL_APP_IMPLEMENTATION / NO_DEPLOY / NO_WC_WRITE  
+**Tipo:** impl / scaffold  
+**Tarea:** Crear el scaffold MVP local de Catenaccio Studio — app Next.js en `studio/` con auth Supabase, vista de inventario protegida, empty/error state, y cierre documental completo.
+
+**Decisiones clave:**
+- App aislada en `studio/` (Next.js 15.5.19, App Router, TypeScript strict, React 19).
+- Auth via Supabase magic link (OTP email) — sin hardcoding de usuario, sin contraseñas.
+- `@supabase/ssr` 0.5.2 para server/browser client separation limpia.
+- Middleware en `studio/middleware.ts` protege `/inventory/*` — redirige a `/login` si no hay sesión.
+- `CookieOptions` importado de `@supabase/ssr` para resolver implicit any en TypeScript strict.
+- CSS puro (sin Tailwind, sin shadcn) — MVP backoffice claro y rápido de arrancar.
+- `/inventory/[id]` implementado como read-only — S022 añadirá edición y publicación.
+- Next.js 15.3.4 tenía CVE-2025-66478 — actualizado a 15.5.19 (patched).
+- postcss CVE transitiva aceptada para MVP local (fix requeriría downgrade a Next 9).
+
+**Qué se validó:** typecheck PASS (0 errores). build PASS (7 rutas). lint PASS (0 warnings). git diff --check OK. Secret scan: CLEAN. Scope check: CLEAN. Solo `studio/`, docs de cierre y archivos operativos permitidos modificados.  
+**Qué NO se tocó:** WordPress, WooCommerce API, productos/pedidos/clientes/pagos, cPanel, Vercel remoto, Supabase schema/SQL, service_role key, .env.local, temas, plugins, wp-config.php, .htaccess, catenaccio-a0-child.  
+**Siguiente paso:** S022 — STUDIO_CREATE_AND_PUBLISH. Antes: Pablo lanza Studio local, hace login con magic link, verifica empty state y confirma APPROVE_READY.  
+**agent_events ref:** 2026-06-27T23:59:00Z (studio_mvp_scaffold_completed)
+---

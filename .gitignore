@@ -4,6 +4,7 @@
 .env
 .env.local
 .env.*
+!.env.example
 *.env
 *.key
 *.pem
@@ -22,6 +23,7 @@ node_modules/
 dist/
 build/
 .cache/
+*.tsbuildinfo
 
 # Python
 __pycache__/
