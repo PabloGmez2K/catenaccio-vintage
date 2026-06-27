@@ -816,3 +816,24 @@ SesiÃ³n 020B (2026-06-27, Codex): CODEX_CONTROLLED_PRODUCTION_TEST / DRAFT_ONL
 **Siguiente paso:** S022 - STUDIO_CREATE_AND_PUBLISH.
 **agent_events ref:** 2026-06-27T23:59:45Z (workspace_seed_manual_closed)
 ---
+
+---
+**Sesión 021D** - 2026-06-27
+**Agente:** Claude Code Opus
+**Modo:** READ_ONLY_STRATEGIC_REVIEW / NO_IMPLEMENTATION / NO_REMOTE_WRITE
+**Tipo:** revisión estratégica / pre-S022 / veredicto binario
+**Tarea:** STUDIO_STRATEGIC_REVIEW_BEFORE_S022 - revisar si la ruta Studio + Supabase + Woo Draft Bridge sigue alineada con las necesidades reales antes de construir S022, y emitir veredicto estratégico único.
+
+**Resultado:** COMPLETED - veredicto `ADJUST_BEFORE_S022`.
+
+**Qué se hizo:** Revisión proporcional read-only de DECISIONS (DEC-13/DEC-14), BACKLOG, CONTEXTO, contrato del puente WC, scaffold MVP, runbook, modelo AI-first, y verificación del baseline de seguridad directamente en el código del scaffold (`studio/lib/supabase/server.ts`, `middleware.ts`, `.env.example`, `package.json`). Conclusión: la ruta DEC-13/DEC-14 es correcta y está ejecutada al pie de la letra (sin deriva, sin deuda que justifique replantear); el único problema es el **tamaño de S022**, que agrupa 3 clases de riesgo (insert local + Anthropic API + escritura WC a producción) y 2 secretos nuevos en un solo bloque. Se divide S022 en S022A (formulario→Supabase) → S022B (Claude shadow-only) → S022C (Woo Draft DRAFT_ONLY, única sesión que escribe en `catenacciovintage.com`); deploy Vercel **diferido** a después del E2E (S020B ya probó acceso WC desde local → deploy no de-riesga el puente). Creado `docs/studio/STUDIO_STRATEGIC_REVIEW_BEFORE_S022.md` (10 secciones); BACKLOG dividido en S022A/B/C/D con criterios de parada y veredictos esperados; CONTEXTO y agent_events appendeados.
+
+**Qué se validó:** preflight git limpio y sincronizado en `main`, HEAD `a0c73d6`, 0 ahead / 0 behind; baseline de seguridad CLEAN en código (anon key + RLS owner-based; sin `service_role`, `ANTHROPIC_API_KEY` ni `WP_APP_*` en el árbol de la app); alineación total con DEC-13 (Studio-first, Woo bridge, A0 congelado, storefront diferido) y DEC-14 (DRAFT_ONLY, Application Password server-side, meta_data ACF, idempotencia). `git diff --check` PASS; `agent_events.jsonl` parseable; secret scan CLEAN; scope check CLEAN.
+
+**Qué NO se tocó:** `studio/` (app code), SQL canónico, Supabase remoto, WooCommerce, WordPress, WP Admin, cPanel, Vercel, `.env.local`, credenciales. No se ejecutó SQL, ni deploy, ni llamadas remotas, ni implementación.
+
+**Decisión de secuencia:** S022A es la siguiente sesión (superficie Sonnet/Codex, local, sin deploy). Frontera dura: solo S022C escribe en producción y va sola. Fusión S022A+S022B permitida si el formulario es pequeño. Guardrails reafirmados: DRAFT_ONLY, SHADOW_FIRST, secretos server-side only, idempotencia, progreso lineal (bucle de rework → STOP_AND_REPLAN), no Opus para implementación.
+
+**Siguiente paso:** S022A - STUDIO_CREATE_ITEM_FORM.
+**agent_events ref:** 2026-06-28T00:30:00Z (studio_strategic_review_before_s022)
+---
