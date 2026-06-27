@@ -606,3 +606,23 @@ Cross-referencia con `agent_events.jsonl` para detalle de eventos.
 **Siguiente paso:** Pablo realiza la validación visual manualmente usando customize URL en su navegador y procede al release manual.
 **agent_events ref:** 2026-06-27T13:30:00Z (theme_shadow_validation_blocked)
 ---
+
+---
+**Sesión 016** — 2026-06-27  
+**Agente:** Claude Code (Sonnet)  
+**Modo:** LOCAL_CODE_ONLY / SHADOW_THEME_VISUAL_FIX  
+**Tipo:** fix / visual-polish  
+**Tarea:** Corregir blockers visuales del tema sombra `catenaccio-a0-child` detectados por Pablo en preview manual (Sesión 015 / STOP).
+
+**Decisiones clave:**
+- Mini-cart: `woocommerce_mini_cart()` se movió de inline a dropdown contenido con trigger button (icono + contador). La causa raíz era que la función vuelca contenido de carrito directamente en el header, no como widget/dropdown.
+- Toggle off-canvas en desktop: se añadió `@media (min-width: 769px) { display: none !important; }` para beat de estilos del parent theme en preview del Customizer.
+- Off-canvas overflow: `overflow-x: hidden` en panel + word-break en headings/links del inner.
+- `functions.php` no modificado — todos los fixes resueltos con CSS/markup/JS según preferencia del proyecto.
+- PHP lint NOT_AVAILABLE (PHP CLI no en PATH), declarado explícitamente.
+
+**Qué se validó:** `git diff --check` PASS. 3 archivos modificados, todos dentro de scope (`catenaccio-a0-child/`). Secret scan CLEAN. Ningún shortcode literal añadido. Sin dependencias Elementor. Sin referencias absolutas locales.  
+**Qué NO se tocó:** `hello-elementor-child`, `functions.php`, servidor, cPanel, WP Admin, DB, plugins, WooCommerce settings, pagos, `.env.local`, woocommerce templates (archive/content/single).  
+**Siguiente paso:** Resync a servidor de 3 archivos modificados (Codex) → Pablo repite preview manual → si PASS → RELEASE_MANUAL_PABLO.  
+**agent_events ref:** 2026-06-27T16:00:00Z (theme_shadow_visual_blockers_fix)
+---

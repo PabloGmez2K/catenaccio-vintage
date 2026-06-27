@@ -163,6 +163,74 @@ body {
   position: relative;
 }
 
+/* Trigger button (icon + count) */
+.cv-mini-cart__trigger {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: none;
+  border: 1px solid var(--cv-header-border);
+  border-radius: var(--cv-radius);
+  padding: 6px 10px;
+  cursor: pointer;
+  color: var(--cv-color-primary);
+  font-size: 1rem;
+  line-height: 1;
+  transition: background var(--cv-transition);
+}
+
+.cv-mini-cart__trigger:hover {
+  background: #f4f4f4;
+}
+
+.cv-mini-cart__icon {
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.cv-mini-cart__count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1;
+  background: var(--cv-color-accent);
+  color: #ffffff;
+  border-radius: 50%;
+}
+
+/* Dropdown panel — hidden until JS opens it */
+.cv-mini-cart__dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  width: 300px;
+  max-width: calc(100vw - 40px);
+  background: #ffffff;
+  border: 1px solid var(--cv-header-border);
+  border-radius: var(--cv-radius);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+  z-index: 200;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.cv-mini-cart__dropdown[aria-hidden="false"] {
+  display: block;
+}
+
+/* Inner mini-cart content */
+.cv-mini-cart__dropdown .woocommerce-mini-cart,
+.cv-mini-cart__dropdown .cart_list,
+.cv-mini-cart__dropdown .widget_shopping_cart_content > * {
+  padding: 12px 16px;
+}
+
 /* Botones del footer del mini-carrito
    Reemplaza .elementor-menu-cart__footer-buttons */
 .cv-mini-cart__footer-buttons,
@@ -224,6 +292,13 @@ body {
   background: #f4f4f4;
 }
 
+/* Beat parent theme button resets on desktop */
+@media (min-width: 769px) {
+  .cv-offcanvas-toggle {
+    display: none !important;
+  }
+}
+
 /* =============================================================================
    OFF-CANVAS PANEL
    ============================================================================= */
@@ -239,6 +314,7 @@ body {
   transform: translateX(100%);
   transition: transform var(--cv-transition);
   overflow-y: auto;
+  overflow-x: hidden;
   box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15);
 }
 
@@ -250,6 +326,39 @@ body {
   padding: 60px 20px 20px;
   position: relative;
   min-height: 100%;
+}
+
+/* Prevent inner content from breaking panel width */
+.cv-offcanvas-panel__inner > * {
+  max-width: 100%;
+}
+
+.cv-offcanvas-panel__inner h1,
+.cv-offcanvas-panel__inner h2,
+.cv-offcanvas-panel__inner h3,
+.cv-offcanvas-panel__inner h4,
+.cv-offcanvas-panel__inner h5 {
+  word-break: break-word;
+  overflow-wrap: break-word;
+  font-size: clamp(0.88rem, 3vw, 1.1rem);
+}
+
+.cv-offcanvas-panel__inner a,
+.cv-offcanvas-panel__inner p,
+.cv-offcanvas-panel__inner span {
+  word-break: break-word;
+  overflow-wrap: break-word;
+}
+
+.cv-offcanvas-panel__inner ul,
+.cv-offcanvas-panel__inner ol {
+  padding-left: 16px;
+  margin: 0;
+}
+
+.cv-offcanvas-panel__inner img {
+  max-width: 100%;
+  height: auto;
 }
 
 .cv-offcanvas-close {
@@ -710,6 +819,78 @@ li.cv-product-card:hover .cv-product-card__image img {
 .woocommerce-breadcrumb a:hover {
   color: var(--cv-color-primary);
   text-decoration: underline;
+}
+
+/* =============================================================================
+   SIDEBAR FILTROS — CSS defensivo para shortcodes plugin
+   ============================================================================= */
+.cv-archive-sidebar {
+  overflow: hidden;
+  font-size: 0.875rem;
+}
+
+.cv-archive-sidebar > * + * {
+  margin-top: 20px;
+}
+
+/* Contenedor por filtro: márgenes y separador */
+.cv-archive-sidebar .filtro-widget,
+.cv-archive-sidebar [class*="filtro"],
+.cv-archive-sidebar > div,
+.cv-archive-sidebar > section {
+  border-bottom: 1px solid var(--cv-header-border);
+  padding-bottom: 16px;
+}
+
+.cv-archive-sidebar > *:last-child {
+  border-bottom: none;
+}
+
+/* Título del filtro */
+.cv-archive-sidebar h4,
+.cv-archive-sidebar .filtro-titulo,
+.cv-archive-sidebar .widget-title,
+.cv-archive-sidebar strong:only-child {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--cv-color-muted);
+  margin: 0 0 8px;
+}
+
+/* Listas de valores */
+.cv-archive-sidebar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.cv-archive-sidebar li {
+  line-height: 1.5;
+  padding: 3px 0;
+}
+
+.cv-archive-sidebar li a {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--cv-color-text);
+  text-decoration: none;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  transition: color var(--cv-transition);
+}
+
+.cv-archive-sidebar li a:hover {
+  color: var(--cv-color-primary);
+}
+
+/* Toolbar: evitar que shortcode de filtro rompa el layout */
+.cv-archive-toolbar > * {
+  max-width: 100%;
+  overflow: hidden;
 }
 
 /* =============================================================================

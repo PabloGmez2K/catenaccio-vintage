@@ -67,6 +67,42 @@
         }
 
         // =====================================================================
+        // MINI-CART DROPDOWN TOGGLE
+        // =====================================================================
+        var miniCartWrap   = document.getElementById('cv-mini-cart');
+        var miniCartBtn    = document.querySelector('.cv-mini-cart__trigger');
+        var miniCartPanel  = document.getElementById('cv-mini-cart-dropdown');
+
+        if (miniCartBtn && miniCartPanel) {
+            function openMiniCart() {
+                miniCartPanel.setAttribute('aria-hidden', 'false');
+                miniCartBtn.setAttribute('aria-expanded', 'true');
+            }
+
+            function closeMiniCart() {
+                miniCartPanel.setAttribute('aria-hidden', 'true');
+                miniCartBtn.setAttribute('aria-expanded', 'false');
+            }
+
+            miniCartBtn.addEventListener('click', function (e) {
+                e.stopPropagation();
+                miniCartPanel.getAttribute('aria-hidden') === 'false'
+                    ? closeMiniCart()
+                    : openMiniCart();
+            });
+
+            document.addEventListener('click', function (e) {
+                if (miniCartWrap && !miniCartWrap.contains(e.target)) {
+                    closeMiniCart();
+                }
+            });
+
+            document.addEventListener('keydown', function (e) {
+                if (e.key === 'Escape') closeMiniCart();
+            });
+        }
+
+        // =====================================================================
         // CV-ARCHIVE-INTRO TOGGLE (Ver más / Ver menos)
         // =====================================================================
         document.querySelectorAll('.cv-archive-intro__toggle').forEach(function (btn) {

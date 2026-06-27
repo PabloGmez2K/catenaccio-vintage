@@ -44,7 +44,21 @@ defined('ABSPATH') || exit;
 
       <?php if (class_exists('WooCommerce')) : ?>
       <div class="cv-mini-cart" id="cv-mini-cart">
-        <?php woocommerce_mini_cart(); ?>
+        <button
+          class="cv-mini-cart__trigger"
+          type="button"
+          aria-expanded="false"
+          aria-controls="cv-mini-cart-dropdown"
+          aria-label="<?php esc_attr_e('Ver carrito', 'catenaccio-a0-child'); ?>"
+        >
+          <span class="cv-mini-cart__icon" aria-hidden="true">&#128722;</span>
+          <span class="cv-mini-cart__count" id="cv-cart-count">
+            <?php echo (WC()->cart) ? absint(WC()->cart->get_cart_contents_count()) : 0; ?>
+          </span>
+        </button>
+        <div class="cv-mini-cart__dropdown" id="cv-mini-cart-dropdown" aria-hidden="true">
+          <?php woocommerce_mini_cart(); ?>
+        </div>
       </div>
       <?php endif; ?>
 
