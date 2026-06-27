@@ -428,6 +428,28 @@ CREATE POLICY pol_media_assets_owner
     USING (auth.uid() = owner_id);
 
 -- ============================================================
+-- GRANTS - acceso SQL para rol autenticado
+-- ============================================================
+-- RLS no sustituye los privilegios SQL basicos.
+-- Estos GRANTs permiten que el rol authenticated acceda a las tablas/vista
+-- para que Postgres pueda evaluar las policies owner-based.
+-- RLS sigue limitando filas por auth.uid() = owner_id.
+-- No conceder permisos a anon en el MVP.
+
+GRANT USAGE ON SCHEMA public TO authenticated;
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE
+    public.workspaces,
+    public.inventory_items,
+    public.football_shirt_details,
+    public.ai_suggestions,
+    public.item_lifecycle_events,
+    public.media_assets
+TO authenticated;
+
+GRANT SELECT ON TABLE public.inventory_margins TO authenticated;
+
+-- ============================================================
 -- STORAGE BUCKET (Supabase Storage — FUTURO, no ejecutar en MVP)
 -- ============================================================
 -- Descomentar cuando Pablo esté listo para subir fotos desde Studio.

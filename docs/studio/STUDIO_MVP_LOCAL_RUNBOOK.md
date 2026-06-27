@@ -150,6 +150,19 @@ Hacer clic en "Salir" en el header de la app.
 | Enlace mágico no llega | Email incorrecto o spam | Revisar carpeta de spam; verificar email en Supabase Auth > Users |
 | `auth_callback_failed` en URL | El código del magic link expiró o se usó ya | Solicitar un nuevo enlace desde `/login` |
 
+### Troubleshooting: `permission denied for table inventory_items`
+
+Causa probable: el schema tiene RLS y policies creadas, pero faltan los `GRANT` SQL base para el rol `authenticated`.
+
+Solucion:
+
+1. Confirmar que el SQL canonico actualizado incluye el bloque `GRANTS - acceso SQL para rol autenticado`.
+2. Si el proyecto Supabase fue creado antes de S021B, ejecutar manualmente ese bloque `GRANT` desde Supabase SQL Editor.
+3. No desactivar RLS.
+4. No conceder permisos a `anon` en el MVP.
+
+Nota de seguridad: `GRANT` permite que Postgres evalue RLS; RLS sigue filtrando filas por `auth.uid() = owner_id`.
+
 ---
 
 ## Comandos útiles

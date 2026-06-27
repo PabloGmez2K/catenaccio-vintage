@@ -99,6 +99,31 @@ Ver `.env.example` para la plantilla.
 | Secret scan | PASS — sin valores reales en archivos versionados |
 | Scope check | PASS — solo `studio/` y docs permitidos |
 
+---
+
+## Local visual review result (S021B)
+
+Pablo valido Studio localmente tras configurar `studio/.env.local` y corregir el redirect de Supabase.
+
+| Check | Resultado |
+|-------|-----------|
+| Login magic link | PASS |
+| `/inventory` | PASS |
+| Empty state | PASS - "No hay camisetas todavia." |
+| Error rojo | NO visible tras el fix |
+
+Blocker inicial:
+
+- `/inventory` mostro `permission denied for table inventory_items`.
+
+Manual fix:
+
+- Pablo ejecuto los `GRANT` necesarios en Supabase SQL Editor para el rol `authenticated`.
+
+Canonical fix:
+
+- S021B actualizo `docs/studio/STUDIO_SUPABASE_SCHEMA_MVP.sql` para que futuros entornos incluyan esos `GRANT`.
+
 ### Nota sobre dependencias vulnerables
 
 Next.js 15.5.19 incluye una dependencia transitiva de `postcss <8.5.10` con CVE moderada (XSS en stringify CSS). El fix requeriría degradar a Next.js 9.3.3 — no viable. Aceptado para MVP interno local; no afecta a la funcionalidad de auth+inventario. Revisar cuando Next.js publique un parche postcss.

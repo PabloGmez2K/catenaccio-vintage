@@ -159,4 +159,21 @@ Cada vendedor ve solo su propio workspace. La política `auth.uid() = owner_id` 
 
 ---
 
+## 8. Nota S021B - GRANTs SQL para authenticated
+
+La review local S021 descubrio que tener RLS habilitado y policies owner-based no basta si el rol SQL no tiene privilegios base sobre las tablas. El sintoma observado en `/inventory` fue:
+
+`permission denied for table inventory_items`
+
+Solucion canonica:
+
+- Mantener RLS activo.
+- Mantener las policies owner-based con `auth.uid() = owner_id`.
+- Conceder a `authenticated` los privilegios SQL base necesarios sobre schema, tablas y vista.
+- No conceder permisos a `anon` en el MVP.
+
+Interpretacion de seguridad: `GRANT` da acceso SQL base para que Postgres pueda evaluar RLS; no abre datos por si solo. El aislamiento de filas sigue definido por RLS y `owner_id`.
+
+---
+
 *Sesión 019 — 2026-06-27 — Claude Code (Sonnet). Modo LOCAL_SCHEMA_DESIGN_ONLY / NO_REMOTE_WRITE.*

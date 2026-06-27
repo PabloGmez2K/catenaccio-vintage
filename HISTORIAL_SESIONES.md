@@ -778,3 +778,22 @@ SesiÃ³n 020B (2026-06-27, Codex): CODEX_CONTROLLED_PRODUCTION_TEST / DRAFT_ONL
 **Siguiente paso:** S022 — STUDIO_CREATE_AND_PUBLISH. Antes: Pablo lanza Studio local, hace login con magic link, verifica empty state y confirma APPROVE_READY.  
 **agent_events ref:** 2026-06-27T23:59:00Z (studio_mvp_scaffold_completed)
 ---
+
+---
+**Sesion 021B** - 2026-06-27
+**Agente:** Codex
+**Modo:** DOCS_AND_SCHEMA_PATCH_ONLY / NO_REMOTE_WRITE / NO_APP_CODE
+**Tipo:** close-gate / visual-review / schema-doc-patch
+**Tarea:** STUDIO_VISUAL_REVIEW_AND_RLS_GRANTS_CLOSE - documentar el PASS visual local de Pablo y corregir el SQL canonico con GRANTs para `authenticated`.
+
+**Resultado:** COMPLETED - APPROVE_READY_FOR_S022_CREATE_AND_PUBLISH.
+
+**Que se hizo:** Se registro `STUDIO_VISUAL_REVIEW_PABLO = PASS`, se creo `docs/studio/STUDIO_VISUAL_REVIEW_RESULT.md`, se agrego el bloque `GRANTS` a `docs/studio/STUDIO_SUPABASE_SCHEMA_MVP.sql`, y se actualizaron docs de RLS, scaffold, runbook, apply result, BACKLOG, CONTEXTO y `agent_events.jsonl`.
+
+**Que se valido:** preflight git limpio y sincronizado en `main`, HEAD `de1c384`; `git diff --check` PASS; `agent_events.jsonl` parseable; secret scan CLEAN; scope check CLEAN; SQL contiene GRANTs a `authenticated`, no contiene GRANT a `anon`, RLS sigue enabled y las policies owner-based siguen presentes.
+
+**Que NO se toco:** Supabase remoto por agente, SQL ejecutado por agente, app code, WordPress, WooCommerce, Vercel, cPanel, `.env.local`, credenciales.
+
+**Siguiente paso:** S022 - STUDIO_CREATE_AND_PUBLISH.
+**agent_events ref:** 2026-06-27T23:59:30Z (studio_visual_review_and_rls_grants_closed)
+---

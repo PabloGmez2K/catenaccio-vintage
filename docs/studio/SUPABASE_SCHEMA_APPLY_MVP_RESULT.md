@@ -122,3 +122,30 @@ Si el apply y la verificacion read-only pasan, cerrar el gate con `APPROVE_READY
 - Secrets shared: NO.
 - Agent executed SQL: NO.
 - Status: APPROVE_READY_FOR_S021_MVP_SCAFFOLD.
+
+---
+
+## S021B grants follow-up - 2026-06-27
+
+Pablo's local visual review found one missing piece in the canonical schema: SQL privileges for the Supabase `authenticated` role.
+
+Observed blocker:
+
+- `/inventory` returned `permission denied for table inventory_items`.
+
+Manual fix already applied by Pablo in Supabase SQL Editor:
+
+- `GRANT USAGE ON SCHEMA public TO authenticated`.
+- `GRANT SELECT, INSERT, UPDATE, DELETE` on MVP tables to `authenticated`.
+- `GRANT SELECT` on `public.inventory_margins` to `authenticated`.
+
+Canonical fix:
+
+- `docs/studio/STUDIO_SUPABASE_SCHEMA_MVP.sql` now includes the `GRANTS` block after RLS policies and before Storage/Seed notes.
+
+Security interpretation:
+
+- `GRANT` does not open data by itself.
+- `GRANT` allows Postgres to reach RLS evaluation.
+- RLS remains enabled and owner-based with `auth.uid() = owner_id`.
+- No `anon` grant is part of the MVP.
