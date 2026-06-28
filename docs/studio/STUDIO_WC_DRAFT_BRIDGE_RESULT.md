@@ -259,4 +259,76 @@ La implementación técnica está completa y validada (typecheck/build/lint PASS
 
 ---
 
+## 17. S022C.3 — WC_TERM_ID_SYNC_FOR_FIRST_DRAFT_PSV_2007_09
+
+**Resultado:** `TERM_MISSING_STOP`
+
+**Fecha:** 2026-06-28  
+**Modo:** READ_ONLY_WC_GET / NO_WC_POST / NO_CODE_CHANGE
+
+### Diagnóstico
+
+Se ejecutaron lecturas GET read-only a WooCommerce para resolver los term IDs del item de prueba:
+- Equipo: PSV Eindhoven (`pa_equipo`, atributo 4)
+- Temporada: 2007-09 (`pa_ano`, atributo 7)
+- Liga: Eredivisie — **confirmada** `termId: '177'` ✓ (ya correcta en `wc-terms-mvp.ts`, sin cambios)
+
+### Términos ausentes en WooCommerce
+
+| Taxonomía | Valor buscado | Estado |
+|-----------|--------------|--------|
+| `pa_equipo` (attr 4) | PSV / PSV Eindhoven | **NO EXISTE** — 21 equipos en WC, ninguno es PSV |
+| `pa_ano` (attr 7) | 2007-09 | **NO EXISTE** — 18 temporadas en WC, ninguna es 2007-09 |
+
+### Términos disponibles en WooCommerce (inventario completo)
+
+**pa_equipo (21 términos):**
+AC Milan (73), Ajax (178), Alemania (167), Arsenal F.C. (163), AS Roma (161), Bayern Munich (56), Borussia Dortmund (113), Colombia (75), Escocia (63), FC Barcelona (170), Francia (129), Juventus (100), Lazio (42), Liverpool (93), Málaga (140), Manchester United (164), Paraguay (159), Paris Saint-Germain (107), PSG (108), Real Madrid (70), República Checa (67)
+
+**pa_ano (18 términos):**
+1995-97 (99), 1999-00 (49), 2000-01 (172), 2000-02 (66), 2003-04 (62), 2008-09 (92), 2009-10 (128), 2010-11 (166), 2011-12 (160), 2012-13 (69), 2014-15 (139), 2015-16 (174), 2016-17 (74), 2017-18 (106), 2018-19 (112), 2019-20 (175), 2020-21 (55), 2022-23 (176)
+
+### Aviso adicional sobre el formato de temporada
+
+`buildSeasonOptions()` en `wc-terms-mvp.ts` genera etiquetas con el patrón `YYYY-YY` (p.ej. para 2007: `"2007-08"`, para 2008: `"2008-09"`). La etiqueta `"2007-09"` **no es generada por esta función** — no existe en ningún dropdown de Studio ni en WooCommerce. Posibilidades:
+- El item tiene almacenado en Supabase un valor `temporada` introducido manualmente como texto libre antes de que existiera el datalist canónico.
+- O Pablo se refiere a la temporada 2008-09 (cuando PSV Eindhoven compitió en la Eredivisie).
+
+**Pablo debe confirmar qué valor exacto tiene `football_shirt_details.temporada` para ese item en Supabase** antes de crear el término en WooCommerce y actualizar el mapa.
+
+### Acción requerida de Pablo (manual, sin agente)
+
+**COMPLETADO en S022C.4:**
+- PSV Eindhoven creado en WP Admin → pa_equipo → ID 179
+- 2007-09 creado en WP Admin → pa_ano → ID 180
+- `wc-terms-mvp.ts` parcheado con ambos IDs
+
+**Pendiente — acción Pablo:**
+1. Abrir el item en Studio
+2. Ir a **Editar**
+3. Confirmar que los campos muestran: Equipo = PSV / PSV Eindhoven, Temporada = 2007-09, Liga = Eredivisie
+4. **Guardar** (necesario para que `updateInventoryItem` reescriba `football_shirt_details.equipo` y `.temporada` con los nuevos term IDs resueltos por `resolveTermId`)
+5. Volver a la ficha del item
+6. Pulsar **"Crear borrador en WooCommerce"** una sola vez
+
+### S022C.4 — PATCH_WC_TERM_IDS_PSV_2007_09
+
+**Resultado:** `READY_FOR_PABLO_TERM_REWRITE_TEST`  
+**Fecha:** 2026-06-28
+
+`studio/lib/wc-terms-mvp.ts` parcheado:
+- `PSV Eindhoven` → `termId: '179'` (alias `'psv'` ya existía; cubre entrada "PSV" guardada en el item)
+- `2007-09` → `termId: '180'` (insertado en `buildSeasonOptions()` vía `splice` después de `2008-09`)
+- `Eredivisie` → `termId: '177'` sin cambios ✓
+
+typecheck / build / lint / git diff --check / secret scan: todos **PASS**
+
+### Qué NO se modificó
+
+- Ninguna llamada `POST /wc/v3/products`
+- Ningún término creado en WooCommerce (Pablo los creó manualmente)
+- `.env.local`, secretos, schema Supabase, bridge.ts, productos/pedidos/clientes existentes
+
+---
+
 *Sesión S022C — 2026-06-28 — Claude Code (Sonnet). IMPL / DRAFT_ONLY / NO_PUBLISH / NO_CONFIG_CHANGE.*

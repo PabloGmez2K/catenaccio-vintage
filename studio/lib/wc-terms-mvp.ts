@@ -79,7 +79,7 @@ export const equipoOptions: TermOption[] = [
   { label: 'Paris Saint-Germain', termId: '', titleLabel: 'PSG', aliases: ['psg', 'paris sg'] },
   { label: 'Parma', termId: '' },
   { label: 'Portugal', termId: '' },
-  { label: 'PSV Eindhoven', termId: '', titleLabel: 'PSV', aliases: ['psv'] },
+  { label: 'PSV Eindhoven', termId: '179', titleLabel: 'PSV', aliases: ['psv'] },
   { label: 'Racing de Santander', termId: '' },
   { label: 'Rayo Vallecano', termId: '' },
   { label: 'Real Madrid', termId: '' },
@@ -105,6 +105,9 @@ function buildSeasonOptions(): TermOption[] {
     const termId = label === '2014-15' ? '139' : ''
     seasons.push({ label, termId })
   }
+  // Non-standard season label confirmed in WooCommerce pa_ano (term 180)
+  const idx = seasons.findIndex((s) => s.label === '2008-09')
+  seasons.splice(idx + 1, 0, { label: '2007-09', termId: '180' })
   return seasons
 }
 

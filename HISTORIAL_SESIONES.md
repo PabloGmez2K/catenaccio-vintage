@@ -32,6 +32,42 @@ Cross-referencia con `agent_events.jsonl` para detalle de eventos.
 <!-- APPEND ENTRADAS AQUÍ — no modificar lo de arriba -->
 
 ---
+**Sesión S022C.4** — 2026-06-28  
+**Agente:** Claude Code (Sonnet)  
+**Modo:** PATCH_WC_TERM_IDS / NO_WC_POST / NO_DEPLOY  
+**Tipo:** fix / term-id-patch  
+**Tarea:** Parchear `studio/lib/wc-terms-mvp.ts` con los term IDs reales de PSV Eindhoven (179) y 2007-09 (180) confirmados por Pablo desde WP Admin.
+
+**Decisiones clave:**
+- `PSV Eindhoven` → `termId: '179'`. Alias `'psv'` ya existente cubre el valor "PSV" guardado en el item.
+- `2007-09` → `termId: '180'`. `buildSeasonOptions()` nunca genera esta etiqueta (genera "2007-08" o "2008-09"), por lo que se inserta con `splice` justo después de `2008-09` para mantener el orden cronológico descendente.
+- `Eredivisie` → `termId: '177'` sin cambios.
+- No se tocó el bridge ni ningún otro equipo/temporada del mapa.
+
+**Qué se validó:** typecheck PASS, build PASS (8/8 rutas), lint PASS (0 errores), git diff --check PASS, secret scan CLEAN, agent_events.jsonl VALID.  
+**Qué NO se tocó:** POST /wc/v3/products (no llamado), términos WC (Pablo los creó manualmente), .env.local, secretos, schema Supabase, bridge.ts, productos/pedidos/clientes existentes, WP Admin, Vercel, producción.  
+**Siguiente paso:** Pablo abre el item en Studio → Editar → confirmar PSV/2007-09/Eredivisie → Guardar → volver a ficha → "Crear borrador en WooCommerce" 1 vez.  
+**agent_events ref:** 2026-06-28T23:59:30Z (wc_term_id_patch_psv_2007_09)
+---
+**Sesión S022C.3** — 2026-06-28  
+**Agente:** Claude Code (Sonnet)  
+**Modo:** READ_ONLY_WC_GET / NO_WC_POST / NO_CODE_CHANGE  
+**Tipo:** diagnosis / term-id-resolution  
+**Tarea:** Resolver term IDs de PSV Eindhoven y 2007-09 en WooCommerce para desbloquear el primer borrador del item de prueba (PSV / 2007-09 / Eredivisie).
+
+**Decisiones clave:**
+- GET read-only a WooCommerce (pa_equipo attr 4, pa_ano attr 7) ejecutado con éxito.
+- **PSV Eindhoven NO existe en WooCommerce** pa_equipo (21 equipos, ninguno es PSV).
+- **2007-09 NO existe en WooCommerce** pa_ano (18 temporadas; la más cercana es 2008-09 id=92).
+- **Alerta de formato:** `buildSeasonOptions()` nunca genera "2007-09" — genera "2007-08" (y=2007) ó "2008-09" (y=2008). El valor "2007-09" no existe en ningún dropdown canónico de Studio. Pablo debe confirmar el valor exacto guardado en `football_shirt_details.temporada` para ese item.
+- **Eredivisie=177** confirmada correcta en `wc-terms-mvp.ts` — sin cambios.
+- Veredicto: `TERM_MISSING_STOP`. No se modifica `wc-terms-mvp.ts` con datos incompletos.
+
+**Qué se validó:** GET WooCommerce retornó los 21 equipos y 18 temporadas actuales. Búsqueda exhaustiva de PSV/Eindhoven y 2007-x en ambas listas. `wc-terms-mvp.ts` leído y verificado. Inventario completo de términos WC documentado en §17 de `docs/studio/STUDIO_WC_DRAFT_BRIDGE_RESULT.md`.  
+**Qué NO se tocó:** `wc-terms-mvp.ts` (sin cambios de código), POST /wc/v3/products (no llamado), términos WC (ninguno creado), .env.local, schema Supabase, productos/pedidos/clientes existentes, WP Admin, Vercel, producción.  
+**Siguiente paso:** Pablo crea término `PSV Eindhoven` en WP Admin → Productos → Atributos → Equipo; confirma valor exacto de `temporada` del item en Supabase (`football_shirt_details.temporada`); crea término correspondiente en pa_ano; comparte ambos IDs con agente → agente parchea únicamente esas dos entradas en `wc-terms-mvp.ts` → Pablo Editar → Guardar item → reintentar borrador una sola vez.  
+**agent_events ref:** 2026-06-28T23:59:00Z (wc_term_id_sync_psv_2007_09_term_missing_stop)
+---
 **Sesión 022A.1B** — 2026-06-28
 **Agente:** Antigravity
 **Modo:** READ_ONLY_COMPETITOR_PRODUCT_MODEL_AUDIT / NO_CODE / NO_REMOTE_WRITE
