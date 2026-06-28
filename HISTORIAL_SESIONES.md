@@ -884,3 +884,22 @@ SesiÃ³n 020B (2026-06-27, Codex): CODEX_CONTROLLED_PRODUCTION_TEST / DRAFT_ONL
 ---
 
 Sesión 022A (2026-06-28, Claude Code Sonnet): LOCAL_APP_IMPLEMENTATION / NO_DEPLOY / NO_WC / NO_AI — STUDIO_CREATE_ITEM_FORM. **Primer flujo operativo real de Catenaccio Studio implementado.** Rutas: `/inventory/new` (creada), `/inventory` (actualizada — botón nueva camiseta, query ampliada), `/inventory/[id]` (actualizada — precio objetivo, jugador, dorsal, características, notas). Archivos creados: `studio/app/inventory/actions.ts` (Server Action), `studio/app/inventory/new/page.tsx`, `studio/components/ItemForm.tsx` (Client Component useActionState React 19), `docs/studio/STUDIO_CREATE_ITEM_FORM_RESULT.md`. Archivos modificados: `studio/lib/types.ts` (FootballShirtDetails, InventoryItemWithDetails añadidos), `studio/app/inventory/page.tsx`, `studio/app/inventory/[id]/page.tsx`, `studio/components/EmptyState.tsx` (link nueva camiseta), `studio/styles/globals.css` (clases formulario), `studio/eslint.config.mjs` (ignores .next/**). Escribe en `inventory_items` + `football_shirt_details` vía anon key + RLS owner-based. Validaciones técnicas: typecheck PASS, build PASS (8.7s, 8 rutas), lint PASS (0 errores), git diff --check PASS, JSONL VALID, secret scan CLEAN, scope CLEAN (solo studio/). Veredicto: READY_FOR_PABLO_LOCAL_FORM_OK. No se tocó: WooCommerce, WordPress, Anthropic, Vercel, cPanel, SQL, service_role, .env.local, credenciales, producción. Siguiente: Pablo valida localmente → PABLO_LOCAL_FORM_OK → S022B.
+
+---
+**Sesion 022A.2A** - 2026-06-28
+**Agente:** Codex
+**Modo:** DOCS_ONLY / MANUAL_SCHEMA_PATCH_CLOSE / NO_REMOTE_WRITE
+**Tipo:** close-gate / manual-schema-patch / docs-only
+**Tarea:** STUDIO_DOMAIN_SCHEMA_PATCH_CLOSE - registrar que Pablo ejecuto manualmente el schema patch de dominio para football_shirt_details.
+
+**Resultado:** COMPLETED - APPROVE_READY_FOR_S022A2B_UI_PATCH.
+
+**Que se hizo:** Se registro S022A.2A_SCHEMA_PATCH: PASS confirmado por Pablo. Se creo docs/studio/STUDIO_DOMAIN_SCHEMA_PATCH_RESULT.md, se marco S022A.2A como completado en BACKLOG, se dejo S022A.2B como NEXT / UNBLOCKED y se mantuvo S022B bloqueado hasta PABLO_LOCAL_FORM_OK.
+
+**Que se valido:** preflight git limpio y sincronizado en main, HEAD 469f39f; docs/studio/STUDIO_SUPABASE_SCHEMA_MVP.sql contiene product_type, shirt_version, authenticity_type, sleeve_length y sponsor; version_camisa queda descartado; CFS queda documentado como referencia comparativa, no fuente de verdad; Catenaccio Vintage sigue como estructura base.
+
+**Que NO se toco:** studio/, Supabase remoto por agente, SQL ejecutado por agente, Supabase CLI, psql, WooCommerce API, WordPress, WP Admin, cPanel, Vercel, Anthropic API, .env.local, credenciales, secretos.
+
+**Siguiente paso:** S022A.2B - FORM_DOMAIN_UX_PATCH local/no Woo/no AI.
+**agent_events ref:** 2026-06-28T09:10:00Z (studio_domain_schema_patch_closed)
+---
