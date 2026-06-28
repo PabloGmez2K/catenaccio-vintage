@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { AppShell } from '@/components/AppShell'
 import { InventoryTable } from '@/components/InventoryTable'
@@ -11,7 +12,7 @@ export default async function InventoryPage() {
   const { data, error } = await supabase
     .from('inventory_items')
     .select(
-      'id, referencia, status, coste, precio_publicado_web, wc_status, photo_status, created_at'
+      'id, referencia, status, coste, precio_objetivo, precio_publicado_web, wc_status, photo_status, created_at'
     )
     .order('created_at', { ascending: false })
 
@@ -22,6 +23,9 @@ export default async function InventoryPage() {
         <span className="item-count">
           {data ? `${data.length} item${data.length !== 1 ? 's' : ''}` : ''}
         </span>
+        <Link href="/inventory/new" className="btn-primary btn-sm">
+          + Nueva camiseta
+        </Link>
       </div>
       {error ? (
         <ErrorState message={error.message} />

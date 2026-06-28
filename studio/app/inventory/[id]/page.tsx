@@ -64,6 +64,22 @@ export default async function InventoryItemPage({
             <span className="field-label">Coste</span>
             <span className="field-value">€{Number(data.coste).toFixed(2)}</span>
           </div>
+          {data.precio_objetivo != null && (
+            <div className="field-row">
+              <span className="field-label">Precio objetivo</span>
+              <span className="field-value">
+                €{Number(data.precio_objetivo).toFixed(2)}
+              </span>
+            </div>
+          )}
+          {data.precio_objetivo != null && (
+            <div className="field-row">
+              <span className="field-label">Margen esperado</span>
+              <span className="field-value">
+                €{(Number(data.precio_objetivo) - Number(data.coste)).toFixed(2)}
+              </span>
+            </div>
+          )}
           {data.precio_publicado_web != null && (
             <div className="field-row">
               <span className="field-label">Precio web</span>
@@ -72,15 +88,25 @@ export default async function InventoryItemPage({
               </span>
             </div>
           )}
-          {data.precio_publicado_web != null && (
-            <div className="field-row">
-              <span className="field-label">Margen</span>
-              <span className="field-value">
-                €{(Number(data.precio_publicado_web) - Number(data.coste)).toFixed(2)}
-              </span>
-            </div>
-          )}
         </section>
+
+        {data.proveedor && (
+          <section className="detail-section">
+            <h3>Adquisición</h3>
+            <div className="field-row">
+              <span className="field-label">Proveedor</span>
+              <span className="field-value">{data.proveedor}</span>
+            </div>
+            {data.fecha_compra && (
+              <div className="field-row">
+                <span className="field-label">Fecha compra</span>
+                <span className="field-value">
+                  {new Date(data.fecha_compra).toLocaleDateString('es-ES')}
+                </span>
+              </div>
+            )}
+          </section>
+        )}
 
         {shirt && (
           <section className="detail-section">
@@ -117,11 +143,64 @@ export default async function InventoryItemPage({
                 <span className="field-value">{shirt.marca_display}</span>
               </div>
             )}
+            {shirt.jugador_display && (
+              <div className="field-row">
+                <span className="field-label">Jugador</span>
+                <span className="field-value">{shirt.jugador_display}</span>
+              </div>
+            )}
+            {shirt.numero_dorsal && (
+              <div className="field-row">
+                <span className="field-label">Dorsal</span>
+                <span className="field-value">
+                  {shirt.numero_dorsal}
+                  {shirt.nombre_dorsal ? ` · ${shirt.nombre_dorsal}` : ''}
+                </span>
+              </div>
+            )}
+            {(shirt.es_match_worn ||
+              shirt.tiene_parches ||
+              shirt.tiene_etiquetas ||
+              shirt.es_replica) && (
+              <div className="field-row">
+                <span className="field-label">Características</span>
+                <span className="field-value">
+                  {[
+                    shirt.es_match_worn && 'Match worn',
+                    shirt.tiene_parches && 'Con parches',
+                    shirt.tiene_etiquetas && 'Con etiquetas',
+                    shirt.es_replica && 'Réplica',
+                  ]
+                    .filter(Boolean)
+                    .join(' · ')}
+                </span>
+              </div>
+            )}
+            {shirt.condicion_notas && (
+              <div className="field-row">
+                <span className="field-label">Notas condición</span>
+                <span className="field-value">{shirt.condicion_notas}</span>
+              </div>
+            )}
+          </section>
+        )}
+
+        {data.notas_compra && (
+          <section className="detail-section">
+            <h3>Notas de compra</h3>
+            <p className="detail-notes">{data.notas_compra}</p>
+          </section>
+        )}
+
+        {data.notas_internas && (
+          <section className="detail-section">
+            <h3>Notas internas</h3>
+            <p className="detail-notes">{data.notas_internas}</p>
           </section>
         )}
 
         <p className="read-only-notice">
-          Vista de solo lectura — S022 añadirá edición y publicación.
+          Vista de solo lectura — S022B añadirá sugerencias Claude · S022C añadirá publicación Woo
         </p>
       </div>
     </AppShell>
