@@ -1022,3 +1022,52 @@ Sesión 022A (2026-06-28, Claude Code Sonnet): LOCAL_APP_IMPLEMENTATION / NO_DEP
 **Siguiente paso:** Usar el playbook antes de CODE en la proxima tarea Studio con formulario/product UI ambiguo; S022B sigue siendo el siguiente bloque funcional.
 **agent_events ref:** 2026-06-28T16:00:00Z (studio_product_form_modeling_playbook)
 ---
+
+---
+**Sesion 022B** - 2026-06-28
+**Agente:** Claude Code Sonnet
+**Modo:** LOCAL_APP_IMPLEMENTATION / SHADOW_FIRST / DOMAIN_PRODUCT_MODELING_GATE / NO_WC / NO_DEPLOY
+**Tipo:** impl / ai-suggestions / shadow-mode
+**Tarea:** STUDIO_AI_SUGGESTIONS_SHADOW
+
+**Resultado:** READY_FOR_PABLO_AI_SHADOW_TEST. Veredicto: READY_FOR_PABLO_AI_SHADOW_TEST.
+
+**Que se hizo:**
+- DOMAIN_PRODUCT_MODELING_GATE aplicado antes de CODE: field spec (10 campos), vocabulary ambiguity check (11 terminos), example-driven acceptance (10 casos), stop_microfix_spiral armed.
+- `studio/package.json`: `@anthropic-ai/sdk ^0.106.0` añadido (server-side only).
+- `studio/.env.example`: `ANTHROPIC_API_KEY=` y `ANTHROPIC_MODEL=` añadidos.
+- `studio/lib/types.ts`: `AiSuggestionStatus`, `AiConfidence`, `AiSuggestion` añadidos.
+- `studio/lib/ai/suggestion-context.ts` creado: `buildSuggestionContext(item)` → contexto sanitizado sin campos sensibles.
+- `studio/lib/ai/claude-suggestions.ts` creado: `generateClaudeSuggestion(ctx)` → llama Claude con prompt `studio_s022b_v1`, parsea JSON robustamente, maneja errores.
+- `studio/app/inventory/[id]/ai-actions.ts` creado: 4 server actions (generate/approve/reject/editAndApprove), todas con RLS owner_id, lifecycle events, sin tocar inventory_items ni Woo.
+- `studio/components/AiSuggestionsPanel.tsx` creado: panel client-side con SuggestionCard, EditForm inline, badges de status con labels humanos, acciones por status.
+- `studio/app/inventory/[id]/page.tsx` actualizado: carga `ai_suggestions` y renderiza `AiSuggestionsPanel`.
+- `studio/styles/globals.css` actualizado: estilos para panel IA, cards, badges, botón danger, formulario de edicion.
+
+**Que se valido:**
+- typecheck: PASS (0 errores TypeScript)
+- build: PASS (8 rutas, 5.9s)
+- lint: PASS (0 warnings/errors)
+- git diff --check: PASS (solo LF/CRLF warnings de Windows, sin errores de whitespace)
+- agent_events.jsonl: VALID
+- Secret scan: CLEAN (no ANTHROPIC_API_KEY real, no WP creds, no service_role, no auth.uid, no .env.local leido)
+- Scope check: CLEAN (solo archivos permitidos)
+- DOMAIN_PRODUCT_MODELING_GATE: aplicado y documentado en result doc
+
+**Que NO se toco:**
+- WooCommerce API: NO
+- WordPress / WP Admin: NO
+- Anthropic key impresa o commiteada: NO
+- Vercel: NO
+- cPanel: NO
+- Supabase SQL remoto: NO
+- Schema: NO
+- .env.local leido o modificado: NO
+- service_role: NO
+- inventory_items modificado por IA: NO
+- football_shirt_details modificado por IA: NO
+- produccion: NO
+
+**Siguiente paso:** Pablo añade `ANTHROPIC_API_KEY` manualmente en `.env.local`, reinicia `npm run dev`, genera una sugerencia en una camiseta validada, aprueba una, y responde `PABLO_AI_SHADOW_OK`. S022C permanece BLOQUEADO hasta ese OK.
+**agent_events ref:** 2026-06-28T17:00:00Z (studio_ai_suggestions_shadow)
+---

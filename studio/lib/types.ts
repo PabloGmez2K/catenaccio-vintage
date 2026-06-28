@@ -89,3 +89,35 @@ export interface InventoryItemWithDetails extends InventoryItem {
   fecha_compra: string
   football_shirt_details: FootballShirtDetails | null
 }
+
+// ── AI Suggestions (shadow mode — NEVER modifies inventory_items or Woo) ──────
+
+export type AiSuggestionStatus =
+  | 'generando'
+  | 'generado'
+  | 'aprobado'
+  | 'rechazado'
+  | 'editado_aprobado'
+
+export type AiConfidence = 'alta' | 'media' | 'baja'
+
+export interface AiSuggestion {
+  id: string
+  item_id: string
+  workspace_id: string
+  owner_id: string
+  version: number
+  status: AiSuggestionStatus
+  titulo_seo: string | null
+  descripcion_larga: string | null
+  precio_sugerido: number | null
+  notas_tasacion: string | null
+  model_used: string
+  prompt_version: string | null
+  input_context: Record<string, unknown> | null
+  model_confidence: string | null
+  reviewed_by: string | null
+  reviewed_at: string | null
+  review_notes: string | null
+  created_at: string
+}

@@ -3,8 +3,9 @@ import { createClient } from '@/lib/supabase/server'
 import { AppShell } from '@/components/AppShell'
 import { ErrorState } from '@/components/ErrorState'
 import { StatusBadge } from '@/components/StatusBadge'
+import { AiSuggestionsPanel } from '@/components/AiSuggestionsPanel'
 import { notFound } from 'next/navigation'
-import type { ItemStatus, PhotoStatus, WcSyncStatus } from '@/lib/types'
+import type { ItemStatus, PhotoStatus, WcSyncStatus, AiSuggestion } from '@/lib/types'
 
 // Maps raw DB authenticity_type values to the UI label Pablo sees.
 // 'Replica' is the stored value for "Original" (legacy + current internal value).
@@ -41,6 +42,15 @@ export default async function InventoryItemPage({
       </AppShell>
     )
   }
+
+  // Load AI suggestions ordered newest first
+  const { data: suggestionsData } = await supabase
+    .from('ai_suggestions')
+    .select('*')
+    .eq('item_id', id)
+    .order('version', { ascending: false })
+
+  const suggestions: AiSuggestion[] = (suggestionsData ?? []) as AiSuggestion[]
 
   const shirt = data.football_shirt_details
 
@@ -254,6 +264,8 @@ export default async function InventoryItemPage({
             <p className="detail-notes">{data.notas_internas}</p>
           </section>
         )}
+
+        <AiSuggestionsPanel itemId={data.id} suggestions={suggestions} />
 
       </div>
     </AppShell>
