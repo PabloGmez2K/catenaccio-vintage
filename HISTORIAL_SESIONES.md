@@ -1112,3 +1112,36 @@ Sesión 022A (2026-06-28, Claude Code Sonnet): LOCAL_APP_IMPLEMENTATION / NO_DEP
 **Siguiente paso:** S022C — STUDIO_WC_DRAFT_BRIDGE. Prerequisito: Pablo confirma `PABLO_MANUAL_CONTENT_OK` (≥1 camiseta con contenido listo para borrador Woo).
 **agent_events ref:** 2026-06-28T17:30:00Z (studio_ai_suggestions_cost_defer)
 ---
+
+---
+
+## Sesión S022B.1 — MANUAL_SEO_PROMPT_WORKFLOW (2026-06-28)
+
+**Agente:** Claude Code Sonnet 4.6  
+**Modo:** LOCAL_APP_IMPLEMENTATION / NO_API / NO_WC / NO_DEPLOY  
+**Veredicto:** READY_FOR_PABLO_MANUAL_SEO_TEST
+
+**Objetivo:** Flujo manual NO-API para preparar contenido SEO desde Studio sin llamar a Anthropic.
+
+**Qué se hizo:**
+- Creado `studio/lib/seo/manual-seo-prompt.ts`: helper `buildManualSeoPrompt(SuggestionContext)` — construye prompt estructurado con datos reales de la camiseta, restricciones anti-invención, instrucciones de formato y checklist.
+- Creado `studio/app/inventory/[id]/manual-seo-actions.ts`: server action `saveManualSeoContent` — guarda en `ai_suggestions` con `status=editado_aprobado`, `model_used=manual_external_agent`, `prompt_version=studio_manual_seo_v1`, snapshot sanitizado en `input_context`. Emite `item_lifecycle_events` con `event_type=manual_seo_content_saved`.
+- Creado `studio/components/ManualSeoPanel.tsx`: Client Component con botón "Copiar prompt SEO" (clipboard + fallback textarea), botón "Pegar resultado", formulario (título, descripción, precio opcional, notas opcionales), botón "Guardar contenido SEO", y bloque "Contenido SEO listo para borrador" si ya existe suggestion aprobada.
+- Modificado `studio/app/inventory/[id]/page.tsx`: siempre carga suggestions (no gateado por STUDIO_AI_ENABLED), detecta `approvedSuggestion`, construye `manualSeoPromptText` server-side, renderiza `ManualSeoPanel` siempre y `AiSuggestionsPanel` solo cuando aiEnabled.
+- Modificado `studio/styles/globals.css`: clases `manual-seo-*` + `btn-ghost`.
+- Creado `docs/studio/STUDIO_MANUAL_SEO_PROMPT_WORKFLOW_RESULT.md`.
+
+**Qué NO se tocó:**
+- WooCommerce, WordPress, WP Admin, Supabase remoto, schema, .env.local, STUDIO_AI_ENABLED, Anthropic API, inventory_items, football_shirt_details, deploy, producción, service_role, secretos.
+
+**Validaciones:**
+- typecheck: PASS
+- build (8 rutas): PASS
+- lint: PASS (0 errores)
+- git diff --check: PASS
+- secret scan: CLEAN
+- scope: CLEAN (solo archivos studio/)
+
+**Siguiente paso:** Pablo ejecuta el flujo manualmente (copiar prompt → ChatGPT/Claude → pegar → guardar) y confirma `PABLO_MANUAL_CONTENT_OK`. S022C desbloqueada cuando haya ≥1 suggestion `editado_aprobado`.
+**agent_events ref:** 2026-06-28T18:00:00Z (manual_seo_prompt_workflow)
+---

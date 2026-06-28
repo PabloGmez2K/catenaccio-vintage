@@ -4,8 +4,11 @@ import { AppShell } from '@/components/AppShell'
 import { ErrorState } from '@/components/ErrorState'
 import { StatusBadge } from '@/components/StatusBadge'
 import { AiSuggestionsPanel } from '@/components/AiSuggestionsPanel'
+import { ManualSeoPanel } from '@/components/ManualSeoPanel'
+import { buildSuggestionContext } from '@/lib/ai/suggestion-context'
+import { buildManualSeoPrompt } from '@/lib/seo/manual-seo-prompt'
 import { notFound } from 'next/navigation'
-import type { ItemStatus, PhotoStatus, WcSyncStatus, AiSuggestion } from '@/lib/types'
+import type { ItemStatus, PhotoStatus, WcSyncStatus, AiSuggestion, InventoryItemWithDetails } from '@/lib/types'
 
 // Maps raw DB authenticity_type values to the UI label Pablo sees.
 // 'Replica' is the stored value for "Original" (legacy + current internal value).
@@ -47,15 +50,23 @@ export default async function InventoryItemPage({
   // Default off: cost-deferred until AI integration is explicitly activated.
   const aiEnabled = process.env.STUDIO_AI_ENABLED === 'true'
 
-  let suggestions: AiSuggestion[] = []
-  if (aiEnabled) {
-    const { data: suggestionsData } = await supabase
-      .from('ai_suggestions')
-      .select('*')
-      .eq('item_id', id)
-      .order('version', { ascending: false })
-    suggestions = (suggestionsData ?? []) as AiSuggestion[]
-  }
+  // Always load suggestions (needed for ManualSeoPanel regardless of aiEnabled).
+  const { data: suggestionsData } = await supabase
+    .from('ai_suggestions')
+    .select('*')
+    .eq('item_id', id)
+    .order('version', { ascending: false })
+  const suggestions = (suggestionsData ?? []) as AiSuggestion[]
+
+  // Latest approved suggestion for display in ManualSeoPanel (covers both manual + AI sources).
+  const approvedSuggestion =
+    suggestions.find(
+      s => s.status === 'editado_aprobado' || s.status === 'aprobado'
+    ) ?? null
+
+  // Build prompt text server-side (no secrets; SuggestionContext is already sanitized).
+  const ctx = buildSuggestionContext(data as InventoryItemWithDetails)
+  const manualSeoPromptText = buildManualSeoPrompt(ctx)
 
   const shirt = data.football_shirt_details
 
@@ -269,6 +280,12 @@ export default async function InventoryItemPage({
             <p className="detail-notes">{data.notas_internas}</p>
           </section>
         )}
+
+        <ManualSeoPanel
+          itemId={data.id}
+          promptText={manualSeoPromptText}
+          approvedSuggestion={approvedSuggestion}
+        />
 
         {aiEnabled && (
           <AiSuggestionsPanel itemId={data.id} suggestions={suggestions} />
