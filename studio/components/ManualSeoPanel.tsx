@@ -9,10 +9,12 @@ export function ManualSeoPanel({
   itemId,
   promptText,
   approvedSuggestion,
+  precioPubWeb,
 }: {
   itemId: string
   promptText: string
   approvedSuggestion: AiSuggestion | null
+  precioPubWeb: number | null
 }) {
   const router = useRouter()
 
@@ -90,14 +92,18 @@ export function ManualSeoPanel({
             </div>
           )}
 
-          {approvedSuggestion.precio_sugerido != null && (
-            <div className="manual-seo-field">
-              <span className="manual-seo-label">Precio recomendado</span>
-              <p className="manual-seo-value">
-                €{Number(approvedSuggestion.precio_sugerido).toFixed(2)}
+          <div className="manual-seo-field">
+            <span className="manual-seo-label">Precio web / WooCommerce</span>
+            {precioPubWeb != null ? (
+              <p className="manual-seo-value manual-seo-value--price">
+                €{Number(precioPubWeb).toFixed(2)}
               </p>
-            </div>
-          )}
+            ) : (
+              <p className="manual-seo-value manual-seo-value--missing">
+                Sin precio — introduce el precio al guardar el contenido SEO
+              </p>
+            )}
+          </div>
 
           {approvedSuggestion.notas_tasacion && (
             <div className="manual-seo-field">
@@ -184,7 +190,7 @@ export function ManualSeoPanel({
           </div>
 
           <div className="manual-seo-form-field">
-            <label className="manual-seo-form-label">Precio recomendado (€, opcional)</label>
+            <label className="manual-seo-form-label">Precio web / WooCommerce (€)</label>
             <input
               className="manual-seo-input manual-seo-input--short"
               type="number"
@@ -194,6 +200,9 @@ export function ManualSeoPanel({
               onChange={e => setPrecio(e.target.value)}
               placeholder="ej. 85.00"
             />
+            <p className="manual-seo-field-hint">
+              Usa el precio recomendado por ChatGPT o ajusta el precio final. Se guardará como precio del borrador WooCommerce.
+            </p>
           </div>
 
           <div className="manual-seo-form-field">

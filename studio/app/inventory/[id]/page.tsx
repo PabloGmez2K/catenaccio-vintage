@@ -286,6 +286,7 @@ export default async function InventoryItemPage({
           itemId={data.id}
           promptText={manualSeoPromptText}
           approvedSuggestion={approvedSuggestion}
+          precioPubWeb={data.precio_publicado_web != null ? Number(data.precio_publicado_web) : null}
         />
 
         {approvedSuggestion && (

@@ -60,17 +60,33 @@ Prerequisito para desbloquear S022C vía `PABLO_MANUAL_CONTENT_OK`.
 
 ---
 
+## Actualización S022C.1 (2026-06-28)
+
+El campo "Precio recomendado" fue renombrado a **"Precio web / WooCommerce (€)"** y su comportamiento amplió:
+
+- El precio introducido al guardar contenido SEO se propaga a `inventory_items.precio_publicado_web` (si es > 0 y válido).
+- Esto elimina la necesidad de volver al formulario base del item para fijar el precio WC.
+- El bridge S022C sigue leyendo `inventory_items.precio_publicado_web` — el contrato del bridge no cambia.
+- En el bloque "Contenido SEO listo para borrador" se muestra el precio web operativo actual.
+- Si el precio no se introduce al guardar SEO, el WcDraftPanel sigue mostrando el warning.
+
+**Flujo actualizado (paso 7):**
+> Pega título, descripción, **precio web final (€)** (opcional pero recomendado), notas (opcional).
+
+**Decisión documentada:** El precio final WooCommerce se fija en el flujo manual SEO (cuando ChatGPT devuelve su recomendación), no en el formulario inicial. `ai_suggestions.precio_sugerido` = recomendación/auditoría. `inventory_items.precio_publicado_web` = precio operativo final para Woo.
+
+---
+
 ## Qué NO se tocó
 
 - WooCommerce / WordPress / WP Admin
 - Supabase remoto (solo escribe en local via cliente anon + RLS)
-- `inventory_items` (no se modifica)
 - `football_shirt_details` (no se modifica)
 - Anthropic API (no se llama)
 - `.env.local` (no se lee)
 - `STUDIO_AI_ENABLED` (no se necesita para este flujo)
 - Deploy / Vercel
-- Schema (no hay ALTER TABLE — `ai_suggestions` ya tenía todos los campos)
+- Schema (no hay ALTER TABLE — `inventory_items.precio_publicado_web` ya existía)
 
 ---
 

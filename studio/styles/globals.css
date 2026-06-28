@@ -1147,6 +1147,24 @@ body {
   font-size: 13px;
 }
 
+.manual-seo-value--price {
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.manual-seo-value--missing {
+  color: var(--color-text-muted);
+  font-style: italic;
+  font-size: 12px;
+}
+
+.manual-seo-field-hint {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
 /* ── WC Draft panel ──────────────────────────────────────────────── */
 
 .wc-draft-section {

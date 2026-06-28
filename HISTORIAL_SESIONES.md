@@ -1266,3 +1266,40 @@ Sesión 022A (2026-06-28, Claude Code Sonnet): LOCAL_APP_IMPLEMENTATION / NO_DEP
 **Siguiente paso:** Commit + push (pendiente Pablo). Luego: Pablo crea 1 borrador real → verifica en WP Admin → APPROVE_E2E_LOOP_PROVEN.
 **agent_events ref:** 2026-06-28T23:00:00Z (wc_draft_bridge_fix_blockers)
 ---
+
+---
+**Sesión S022C.1** — 2026-06-28  
+**Agente:** Claude Code (Sonnet 4.6)  
+**Modo:** FIX_BLOCKER_FIRST / NO_WC_CALL / NO_DEPLOY  
+**Tipo:** fix / ux  
+**Tarea:** S022C.1 — PRICE_FROM_MANUAL_SEO_FLOW. Permitir fijar precio web WooCommerce desde el flujo de guardado de contenido SEO.
+
+**Decisiones clave:**
+- El precio WooCommerce (`inventory_items.precio_publicado_web`) se fija en el flujo manual SEO, NO en el formulario base del item. Es el momento natural: ChatGPT recomienda el precio → Pablo lo ajusta → guarda junto con el contenido SEO.
+- `saveManualSeoContent` actualiza `precio_publicado_web` si el precio es > 0 y válido. Best-effort: si el update falla, la suggestion fue guardada y el WcDraftPanel warning persiste (Pablo reintenta).
+- `precio_objetivo` NO se usa como fallback silencioso. Solo un precio explícito del formulario SEO cuenta.
+- El contrato del bridge S022C no cambia: sigue leyendo `inventory_items.precio_publicado_web`.
+- El bloque "Contenido SEO listo para borrador" muestra `precioPubWeb` (de `inventory_items`) con label "Precio web / WooCommerce", no `precio_sugerido` de la suggestion (que puede desincronizarse).
+
+**Qué se hizo:**
+- `studio/app/inventory/[id]/manual-seo-actions.ts`: añadida validación server-side del precio (isNaN / < 0 → error). Añadido update `inventory_items.precio_publicado_web` post-lifecycleevent si precio > 0.
+- `studio/components/ManualSeoPanel.tsx`: añadida prop `precioPubWeb: number | null`. Approved section: muestra `precioPubWeb` con label "Precio web / WooCommerce" (no precio_sugerido). Form field: label renombrada, help text añadido, `min="0"`.
+- `studio/app/inventory/[id]/page.tsx`: `precioPubWeb` pasado a `ManualSeoPanel`.
+- `studio/styles/globals.css`: añadidas clases `.manual-seo-value--price`, `.manual-seo-value--missing`, `.manual-seo-field-hint`.
+- `docs/studio/STUDIO_MANUAL_SEO_PROMPT_WORKFLOW_RESULT.md`: sección actualización S022C.1 añadida.
+- `docs/studio/STUDIO_WC_DRAFT_BRIDGE_RESULT.md`: §13 UX del precio añadida.
+
+**Qué se validó:**
+- typecheck: PASS (0 errores)
+- build (8 rutas): PASS
+- lint: PASS (0 warnings/errores)
+- git diff --check: PASS
+- Secret scan: CLEAN
+- agent_events.jsonl: JSON VALID
+
+**Qué NO se tocó:**
+- WooCommerce, WP Admin, bridge.ts, client.ts, wc-actions.ts, Supabase schema, .env.local, Vercel, pedidos, clientes, emails, plugins, temas.
+
+**Siguiente paso:** commit + push → Pablo configura .env.local → `npm run dev` → ficha con contenido SEO → guardar con precio → verificar warning desaparece → crear borrador WC → verificar WP Admin → APPROVE_E2E_LOOP_PROVEN.
+**agent_events ref:** 2026-06-28T23:30:00Z (price_from_manual_seo_flow)
+---

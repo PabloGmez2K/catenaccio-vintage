@@ -205,7 +205,18 @@ Para validar el E2E con 1 camiseta real:
 
 ---
 
-## 13. Posibles blockers conocidos
+## 13. UX del precio — decisión S022C.1
+
+El precio `inventory_items.precio_publicado_web` (que lee el bridge) se fija en el **flujo manual SEO**, no en el formulario inicial del item:
+
+- Pablo copia prompt → ChatGPT devuelve precio recomendado → Pablo introduce ese precio en "Precio web / WooCommerce (€)" al guardar el contenido SEO.
+- `saveManualSeoContent` guarda el precio en `ai_suggestions.precio_sugerido` **y** actualiza `inventory_items.precio_publicado_web`.
+- El bridge S022C sigue leyendo `precio_publicado_web` sin cambios — el contrato no varía.
+- Si el precio no se introduce al guardar SEO, el WcDraftPanel muestra el warning hasta que se guarde de nuevo con precio.
+
+---
+
+## 14. Posibles blockers conocidos
 
 | Blocker | Causa probable | Acción |
 |---------|----------------|--------|
