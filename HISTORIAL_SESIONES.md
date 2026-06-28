@@ -1183,3 +1183,86 @@ Sesión 022A (2026-06-28, Claude Code Sonnet): LOCAL_APP_IMPLEMENTATION / NO_DEP
 **Siguiente paso:** Pablo prueba el flujo manual SEO con una camiseta usando el Project ChatGPT "Catenaccio Vintage" y confirma `PABLO_MANUAL_CONTENT_OK` → S022C desbloqueada.
 **agent_events ref:** 2026-06-28T19:00:00Z (seo_content_rules_and_prompt_standardization)
 ---
+
+---
+**Sesión S022C** — 2026-06-28  
+**Agente:** Claude Code (Sonnet 4.6)  
+**Modo:** IMPL / DRAFT_ONLY / NO_PUBLISH / NO_CONFIG_CHANGE  
+**Tipo:** impl  
+**Tarea:** Implementar puente Studio → WooCommerce (S022C — STUDIO_WC_DRAFT_BRIDGE). Botón "Crear borrador en WooCommerce" en ficha de item con contenido SEO aprobado.
+
+**Decisiones clave:**
+- `status=draft` hardcoded como tipo literal TypeScript en `WcProductPayload` + guard en `createWcDraftProduct()` + sanity check en respuesta WC — triple DRAFT_ONLY lock.
+- Idempotencia: `wc_product_id IS NULL` verificado server-side antes de cualquier llamada a WC API. Si ya existe, STOP con `IDEMPOTENCY_STOP`.
+- Term IDs para `equipo` y `temporada` se leen directamente de `football_shirt_details.equipo` / `football_shirt_details.temporada` (ya resueltos por el form action con `resolveTermId`). Jugador permanece `""` (no resuelto, correcto según contrato).
+- `WcDraftPanel` visible solo cuando existe `approvedSuggestion` (controlado en page.tsx server-side).
+- `wc_payload_snapshot` guardado sin credenciales: incluye payload, response_id, http_status, bridge_version.
+- En error: `item.status` NO cambia; solo `wc_status=error_sync` + `wc_error` sanitizado.
+- `sanitizeMessage()` en client.ts reemplaza user+password antes de guardar en DB o logs.
+
+**Qué se hizo:**
+- Creado `studio/lib/wc/client.ts`: WC REST API client (Basic Auth, fetch, DRAFT_ONLY guard, sanitización de errores).
+- Creado `studio/lib/wc/bridge.ts`: Bridge service completo (auth, RLS, idempotencia, 13 precondiciones, payload spec, WC call, Supabase update, lifecycle events).
+- Creado `studio/app/inventory/[id]/wc-actions.ts`: Server Action wrapper sobre bridge.
+- Creado `studio/components/WcDraftPanel.tsx`: Componente UI (estado borrador, botón, errores, hint).
+- Modificado `studio/lib/types.ts`: Añadidos `wc_product_id: number | null` y `wc_error: string | null` a `InventoryItem`.
+- Modificado `studio/app/inventory/[id]/page.tsx`: Importado y renderizado `WcDraftPanel` condicionalmente.
+- Modificado `studio/.env.example`: Añadidas `WP_SITE_URL`, `WP_APP_USER`, `WP_APP_PASSWORD` con comentarios.
+- Modificado `studio/styles/globals.css`: Estilos `.wc-draft-*` añadidos.
+- Creado `docs/studio/STUDIO_WC_DRAFT_BRIDGE_RESULT.md`.
+
+**Qué se validó:**
+- typecheck: PASS (0 errores)
+- build (8 rutas incluyendo `/inventory/[id]`): PASS
+- lint: PASS (0 warnings/errores)
+- git diff --check: PASS
+- Secret scan: CLEAN (ningún secreto en diff)
+- DRAFT_ONLY: tipado + guard + sanity check en response
+- Idempotencia: `wc_product_id IS NULL` pre-WC-call
+- Payload WooCommerce: sigue `STUDIO_WC_PAYLOAD_SPEC.md` exactamente
+
+**Qué NO se tocó:**
+- WooCommerce real (0 llamadas a WC API en esta sesión)
+- WordPress, WP Admin, cPanel
+- Supabase schema (no ALTER TABLE)
+- `.env.local` ni credenciales reales
+- Vercel, deploy, producción
+- Pedidos, clientes, emails, métodos de pago, impuestos, envíos
+- Plugins, temas, wp-config.php
+- service_role
+
+**Siguiente paso:** Pablo configura `.env.local` en `studio/` con `WP_SITE_URL`, `WP_APP_USER`, `WP_APP_PASSWORD` → `npm run dev` → abrir ficha con contenido SEO → pulsar "Crear borrador en WooCommerce" → verificar borrador en WP Admin → confirmar `APPROVE_E2E_LOOP_PROVEN` → GATE_STUDIO_MVP.
+**agent_events ref:** 2026-06-28T22:00:00Z (wc_draft_bridge_impl)
+---
+
+---
+**Sesión S022C-FIX** — 2026-06-28  
+**Agente:** Claude Code (Sonnet 4.6)  
+**Modo:** FIX_BLOCKER_FIRST / NO_WC_CALL / NO_DEPLOY  
+**Tipo:** fix  
+**Tarea:** Aplicar tres blockers a `studio/lib/wc/bridge.ts` antes de commit/push y prueba real.
+
+**Decisiones clave:**
+- `formatWcRegularPrice()`: lógica correcta per STUDIO_WC_PAYLOAD_SPEC.md — `Math.round(n*100)/100`, luego `Number.isInteger(rounded) ? rounded.toString() : rounded.toFixed(2)`. Rechaza `null`, `NaN`, `<=0`.
+- Term ID validation con `/^\d+$/.test()`: `isValidRequiredTermId` (equipo, temporada — no vacío + numérico) y `isValidOptionalTermId` (liga, jugador — vacío OK o numérico). Errores específicos por campo: `equipo_term_id_required`, `temporada_term_id_required`, `liga_term_id_invalid`, `jugador_term_id_invalid`.
+- Persistencia post-201: `await supabase.update()` ahora desestructura `{ error: updateError }` y lo comprueba. Si falla → `WC_CREATED_SUPABASE_UPDATE_FAILED` con STOP_DO_NOT_RETRY y wcProductId en el mensaje. Lifecycle event failure → `console.warn` + success devuelto (idempotencia garantizada).
+
+**Qué se hizo:**
+- Reescrito `studio/lib/wc/bridge.ts`: añadidos helpers `formatWcRegularPrice`, `isValidRequiredTermId`, `isValidOptionalTermId`. Precondición precio usa helper. Validación term IDs completa con regex. Post-201: update error capturado, lifecycle failure no bloquea.
+- Actualizado `docs/studio/STUDIO_WC_DRAFT_BRIDGE_RESULT.md`: payload spec corregida, tabla de precondiciones ampliada, tabla de persistencia post-WC añadida.
+- Actualizado BACKLOG.md, CONTEXTO.md, HISTORIAL_SESIONES.md, agent_events.jsonl.
+
+**Qué se validó:**
+- typecheck: PASS (0 errores)
+- build (8 rutas): PASS
+- lint: PASS (0 warnings/errores)
+- git diff --check: PASS (warnings LF→CRLF de Windows, no son errores de whitespace)
+- Secret scan bridge.ts diff: CLEAN
+- agent_events.jsonl: JSON VALID
+
+**Qué NO se tocó:**
+- WooCommerce, WP Admin, Supabase schema, .env.local, Vercel, deploy, producción, plugins, clientes, pedidos.
+
+**Siguiente paso:** Commit + push (pendiente Pablo). Luego: Pablo crea 1 borrador real → verifica en WP Admin → APPROVE_E2E_LOOP_PROVEN.
+**agent_events ref:** 2026-06-28T23:00:00Z (wc_draft_bridge_fix_blockers)
+---

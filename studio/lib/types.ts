@@ -39,7 +39,9 @@ export interface InventoryItem {
   coste: number
   precio_objetivo: number | null
   precio_publicado_web: number | null
+  wc_product_id: number | null
   wc_status: WcSyncStatus
+  wc_error: string | null
   photo_status: PhotoStatus
   created_at: string
 }

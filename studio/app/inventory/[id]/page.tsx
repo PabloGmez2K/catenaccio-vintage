@@ -5,6 +5,7 @@ import { ErrorState } from '@/components/ErrorState'
 import { StatusBadge } from '@/components/StatusBadge'
 import { AiSuggestionsPanel } from '@/components/AiSuggestionsPanel'
 import { ManualSeoPanel } from '@/components/ManualSeoPanel'
+import { WcDraftPanel } from '@/components/WcDraftPanel'
 import { buildSuggestionContext } from '@/lib/ai/suggestion-context'
 import { buildManualSeoPrompt } from '@/lib/seo/manual-seo-prompt'
 import { notFound } from 'next/navigation'
@@ -286,6 +287,16 @@ export default async function InventoryItemPage({
           promptText={manualSeoPromptText}
           approvedSuggestion={approvedSuggestion}
         />
+
+        {approvedSuggestion && (
+          <WcDraftPanel
+            itemId={data.id}
+            wcProductId={data.wc_product_id ?? null}
+            wcStatus={data.wc_status as string}
+            wcError={data.wc_error ?? null}
+            precioPubWeb={data.precio_publicado_web ? Number(data.precio_publicado_web) : null}
+          />
+        )}
 
         {aiEnabled && (
           <AiSuggestionsPanel itemId={data.id} suggestions={suggestions} />
