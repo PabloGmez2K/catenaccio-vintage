@@ -9,8 +9,11 @@ export type WcProductPayload = {
   description: string
   short_description: ''
   stock_status: 'instock'
-  manage_stock: false
-  meta_data: Array<{ key: string; value: string }>
+  manage_stock: boolean
+  stock_quantity?: number | null
+  categories?: Array<{ id: number }>
+  // value is string for most fields; string[] for ACF multi-value fields (e.g. ano_temporada)
+  meta_data: Array<{ key: string; value: string | string[] }>
 }
 
 export type WcProductResponse = {

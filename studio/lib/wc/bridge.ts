@@ -7,7 +7,38 @@ import { createClient } from '@/lib/supabase/server'
 import { createWcDraftProduct } from './client'
 import type { WcProductPayload } from './client'
 
-const BRIDGE_VERSION = 'v1.0'
+const BRIDGE_VERSION = 'v2.0'
+
+// ACF field reference keys — static values from the ACF field group config.
+// Each custom field value must be accompanied by its _fieldname key so that
+// WP Admin / ACF can associate the stored value with the correct field definition.
+// Confirmed from reference product 1731 in S022C.5 audit.
+const ACF_KEYS = {
+  liga: 'field_6919a5df21a63',
+  equipo: 'field_6919a6e721a64',
+  jugador: 'field_692af8bd4913e',
+  ano_temporada: 'field_6919aae821a65',
+  talla: 'field_66b9ef77d1372',
+  medida_axila: 'field_6919a35c21a61',
+  medida_largo: 'field_6919a57921a62',
+  condicion: 'field_66b9efd3d1373',
+  defectos: 'field_66b9f060d1374',
+  descripcion_del_producto: 'field_66b9f077d1375',
+} as const
+
+// WooCommerce product category IDs — confirmed in S022C.5.
+// liga === '' → no league → assumed national team → Selecciones Nacionales.
+// liga !== '' → club in a known league → Otros Clubs.
+// Leyendas (149) and Nuevo (22) require curatorial judgment — Pablo assigns manually in WP Admin.
+// S023 will add a category selector to Studio UI to handle Leyendas.
+const WC_CATEGORY_IDS = {
+  seleccionesNacionales: 148,
+  otrosClubs: 147,
+} as const
+
+function resolveCategoryId(ligaValue: string): number {
+  return ligaValue === '' ? WC_CATEGORY_IDS.seleccionesNacionales : WC_CATEGORY_IDS.otrosClubs
+}
 
 export type BridgeResult =
   | { ok: true; wcProductId: number }
@@ -191,23 +222,51 @@ export async function createWcDraftForItem(itemId: string): Promise<BridgeResult
   }
 
   // ── 8. Build WC payload ───────────────────────────────────────────────────
+  const descriptionText = suggestion.descripcion_larga.trim()
+
+  // descripcion_del_producto meta: WC does not auto-wrap meta values in <p> (unlike the root
+  // description field). Wrap in <p> if the content is plain text; preserve existing HTML as-is.
+  const descForMeta = descriptionText.trimStart().startsWith('<')
+    ? descriptionText
+    : `<p>${descriptionText}</p>`
+
+  const categoryId = resolveCategoryId(ligaValue)
+
   const payload: WcProductPayload = {
     name: suggestion.titulo_seo.trim(),
     type: 'simple',
     status: 'draft', // HARDCODED — immutable
     regular_price: precioStr,
-    description: suggestion.descripcion_larga.trim(),
+    description: descriptionText,
     short_description: '',
     stock_status: 'instock',
-    manage_stock: false,
+    manage_stock: true,
+    stock_quantity: 1,
+    categories: [{ id: categoryId }],
     meta_data: [
       { key: 'liga', value: ligaValue },
+      { key: '_liga', value: ACF_KEYS.liga },
       { key: 'equipo', value: shirt.equipo.trim() },
-      { key: 'ano_temporada', value: shirt.temporada.trim() },
-      { key: 'talla', value: shirt.talla.trim() },
-      { key: 'condicion', value: shirt.condicion.trim() },
+      { key: '_equipo', value: ACF_KEYS.equipo },
       { key: 'jugador', value: jugadorValue },
-      { key: 'descripcion_del_producto', value: suggestion.descripcion_larga.trim() },
+      { key: '_jugador', value: ACF_KEYS.jugador },
+      // ano_temporada is an ACF multi-value field — must be sent as array, not plain string.
+      // Plain string breaks PHP serialization and the Filtro Camisetas Pro meta_query.
+      { key: 'ano_temporada', value: [shirt.temporada.trim()] },
+      { key: '_ano_temporada', value: ACF_KEYS.ano_temporada },
+      { key: 'talla', value: shirt.talla.trim() },
+      { key: '_talla', value: ACF_KEYS.talla },
+      { key: 'medida_axila', value: shirt.ancho_cm?.toString() ?? '' },
+      { key: '_medida_axila', value: ACF_KEYS.medida_axila },
+      { key: 'medida_largo', value: shirt.largo_cm?.toString() ?? '' },
+      { key: '_medida_largo', value: ACF_KEYS.medida_largo },
+      { key: 'condicion', value: shirt.condicion.trim() },
+      { key: '_condicion', value: ACF_KEYS.condicion },
+      { key: 'defectos', value: shirt.condicion_notas?.trim() ?? '' },
+      { key: '_defectos', value: ACF_KEYS.defectos },
+      { key: 'descripcion_del_producto', value: descForMeta },
+      { key: '_descripcion_del_producto', value: ACF_KEYS.descripcion_del_producto },
+      { key: 'rank_math_primary_product_cat', value: categoryId.toString() },
     ],
   }
 
@@ -221,6 +280,9 @@ export async function createWcDraftForItem(itemId: string): Promise<BridgeResult
       status: payload.status,
       regular_price: payload.regular_price,
       description: payload.description,
+      manage_stock: payload.manage_stock,
+      stock_quantity: payload.stock_quantity,
+      categories: payload.categories,
       meta_data: payload.meta_data,
     },
     bridge_version: BRIDGE_VERSION,

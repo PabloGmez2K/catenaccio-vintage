@@ -32,6 +32,49 @@ Cross-referencia con `agent_events.jsonl` para detalle de eventos.
 <!-- APPEND ENTRADAS AQUÍ — no modificar lo de arriba -->
 
 ---
+**Sesión S022C.6** — 2026-06-28
+**Agente:** Claude Code (Sonnet)
+**Modo:** IMPL / DRAFT_ONLY / NO_PUBLISH / NO_WC_UPDATE / NO_DEPLOY
+**Tipo:** impl / payload-patch
+**Tarea:** Mejorar el payload Studio → WooCommerce (bridge v2.0) para que el siguiente borrador creado desde Studio sea publicable: ACF field keys, `ano_temporada` array, medidas, defectos, categorías, manage_stock, HTML en descripción.
+
+**Decisiones clave:**
+- ACF `_fieldname` reference keys (10 campos) añadidas como constante `ACF_KEYS` hardcodeada en bridge.ts — keys estáticas del ACF field group, confirmadas en S022C.5 desde el producto 1731.
+- `ano_temporada` value: `string` → `[string]` array. Sin este cambio, el Filtro Camisetas Pro (PHP serialized array meta_query) no hace match y el campo queda vacío en WP Admin.
+- `medida_axila` y `medida_largo` leídos de `shirt.ancho_cm` y `shirt.largo_cm` (ya disponibles en `football_shirt_details`).
+- `defectos` leído de `shirt.condicion_notas`.
+- `categories` auto-asignada: `liga === ''` → 148 (Selecciones Nacionales), `liga !== ''` → 147 (Otros Clubs). Leyendas (149) y Nuevo (22) son curatoriales → asignación manual en WP Admin hasta S023.
+- `manage_stock: true + stock_quantity: 1` — pattern correcto para vintage único. `sold_individually` no es el mecanismo real (la referencia también tiene false).
+- `descripcion_del_producto` meta: si el texto no empieza con `<`, se envuelve en `<p>…</p>` explícito (WC no auto-wraps meta values).
+- `rank_math_primary_product_cat` añadido como meta entry con el categoryId.
+- `BRIDGE_VERSION` → `'v2.0'`.
+- `WcProductPayload` type actualizado: `manage_stock: boolean`, `stock_quantity?: number | null`, `categories?: Array<{id: number}>`, `meta_data.value: string | string[]`.
+- Snapshot ampliado: incluye `manage_stock`, `stock_quantity`, `categories`.
+
+**Qué se validó:** typecheck PASS, build PASS (8/8 rutas), lint PASS (0 issues), git diff --check PASS, secret scan CLEAN. No se llamó a WooCommerce. Producto 1854 no modificado.
+**Qué NO se tocó:** POST/PUT/PATCH/DELETE WooCommerce, producto 1854, .env.local, secretos, schema Supabase, DRAFT_ONLY guard, idempotencia, wc-terms-mvp.ts, WP Admin, Vercel, producción.
+**Siguiente paso:** Pablo crea nuevo item de prueba en Studio (con medidas y notas condición), aprueba SEO manual, pulsa "Crear borrador en WooCommerce" 1 vez, verifica en WP Admin que "Detalles del Producto" muestra Liga/Equipo/Año correctamente y que la categoría NO es "Sin categorizar".
+**agent_events ref:** 2026-06-28T23:59:59Z (wc_payload_patch_bridge_v2)
+---
+**Sesión S022C.5** — 2026-06-28
+**Agente:** Claude Code (Sonnet)
+**Modo:** READ_ONLY / NO_CODE / NO_WRITE / NO_WC_UPDATE / NO_PUBLISH
+**Tipo:** audit / gap-analysis
+**Tarea:** Auditar por qué el borrador 1854 no es publicable, comparando contra el producto referencia 1731 (Rivaldo Barcelona) mediante GET read-only a WooCommerce.
+
+**Decisiones clave:**
+- ACF field reference keys (10 campos) son estáticas y se pueden hardcodear en el bridge — confirmadas desde el producto 1731.
+- `ano_temporada` se almacena como PHP serialized array en WC → debe enviarse como `["termId"]` (array JSON), no como string.
+- `sold_individually` NO es la diferencia clave — la referencia también tiene false. El mecanismo correcto es `manage_stock: true + stock_quantity: 1`.
+- Categorías disponibles confirmadas: Leyendas(149), Nuevo(22), Otros Clubs(147), Selecciones Nacionales(148), Sin categorizar(17).
+- Mapeo automático propuesto: `liga === ''` → 148, `liga !== ''` → 147.
+- Leyendas (149) y Nuevo (22) requieren juicio curatorial de Pablo → S023.
+
+**Qué se validó:** GET /wc/v3/products/1854 OK. GET /wc/v3/products?search=Rivaldo OK. GET /wc/v3/products/categories OK. 10 gaps documentados en `docs/studio/STUDIO_WC_DRAFT_PUBLISHABILITY_GAP_AUDIT.md`.
+**Qué NO se tocó:** ningún POST/PUT/PATCH/DELETE a WooCommerce. Producto 1854 y 1731 no modificados. .env.local, secretos (no impresos), código, Supabase schema, WP Admin, Vercel, producción.
+**Siguiente paso:** S022C.6 — implementar patch mínimo M1–M9 en bridge.ts y client.ts.
+**agent_events ref:** 2026-06-28T23:59:50Z (wc_draft_publishability_gap_audit_s022c5)
+---
 **Sesión S022C.4** — 2026-06-28  
 **Agente:** Claude Code (Sonnet)  
 **Modo:** PATCH_WC_TERM_IDS / NO_WC_POST / NO_DEPLOY  

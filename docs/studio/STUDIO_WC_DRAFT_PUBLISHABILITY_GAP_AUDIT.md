@@ -354,4 +354,25 @@ Implementar en `studio/lib/wc/bridge.ts` y `studio/lib/wc/client.ts` (WcProductP
 
 ---
 
+---
+
+## S022C.6 — PATCH IMPLEMENTADO
+
+**Fecha:** 2026-06-28  
+**Estado:** PATCH IMPLEMENTADO — pendiente validación funcional por Pablo con nuevo borrador de prueba.
+
+Todos los gaps MUST (M1–M9) implementados en `studio/lib/wc/bridge.ts` y `studio/lib/wc/client.ts`:
+- ACF `_fieldname` keys: ✓ añadidas para los 10 campos
+- `ano_temporada` array: ✓ `string` → `[string]`
+- `medida_axila` + `medida_largo`: ✓ (`ancho_cm` / `largo_cm`)
+- `defectos`: ✓ (`condicion_notas`)
+- `categories`: ✓ mapeo automático 148/147
+- `descripcion_del_producto` HTML: ✓ `<p>` wrapping
+- `manage_stock: true` + `stock_quantity: 1`: ✓
+- `rank_math_primary_product_cat`: ✓ como meta entry
+
+typecheck / build / lint / diff --check / secret scan: todos **PASS**.
+
+**Producto 1854 (ya creado con payload v1.0):** no fue modificado. Pablo puede parchear los campos faltantes manualmente en WP Admin antes de publicarlo, o crear un nuevo item de prueba para validar el payload v2.0 completo.
+
 *Sesión S022C.5 — 2026-06-28 — Claude Code (Sonnet). READ_ONLY / NO_CODE / NO_WRITE / NO_WC_UPDATE / NO_PUBLISH.*

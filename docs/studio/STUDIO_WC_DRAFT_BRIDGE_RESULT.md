@@ -331,4 +331,77 @@ typecheck / build / lint / git diff --check / secret scan: todos **PASS**
 
 ---
 
+### S022C.5 — READ_ONLY_WC_DRAFT_PUBLISHABILITY_GAP_AUDIT
+
+**Resultado:** `READY_FOR_S022C6_PAYLOAD_PATCH`  
+**Fecha:** 2026-06-28  
+**Modo:** READ_ONLY / NO_CODE / NO_WC_UPDATE
+
+Auditoría GET read-only del borrador 1854 vs producto publicado de referencia 1731 (Rivaldo Barcelona). 10 gaps documentados. Ver `docs/studio/STUDIO_WC_DRAFT_PUBLISHABILITY_GAP_AUDIT.md` para la matriz completa.
+
+Hallazgos críticos:
+- Faltan ACF `_fieldname` keys para todos los campos → "Detalles del Producto" vacío en WP Admin.
+- `ano_temporada` enviado como string `"180"` → debe ser array `["180"]` para que el Filtro Camisetas Pro haga match.
+- Faltan `medida_axila`, `medida_largo`, `defectos`.
+- `categories` → "Sin categorizar" (id:17). Categorías reales: Otros Clubs (147), Selecciones (148), Leyendas (149).
+- `manage_stock: false` → debe ser `true + stock_quantity: 1`.
+- `descripcion_del_producto` sin `<p>` HTML en meta.
+
+---
+
+### S022C.6 — PAYLOAD_PATCH_BRIDGE
+
+**Resultado:** `READY_FOR_PABLO_NEW_DRAFT_TEST`  
+**Fecha:** 2026-06-28  
+**Modo:** IMPL / DRAFT_ONLY / NO_PUBLISH / NO_WC_UPDATE / NO_PUBLISH
+
+#### Cambios implementados
+
+**`studio/lib/wc/client.ts` — tipo `WcProductPayload`:**
+- `manage_stock: boolean` (antes literal `false`)
+- Campo nuevo: `stock_quantity?: number | null`
+- Campo nuevo: `categories?: Array<{ id: number }>`
+- `meta_data.value`: `string | string[]` (antes `string` — necesario para `ano_temporada` array)
+
+**`studio/lib/wc/bridge.ts` — lógica de payload:**
+- `BRIDGE_VERSION` → `'v2.0'`
+- Constantes `ACF_KEYS` con las 10 field reference keys extraídas del producto 1731
+- Constante `WC_CATEGORY_IDS` con `seleccionesNacionales: 148`, `otrosClubs: 147`
+- Helper `resolveCategoryId(ligaValue)`: `liga === ''` → 148 (Selecciones), `liga !== ''` → 147 (Otros Clubs)
+- `ano_temporada` value: `string` → `[string]` array
+- ACF `_fieldname` keys añadidas para todos los campos custom
+- Campos nuevos en meta_data: `medida_axila`, `_medida_axila`, `medida_largo`, `_medida_largo`, `defectos`, `_defectos`
+- Fuentes: `shirt.ancho_cm`, `shirt.largo_cm`, `shirt.condicion_notas`
+- `descripcion_del_producto`: texto plano → `<p>${text}</p>` si no empieza con `<`; HTML preservado si ya tiene markup
+- `manage_stock: true` + `stock_quantity: 1`
+- `categories: [{ id: categoryId }]`
+- `rank_math_primary_product_cat` como meta entry con el `categoryId`
+- `wc_payload_snapshot` ampliado: incluye `manage_stock`, `stock_quantity`, `categories`
+
+#### Categorías — decisiones diferidas a S023
+
+- **Leyendas (149):** categoría curatorial, requiere juicio de Pablo → asignación manual en WP Admin
+- **Nuevo (22):** para deadstock/BNWT → asignación manual en WP Admin
+- **S023** añadirá selector de categoría en Studio UI
+
+#### Validaciones
+
+| Check | Resultado |
+|-------|-----------|
+| `npm run typecheck` | PASS |
+| `npm run build` | PASS (8/8 páginas) |
+| `npm run lint` | PASS (0 issues) |
+| `git diff --check` | PASS |
+| Secret scan del diff | CLEAN |
+| DRAFT_ONLY guard | PASS — status literal 'draft' no modificado |
+| Idempotencia | PASS — check `wc_product_id IS NULL` sin cambios |
+
+#### Qué NO se modificó
+
+- Ninguna llamada a WooCommerce (ni POST, ni PUT, ni PATCH)
+- Producto 1854 no modificado
+- `.env.local`, schema Supabase, DRAFT_ONLY guard, idempotencia, wc-terms-mvp.ts
+
+---
+
 *Sesión S022C — 2026-06-28 — Claude Code (Sonnet). IMPL / DRAFT_ONLY / NO_PUBLISH / NO_CONFIG_CHANGE.*
