@@ -37,9 +37,15 @@ export default async function InventoryItemPage({
   return (
     <AppShell>
       <div className="item-detail">
-        <Link href="/inventory" className="back-link">
-          ← Volver al inventario
-        </Link>
+        <div className="detail-top-row">
+          <Link href="/inventory" className="back-link">
+            ← Volver al inventario
+          </Link>
+          <Link href={`/inventory/${data.id}/edit`} className="btn-secondary btn-sm">
+            Editar
+          </Link>
+        </div>
+
         <h2>{data.referencia}</h2>
 
         <section className="detail-section">
@@ -90,13 +96,15 @@ export default async function InventoryItemPage({
           )}
         </section>
 
-        {data.proveedor && (
+        {(data.proveedor || data.fecha_compra) && (
           <section className="detail-section">
             <h3>Adquisición</h3>
-            <div className="field-row">
-              <span className="field-label">Proveedor</span>
-              <span className="field-value">{data.proveedor}</span>
-            </div>
+            {data.proveedor && (
+              <div className="field-row">
+                <span className="field-label">Proveedor</span>
+                <span className="field-value">{data.proveedor}</span>
+              </div>
+            )}
             {data.fecha_compra && (
               <div className="field-row">
                 <span className="field-label">Fecha compra</span>
@@ -111,6 +119,36 @@ export default async function InventoryItemPage({
         {shirt && (
           <section className="detail-section">
             <h3>Camiseta</h3>
+
+            {/* Canonical product fields */}
+            <div className="field-row">
+              <span className="field-label">Tipo</span>
+              <span className="field-value">{shirt.product_type}</span>
+            </div>
+            {shirt.shirt_version && shirt.shirt_version !== 'None' && (
+              <div className="field-row">
+                <span className="field-label">Versión</span>
+                <span className="field-value">{shirt.shirt_version}</span>
+              </div>
+            )}
+            <div className="field-row">
+              <span className="field-label">Autenticidad</span>
+              <span className="field-value">{shirt.authenticity_type}</span>
+            </div>
+            {shirt.product_type === 'Shirt' && (
+              <div className="field-row">
+                <span className="field-label">Manga</span>
+                <span className="field-value">{shirt.sleeve_length}</span>
+              </div>
+            )}
+            {shirt.sponsor && (
+              <div className="field-row">
+                <span className="field-label">Sponsor</span>
+                <span className="field-value">{shirt.sponsor}</span>
+              </div>
+            )}
+
+            {/* Catalogue taxonomy */}
             <div className="field-row">
               <span className="field-label">Equipo</span>
               <span className="field-value">
@@ -143,6 +181,8 @@ export default async function InventoryItemPage({
                 <span className="field-value">{shirt.marca_display}</span>
               </div>
             )}
+
+            {/* Player / personalisation */}
             {shirt.jugador_display && (
               <div className="field-row">
                 <span className="field-label">Jugador</span>
@@ -158,10 +198,10 @@ export default async function InventoryItemPage({
                 </span>
               </div>
             )}
+
             {(shirt.es_match_worn ||
               shirt.tiene_parches ||
-              shirt.tiene_etiquetas ||
-              shirt.es_replica) && (
+              shirt.tiene_etiquetas) && (
               <div className="field-row">
                 <span className="field-label">Características</span>
                 <span className="field-value">
@@ -169,17 +209,23 @@ export default async function InventoryItemPage({
                     shirt.es_match_worn && 'Match worn',
                     shirt.tiene_parches && 'Con parches',
                     shirt.tiene_etiquetas && 'Con etiquetas',
-                    shirt.es_replica && 'Réplica',
                   ]
                     .filter(Boolean)
                     .join(' · ')}
                 </span>
               </div>
             )}
+
             {shirt.condicion_notas && (
               <div className="field-row">
                 <span className="field-label">Notas condición</span>
                 <span className="field-value">{shirt.condicion_notas}</span>
+              </div>
+            )}
+            {shirt.autenticidad && (
+              <div className="field-row">
+                <span className="field-label">Notas autenticidad</span>
+                <span className="field-value">{shirt.autenticidad}</span>
               </div>
             )}
           </section>
@@ -200,7 +246,7 @@ export default async function InventoryItemPage({
         )}
 
         <p className="read-only-notice">
-          Vista de solo lectura — S022B añadirá sugerencias Claude · S022C añadirá publicación Woo
+          S022B añadirá sugerencias Claude · S022C añadirá publicación Woo
         </p>
       </div>
     </AppShell>

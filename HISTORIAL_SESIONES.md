@@ -903,3 +903,29 @@ Sesión 022A (2026-06-28, Claude Code Sonnet): LOCAL_APP_IMPLEMENTATION / NO_DEP
 **Siguiente paso:** S022A.2B - FORM_DOMAIN_UX_PATCH local/no Woo/no AI.
 **agent_events ref:** 2026-06-28T09:10:00Z (studio_domain_schema_patch_closed)
 ---
+
+---
+**Sesion 022A.2B** - 2026-06-28
+**Agente:** Claude Code Sonnet
+**Modo:** LOCAL_APP_IMPLEMENTATION / NO_DEPLOY / NO_WC / NO_AI
+**Tipo:** impl / form-domain-ux-patch / create-edit
+**Tarea:** STUDIO_FORM_DOMAIN_UX_PATCH
+
+**Resultado:** READY_FOR_PABLO_VALIDATION. Veredicto READY_FOR_PABLO_LOCAL_FORM_OK.
+
+**Que se hizo:**
+- studio/lib/wc-terms-mvp.ts creado: opciones canonicas (liga, equipo 60+, temporada 36 seasons, marca, talla, condicion, productType, shirtVersion, authenticityType, sleeveLength) + resolveTermId().
+- studio/lib/title-builder.ts creado: buildTitle() puro. Regla: [Season] [Team] [Auth-if-not-Replica] [Version] [L/S] [Shirt/GK-Shirt/ProductType] - [Player] #[Number] - ([Size]).
+- studio/components/ItemForm.tsx reescrito: inputs controlados React useState, 4 secciones, selects/datalists por campo, titulo autogenerado en tiempo real, override manual con badge, boton Regenerar, mode create/edit.
+- studio/app/inventory/actions.ts: createInventoryItem refactorizado + updateInventoryItem anadido (owner_id + RLS).
+- studio/app/inventory/[id]/edit/page.tsx creado: ruta de edicion.
+- studio/app/inventory/[id]/page.tsx: boton Editar + campos nuevos.
+- studio/styles/globals.css: estilos title-preview, btn-regenerate, manual-badge, detail-top-row.
+
+**Que se valido:** typecheck PASS, build PASS (8 rutas), lint PASS, diff --check PASS, secret scan CLEAN, scope CLEAN.
+
+**Que NO se toco:** WooCommerce, WordPress, Anthropic, Vercel, cPanel, Supabase SQL, .env.local, service_role, produccion.
+
+**Siguiente paso:** Pablo valida local -> PABLO_LOCAL_FORM_OK -> S022B desbloqueado.
+**agent_events ref:** 2026-06-28T12:00:00Z (studio_form_domain_ux_patch)
+---

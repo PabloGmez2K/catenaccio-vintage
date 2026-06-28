@@ -47,6 +47,13 @@ export interface InventoryItem {
 export interface FootballShirtDetails {
   id: string
   item_id: string
+  // S022A.2A canonical fields — NOT NULL with defaults
+  product_type: string
+  shirt_version: string
+  authenticity_type: string
+  sleeve_length: string
+  sponsor: string | null
+  // Catalogue taxonomy
   liga: string | null
   liga_display: string | null
   equipo: string
@@ -57,6 +64,7 @@ export interface FootballShirtDetails {
   marca: string | null
   marca_display: string | null
   condicion: string
+  // Player / personalisation
   jugador: string | null
   jugador_display: string | null
   numero_dorsal: string | null
@@ -66,8 +74,10 @@ export interface FootballShirtDetails {
   tiene_etiquetas: boolean
   es_match_worn: boolean
   es_replica: boolean
+  // Measurements
   largo_cm: number | null
   ancho_cm: number | null
+  // Notes
   condicion_notas: string | null
   autenticidad: string | null
 }
