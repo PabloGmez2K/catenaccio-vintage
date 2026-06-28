@@ -90,6 +90,11 @@ Si la tarea llega como read-only / ASK, no modificar archivos. Devolver diagnós
 - Ejemplo frágil (evitar): `is_checkout()`, `$_SERVER['REQUEST_URI']`.
 - Si el approach de detección de contexto falla 3 veces con el mismo síntoma → STOP_AND_REPLAN (RULE-01 / PATTERN-07).
 
+**Catenaccio Studio — formularios/product UI:**
+- Los agentes CODE no deben introducir labels técnicos, nombres de sesiones, roadmap interno, IDs visibles ni valores internos en UI salvo pantalla explícitamente técnica.
+- Si hay ambigüedad de dominio en campos, labels, title builder, taxonomías, autenticidad, condición, versión o mapping Woo, activar `DOMAIN_PRODUCT_MODELING_GATE` antes de CODE. Ver `docs/studio/STUDIO_PRODUCT_FORM_MODELING_PLAYBOOK.md`.
+- Si Pablo detecta 2+ microfixes de UI/dominio en la misma línea, parar microparches y pedir modelado breve antes del siguiente patch.
+
 ---
 
 ## Modos de operación del proyecto

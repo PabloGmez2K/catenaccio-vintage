@@ -998,3 +998,27 @@ Sesión 022A (2026-06-28, Claude Code Sonnet): LOCAL_APP_IMPLEMENTATION / NO_DEP
 **Siguiente paso:** S022B - STUDIO_AI_SUGGESTIONS_SHADOW.
 **agent_events ref:** 2026-06-28T10:38:01Z (studio_form_local_validation_close)
 ---
+
+---
+**Sesion 022A.LEARN** - 2026-06-28
+**Agente:** Codex
+**Modo:** DOCS_ONLY / NO_CODE / NO_REMOTE_WRITE
+**Tipo:** docs / operating-pattern / product-form-modeling
+**Tarea:** STUDIO_PRODUCT_FORM_MODELING_PLAYBOOK
+
+**Resultado:** COMPLETED - `DOMAIN_PRODUCT_MODELING_GATE` capturado como playbook operativo ligero.
+
+**Que se hizo:**
+- Creado `docs/studio/STUDIO_PRODUCT_FORM_MODELING_PLAYBOOK.md`.
+- ORCHESTRATOR.md actualizado con bloque `DOMAIN_PRODUCT_MODELING_GATE`.
+- AGENTS.md actualizado con guardrail para evitar labels tecnicos, nombres de sesiones, roadmap interno, IDs visibles o valores internos en UI no tecnica.
+- BACKLOG.md actualizado sin duplicar items existentes.
+- `docs/meta/SESSION_LEARNING_TRANSFER_QUEUE.md` actualizado con SLT-005.
+
+**Que se valido:** git diff --check PASS; scope documental; sin cambios en codigo/app/runtime.
+
+**Que NO se toco:** codigo, `studio/`, WordPress, WooCommerce API, Supabase remoto, Supabase CLI, psql, SQL, Vercel, cPanel, Anthropic API, `.env.local`, credenciales, secretos, produccion.
+
+**Siguiente paso:** Usar el playbook antes de CODE en la proxima tarea Studio con formulario/product UI ambiguo; S022B sigue siendo el siguiente bloque funcional.
+**agent_events ref:** 2026-06-28T16:00:00Z (studio_product_form_modeling_playbook)
+---

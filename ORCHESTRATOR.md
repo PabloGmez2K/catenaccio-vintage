@@ -430,6 +430,22 @@ Estos patrones del sistema operativo madre aplican por defecto. Ver definición 
 
 ---
 
+## §20 — DOMAIN_PRODUCT_MODELING_GATE
+
+Activar antes de CODE cuando una tarea toque formularios nuevos, taxonomías, campos de producto,
+UI de backoffice, copy operativo, title builders o flujos donde Pablo valide visualmente.
+
+Regla: si hay ambigüedad de dominio, primero ASK/read-only/modeling, no CODE. El agente debe
+producir una spec breve de campos, labels visibles, valores internos, title labels, opciones,
+mapping externo/Woo pendiente, ejemplos reales y casos borde. Ver
+`docs/studio/STUDIO_PRODUCT_FORM_MODELING_PLAYBOOK.md`.
+
+Señal de parada: si Pablo detecta 2+ microfixes de UI/dominio en la misma línea, no seguir
+parcheando; activar `STOP_AND_MODEL_DOMAIN`, validar matriz de decisiones y luego hacer un patch
+coherente.
+
+---
+
 ## Historial de cambios de este documento
 
 | Fecha | Cambio | Quién |
@@ -437,3 +453,4 @@ Estos patrones del sistema operativo madre aplican por defecto. Ver definición 
 | 2026-06-06 | Creado desde lafabrica-template | lafabrica_new.py |
 | 2026-06-13 | Stack real, lectura proporcional +git step 0, guardrails de dominio, tabla de agentes específica, §16 SESSION_WORKSTREAM_ANCHOR, §17 TARGET_OPTIONS binario | Claude Code (Sonnet) |
 | 2026-06-24 | §19 — reglas RULE-01 a RULE-05, DEC-PABLO-01 a DEC-PABLO-03 absorbidas del Operating Brain; patrones PATTERN-05 a 09 de lafabrica; equivalencias PrestaShop→WooCommerce; referencia al AGENT_EXPERIENCE_LEDGER | Claude Code (Sonnet) |
+| 2026-06-28 | §20 — DOMAIN_PRODUCT_MODELING_GATE para formularios/product UI tras aprendizaje S022A | Codex |

@@ -126,3 +126,24 @@ precios, pedidos, proveedores sensibles). Solo señales saneadas. Ver `DATA_AND_
 - privacy_level: INTERNAL_ONLY
 - Estado: CANDIDATE
 - Siguiente accion: Revisar tras THEME_SHADOW_VISUAL_VALIDATION; si el release completo pasa, promover a patron operacional reusable.
+
+---
+
+### SLT-005 — DOMAIN_PRODUCT_MODELING_GATE desde S022A
+
+- Fecha: 2026-06-28
+- Proyecto: catenaccio-vintage
+- Sesion/bloque: S022A - Studio create/edit product form
+- project_value: Playbook ligero para modelar formularios/product UI antes de CODE cuando hay vocabulario ambiguo, labels visibles, valores internos, title labels y mapping Woo pendiente.
+- lafabrica: Patron generalizable como `DOMAIN_PRODUCT_MODELING_GATE`, `STOP_MICROFIX_SPIRAL` y `FORM_READINESS_CHECKLIST` para evitar bucles de microfix en pantallas de producto/backoffice.
+- brain:
+  - evidence: Evidencia saneada de diseno de backoffice/PIM AI-first y modelado operativo de producto antes de implementacion.
+  - skills: Traduccion de feedback de product owner a guardrails accionables; separacion entre dato interno, display, SEO/title y external mapping.
+  - service_angle: Diseno de backoffices operativos para e-commerce con vocabulario de dominio complejo.
+  - content_angle: "Antes de codear un formulario de producto: modela labels, valores internos y casos borde".
+  - portfolio_asset: Caso documentado de Catenaccio Studio como PIM AI-first con gate de modelado de producto.
+- future_product: Checklist reusable para cualquier vertical donde el operador valide formularios internos antes de publicar a un canal externo.
+- no_copy: Datos comerciales reales, clientes, ventas, precios, proveedores, credenciales o detalles privados de inventario.
+- privacy_level: INTERNAL_ONLY
+- Estado: CANDIDATE
+- Siguiente accion: Validar el gate en la proxima pantalla Studio con ambiguedad de dominio; si reduce microfixes, promover a lafabrica-template.
