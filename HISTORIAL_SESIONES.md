@@ -955,3 +955,27 @@ Sesión 022A (2026-06-28, Claude Code Sonnet): LOCAL_APP_IMPLEMENTATION / NO_DEP
 **Siguiente paso:** Pablo valida local: formulario /inventory/new, comprueba "Original retail / Fan version", entrada manual de liga/marca, titulo con "PSV" para PSV Eindhoven. Responde PABLO_LOCAL_FORM_OK o blockers concretos. Si OK → S022B desbloqueado.
 **agent_events ref:** 2026-06-28 (studio_form_domain_labels_options_fix)
 ---
+
+---
+**Sesion 022A.2D** - 2026-06-28
+**Agente:** Claude Code Sonnet
+**Modo:** LOCAL_APP_PATCH / NO_DEPLOY / NO_WC / NO_AI
+**Tipo:** patch / detail-copy / auth-label-fix
+**Tarea:** STUDIO_DETAIL_COPY_AND_AUTH_LABEL_FIX
+
+**Resultado:** READY_FOR_PABLO_VALIDATION. Veredicto: READY_FOR_PABLO_LOCAL_FORM_OK.
+
+**Que se hizo:**
+- studio/lib/wc-terms-mvp.ts: label principal de autenticidad cambiado de "Original retail / Fan version" a "Original". value:'Replica' mantenido para backward compat.
+- studio/components/ItemForm.tsx: helper text de autenticidad actualizado: "Original retail / Fan version" → "Original".
+- studio/app/inventory/[id]/page.tsx: funcion local formatAuthenticityLabel() anadida (Replica/Original retail/Original → 'Original'; resto pasan tal cual). Usada en fila Autenticidad. Texto "S022B anadira sugerencias Claude · S022C anadira publicacion Woo" eliminado de UI.
+- BACKLOG.md: STUDIO_ARCHIVE_OR_DELETE_ITEM_ACTION anadido en LATER.
+- docs/studio/STUDIO_DETAIL_COPY_AND_AUTH_LABEL_FIX_RESULT.md creado.
+
+**Que se valido:** typecheck PASS, build PASS (8 rutas), lint PASS, diff --check exit 0, secret scan CLEAN, scope CLEAN.
+
+**Que NO se toco:** WooCommerce, WordPress, Anthropic, Vercel, cPanel, Supabase SQL, .env.local, service_role, produccion, borrado duro. S022B sigue BLOQUEADO.
+
+**Siguiente paso:** Pablo valida: detalle muestra "Original", no aparece texto roadmap, formulario sigue OK. Responde PABLO_LOCAL_FORM_OK o blockers.
+**agent_events ref:** 2026-06-28 (studio_detail_copy_and_auth_label_fix)
+---

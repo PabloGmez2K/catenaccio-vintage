@@ -409,7 +409,7 @@ export function ItemForm({
               </select>
               <FieldError msg={fe.authenticity_type} />
               <p className="field-help">
-                Usa <strong>Original retail / Fan version</strong> para una camiseta original vendida al público — no significa falsa. Solo usa Player Issue, Match Issue o Match Worn si tienes indicios o prueba clara. Si dudas, usa <strong>No determinado</strong> y deja notas de autenticidad.
+                Usa <strong>Original</strong> para una camiseta original vendida al público — no significa falsa. Solo usa Player Issue, Match Issue o Match Worn si tienes indicios o prueba clara. Si dudas, usa <strong>No determinado</strong> y deja notas de autenticidad.
               </p>
             </div>
           </div>

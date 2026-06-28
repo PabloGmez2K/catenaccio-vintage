@@ -6,6 +6,16 @@ import { StatusBadge } from '@/components/StatusBadge'
 import { notFound } from 'next/navigation'
 import type { ItemStatus, PhotoStatus, WcSyncStatus } from '@/lib/types'
 
+// Maps raw DB authenticity_type values to the UI label Pablo sees.
+// 'Replica' is the stored value for "Original" (legacy + current internal value).
+function formatAuthenticityLabel(value: string | null): string {
+  if (!value) return '—'
+  if (value === 'Replica' || value === 'Original retail / Fan version' || value === 'Original') {
+    return 'Original'
+  }
+  return value
+}
+
 export default async function InventoryItemPage({
   params,
 }: {
@@ -133,7 +143,7 @@ export default async function InventoryItemPage({
             )}
             <div className="field-row">
               <span className="field-label">Autenticidad</span>
-              <span className="field-value">{shirt.authenticity_type}</span>
+              <span className="field-value">{formatAuthenticityLabel(shirt.authenticity_type)}</span>
             </div>
             {shirt.product_type === 'Shirt' && (
               <div className="field-row">
@@ -245,9 +255,6 @@ export default async function InventoryItemPage({
           </section>
         )}
 
-        <p className="read-only-notice">
-          S022B añadirá sugerencias Claude · S022C añadirá publicación Woo
-        </p>
       </div>
     </AppShell>
   )

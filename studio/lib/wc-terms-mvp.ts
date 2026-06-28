@@ -185,7 +185,7 @@ export const shirtVersionOptions: TermOption[] = [
 
 export const authenticityTypeOptions: TermOption[] = [
   {
-    label: 'Original retail / Fan version',
+    label: 'Original',
     value: 'Replica',
     termId: '',
     titleLabel: '',
