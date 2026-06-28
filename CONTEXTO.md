@@ -58,6 +58,8 @@ Hipótesis no verificadas del SEED:
 <!-- APPEND AQUÍ — no editar entradas anteriores -->
 <!-- Formato: Sesión N (YYYY-MM-DD, Agente): MODO / tipo. [Qué se hizo]. [Qué se validó]. [Qué NO se tocó]. -->
 
+Sesión 022A.1B (2026-06-28, Antigravity): READ_ONLY_COMPETITOR_PRODUCT_MODEL_AUDIT / NO_CODE / NO_REMOTE_WRITE. [Auditoría visual/modelo de CFS completada y comparada con Catenaccio. Definido modelo de datos granular: shirt_version, product_type, authenticity_type, sleeve_length y sponsor. Diseño de patrón de título autogenerado en inglés con talla en el listado]. [Se validó que el repositorio local está limpio, preflight git PASS. Creado docs/studio/CLASSIC_FOOTBALL_SHIRTS_PRODUCT_MODEL_AUDIT.md y actualizado el schema SQL MVP local docs/studio/STUDIO_SUPABASE_SCHEMA_MVP.sql]. [No se tocó código de Next.js, base de datos en Supabase remota, WooCommerce, WordPress Admin ni cPanel]. Veredicto: ADJUST_S022A2_MODEL_FIRST. Siguiente: S022A.2 FORM_DOMAIN_UX_PATCH (prereq: Pablo ejecuta ALTER TABLE con nuevos campos granulares en Supabase).
+
 ## Fase actual (actualizado 2026-06-27 — Sesión 018 / DEC-13)
 
 **Fase:** Redirección estratégica → Studio-first

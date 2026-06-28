@@ -302,6 +302,13 @@ CREATE TABLE football_shirt_details (
     jugador             TEXT,              -- pa_jugador term ID o vacío
     jugador_display     TEXT,
 
+    -- Nuevas columnas granulares de dominio (Sesión 022A.1B)
+    product_type        TEXT NOT NULL DEFAULT 'Shirt',         -- 'Shirt', 'Shorts', 'Jacket', etc.
+    shirt_version       TEXT NOT NULL DEFAULT 'Home',          -- 'Home', 'Away', 'Third', 'Goalkeeper', 'Training', 'Pre-match', 'Special', 'None'
+    authenticity_type   TEXT NOT NULL DEFAULT 'Replica',       -- 'Replica', 'Player Issue', 'Match Issue', 'Match Worn', 'Official Reissue', 'Deadstock'
+    sleeve_length       TEXT NOT NULL DEFAULT 'Short Sleeve',   -- 'Short Sleeve', 'Long Sleeve'
+    sponsor             TEXT,
+
     -- Metadatos vintage
     es_match_worn           BOOLEAN NOT NULL DEFAULT FALSE,
     es_replica              BOOLEAN NOT NULL DEFAULT FALSE,

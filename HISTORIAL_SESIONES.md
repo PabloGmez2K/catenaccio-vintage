@@ -32,6 +32,25 @@ Cross-referencia con `agent_events.jsonl` para detalle de eventos.
 <!-- APPEND ENTRADAS AQUÍ — no modificar lo de arriba -->
 
 ---
+**Sesión 022A.1B** — 2026-06-28
+**Agente:** Antigravity
+**Modo:** READ_ONLY_COMPETITOR_PRODUCT_MODEL_AUDIT / NO_CODE / NO_REMOTE_WRITE
+**Tipo:** audit / model-design
+**Tarea:** Auditar Classic Football Shirts para ajustar el modelo de producto del formulario de Catenaccio Studio y redefinir S022A.2.
+
+**Decisiones clave:**
+- Veredicto: `ADJUST_S022A2_MODEL_FIRST`. Es necesario ajustar el modelo y el schema de la DB local antes de implementar la UI en S022A.2.
+- Renombrar el campo temporal `version_camisa` a `shirt_version` (en inglés) y separarlo de `product_type` (tipo de prenda), `authenticity_type` (tipo de autenticidad: Replica/Player Issue/Match Worn), `sleeve_length` (manga corta/larga) y `sponsor`.
+- Diseñar el patrón de título en inglés con la talla al final entre paréntesis: `[Temporada] [Equipo] [Versión] Shirt – [Jugador] #[Dorsal] – ([TALLA])` para que Pablo la visualice en listados, y se adapte automáticamente a porteros (GK Shirt), manga larga (L/S Shirt), entrenamiento, selecciones nacionales y prendas premium.
+- Estructurar el formulario de Studio en 4 bloques de entrada (identificación, especificación, detalles y datos internos) y definir la lógica de selects, autocomplete datalists, texto libre y campos derivados.
+- Modificar localmente `STUDIO_SUPABASE_SCHEMA_MVP.sql` e instruir a Pablo a aplicar el ALTER TABLE con las nuevas columnas en Supabase SQL Editor como prerrequisito para S022A.2.
+- S022B y S022C permanecen bloqueados. S022A.2 puede realizarse de forma local y offline, sin integraciones a Woo o Anthropic en esta fase de formulario.
+
+**Qué se validó:** git status y preflight git PASS (0 ahead / 0 behind, working tree limpio, HEAD en 2e4b9cd). Audit visual pública de CFS terminada (estructuras, listados, filtros, titles, fichas de producto). Audit pública de Catenaccio y probe de API de WooCommerce inspeccionado (`API_READONLY_PROBE_RESULT.md`). Creado `docs/studio/CLASSIC_FOOTBALL_SHIRTS_PRODUCT_MODEL_AUDIT.md`. Modificado `docs/studio/STUDIO_SUPABASE_SCHEMA_MVP.sql`. Backlog y Contexto actualizados. Sin código tocado. Sin secretos. Sin remoto.
+**Qué NO se tocó:** studio/ (código de Next.js), base de datos de producción o Supabase remota, plugins o temas activos en WordPress, cPanel, Vercel, tokens o variables `.env.local`.
+**Siguiente paso:** S022A.2 — FORM_DOMAIN_UX_PATCH (Secuencia: S022A.2A Pablo ejecuta ALTER TABLE en Supabase, luego S022A.2B sesión CODE local de UI y Server Action).
+**agent_events ref:** 2026-06-28T10:56:00Z (classic_football_shirts_product_model_audit)
+---
 **Sesión 022A.1** — 2026-06-28
 **Agente:** Claude Code (Sonnet)
 **Modo:** READ_ONLY_DIAGNOSIS / NO_CODE / NO_REMOTE_WRITE
