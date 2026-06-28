@@ -226,7 +226,7 @@ function SuggestionCard({ suggestion }: { suggestion: AiSuggestion }) {
 
       <div className="ai-card-footer">
         <span className="ai-card-meta">
-          {suggestion.model_used} · {suggestion.prompt_version} · {new Date(suggestion.created_at).toLocaleDateString('es-ES')}
+          {new Date(suggestion.created_at).toLocaleDateString('es-ES')}
         </span>
       </div>
 

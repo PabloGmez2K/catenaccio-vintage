@@ -43,14 +43,19 @@ export default async function InventoryItemPage({
     )
   }
 
-  // Load AI suggestions ordered newest first
-  const { data: suggestionsData } = await supabase
-    .from('ai_suggestions')
-    .select('*')
-    .eq('item_id', id)
-    .order('version', { ascending: false })
+  // AI suggestions panel — only rendered when STUDIO_AI_ENABLED=true (server-side flag).
+  // Default off: cost-deferred until AI integration is explicitly activated.
+  const aiEnabled = process.env.STUDIO_AI_ENABLED === 'true'
 
-  const suggestions: AiSuggestion[] = (suggestionsData ?? []) as AiSuggestion[]
+  let suggestions: AiSuggestion[] = []
+  if (aiEnabled) {
+    const { data: suggestionsData } = await supabase
+      .from('ai_suggestions')
+      .select('*')
+      .eq('item_id', id)
+      .order('version', { ascending: false })
+    suggestions = (suggestionsData ?? []) as AiSuggestion[]
+  }
 
   const shirt = data.football_shirt_details
 
@@ -265,7 +270,9 @@ export default async function InventoryItemPage({
           </section>
         )}
 
-        <AiSuggestionsPanel itemId={data.id} suggestions={suggestions} />
+        {aiEnabled && (
+          <AiSuggestionsPanel itemId={data.id} suggestions={suggestions} />
+        )}
 
       </div>
     </AppShell>

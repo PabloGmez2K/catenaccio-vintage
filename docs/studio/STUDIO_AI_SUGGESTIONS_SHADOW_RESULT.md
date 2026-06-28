@@ -1,11 +1,15 @@
 # STUDIO_AI_SUGGESTIONS_SHADOW_RESULT
 
 Fecha: 2026-06-28
-Sesión: 022B
+Sesión: 022B / 022B.CLOSE
 Agente: Claude Code Sonnet
 Modo: LOCAL_APP_IMPLEMENTATION / SHADOW_FIRST / DOMAIN_PRODUCT_MODELING_GATE / NO_WC / NO_DEPLOY
-Resultado: READY_FOR_PABLO_AI_SHADOW_TEST
-Veredicto: READY_FOR_PABLO_AI_SHADOW_TEST
+Resultado: IMPLEMENTED / DORMANT / COST_DEFERRED
+Veredicto: READY_FOR_S022C_MANUAL_CONTENT_GATE
+
+**Decisión del operador (2026-06-28):** La integración Claude API queda preparada pero no activada. Primero se valida el sistema Studio y el puente Woo. Sin API key, sin gasto de crédito en esta fase.
+Feature flag server-side `STUDIO_AI_ENABLED` controla visibilidad del panel (default: oculto).
+S022C desbloqueado por ruta manual: `PABLO_MANUAL_CONTENT_OK` (sin depender de IA).
 
 ---
 
@@ -179,27 +183,28 @@ coste, proveedor, notas_compra, ubicacion_fisica, carpeta_local, notas_internas,
 
 ---
 
+## Estado DORMANT — activación futura
+
+La integración está implementada y lista. Para activarla en cualquier momento:
+1. Añadir `STUDIO_AI_ENABLED=true` en `.env.local`.
+2. Añadir `ANTHROPIC_API_KEY=sk-ant-...` en `.env.local`.
+3. Opcionalmente `ANTHROPIC_MODEL=claude-sonnet-4-6`.
+4. Reiniciar `npm run dev`.
+5. El panel "Sugerencias IA" aparecerá en la ficha de cada camiseta.
+
+No requiere cambios de código. El feature flag es la única llave.
+
 ## Validación manual de Pablo
 
-Estado: **PENDIENTE**
+Estado: **DIFERIDA — COST_DEFERRED por decisión del operador.**
 
-Pasos para Pablo:
-1. Asegurarse de tener `ANTHROPIC_API_KEY` añadida manualmente en `.env.local` local (no commiteada).
-2. Opcionalmente añadir `ANTHROPIC_MODEL=claude-sonnet-4-6` (o dejar en blanco para usar el fallback).
-3. Reiniciar `npm run dev` desde `studio/`.
-4. Abrir una camiseta ya validada en `/inventory/[id]`.
-5. Pulsar "Generar sugerencia con Claude".
-6. Verificar que aparece una sugerencia en la ficha con título, descripción, precio y notas.
-7. Comprobar que `inventory_items` no se modificó (el item sigue igual).
-8. Aprobar una sugerencia.
-9. Opcional: editar y aprobar otra sugerencia (o generar una segunda versión y aprobarla).
-10. Confirmar que Woo no se tocó (sin borrador nuevo en WP Admin).
-11. Responder: `PABLO_AI_SHADOW_OK`
+`PABLO_AI_SHADOW_OK` no es prerequisito de S022C en esta fase.
+Cuando el operador decida activar IA: seguir pasos de "activación futura" y responder `PABLO_AI_SHADOW_OK` para registrar la validación.
 
 ---
 
 ## Siguiente paso
 
-- **Si Pablo confirma PABLO_AI_SHADOW_OK** en esta sesión: `APPROVE_READY_FOR_S022C`.
-- **Si Pablo valida después**: `READY_FOR_PABLO_AI_SHADOW_TEST` → siguiente sesión es S022C — STUDIO_WC_DRAFT_BRIDGE.
-- S022C sigue BLOQUEADO hasta PABLO_AI_SHADOW_OK.
+S022C — STUDIO_WC_DRAFT_BRIDGE.
+Prerequisito: `PABLO_MANUAL_CONTENT_OK` — Pablo tiene ≥1 camiseta con referencia, título y descripción listos para crear borrador en WooCommerce.
+No depende de IA activada.

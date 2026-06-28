@@ -1071,3 +1071,44 @@ Sesión 022A (2026-06-28, Claude Code Sonnet): LOCAL_APP_IMPLEMENTATION / NO_DEP
 **Siguiente paso:** Pablo añade `ANTHROPIC_API_KEY` manualmente en `.env.local`, reinicia `npm run dev`, genera una sugerencia en una camiseta validada, aprueba una, y responde `PABLO_AI_SHADOW_OK`. S022C permanece BLOQUEADO hasta ese OK.
 **agent_events ref:** 2026-06-28T17:00:00Z (studio_ai_suggestions_shadow)
 ---
+
+---
+**Sesion 022B.CLOSE** - 2026-06-28
+**Agente:** lafabrica (agente)
+**Modo:** DOCS_AND_MINIMAL_PATCH / COST_DEFER_CLOSE / NO_WC / NO_DEPLOY
+**Tipo:** close-gate / feature-flag / docs-update
+**Tarea:** STUDIO_AI_SUGGESTIONS_COST_DEFER — cerrar S022B como DORMANT / COST_DEFERRED
+
+**Resultado:** READY_FOR_S022C_MANUAL_CONTENT_GATE.
+
+**Que se hizo:**
+- `studio/.env.example`: añadido `STUDIO_AI_ENABLED=` con comentario explicativo.
+- `studio/app/inventory/[id]/page.tsx`: feature flag server-side `process.env.STUDIO_AI_ENABLED === 'true'`. Si no activo: no carga `ai_suggestions` de DB, no renderiza `AiSuggestionsPanel`. Default: oculto.
+- `studio/components/AiSuggestionsPanel.tsx`: eliminados `model_used` y `prompt_version` del footer de tarjetas. Solo muestra fecha.
+- `docs/studio/STUDIO_AI_SUGGESTIONS_SHADOW_RESULT.md`: actualizado estado a IMPLEMENTED/DORMANT/COST_DEFERRED, instrucciones de activación futura, `PABLO_AI_SHADOW_OK` diferido.
+- `BACKLOG.md`: S022B → `[x] IMPLEMENTED/DORMANT/COST_DEFERRED`. S022C prerequisito cambiado a `PABLO_MANUAL_CONTENT_OK`, desbloqueado por ruta manual.
+- `CONTEXTO.md`, `HISTORIAL_SESIONES.md`, `agent_events.jsonl` actualizados.
+
+**Que se valido:**
+- typecheck: PASS (0 errores)
+- build: PASS (8 rutas)
+- lint: PASS (0 warnings/errors)
+- git diff --check: PASS
+- secret scan: CLEAN
+- scope check: CLEAN
+- jsonl: VALID
+
+**Que NO se toco:**
+- .env.local: NO
+- Anthropic API llamada: NO
+- WooCommerce: NO
+- WordPress: NO
+- Supabase remoto: NO
+- Schema: NO
+- service_role: NO
+- deploy: NO
+- produccion: NO
+
+**Siguiente paso:** S022C — STUDIO_WC_DRAFT_BRIDGE. Prerequisito: Pablo confirma `PABLO_MANUAL_CONTENT_OK` (≥1 camiseta con contenido listo para borrador Woo).
+**agent_events ref:** 2026-06-28T17:30:00Z (studio_ai_suggestions_cost_defer)
+---
