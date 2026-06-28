@@ -12,6 +12,7 @@ export type WcProductPayload = {
   manage_stock: boolean
   stock_quantity?: number | null
   categories?: Array<{ id: number }>
+  attributes?: Array<{ id: number; name?: string; options: string[]; visible: boolean; variation: boolean }>
   // value is string for most fields; string[] for ACF multi-value fields (e.g. ano_temporada)
   meta_data: Array<{ key: string; value: string | string[] }>
 }

@@ -4,10 +4,11 @@
 // Idempotent: stops immediately if wc_product_id is already set.
 
 import { createClient } from '@/lib/supabase/server'
+import { equipoOptions, getTermLabelById, ligaOptions, temporadaOptions } from '@/lib/wc-terms-mvp'
 import { createWcDraftProduct } from './client'
 import type { WcProductPayload } from './client'
 
-const BRIDGE_VERSION = 'v2.0'
+const BRIDGE_VERSION = 'v2.1'
 
 // ACF field reference keys — static values from the ACF field group config.
 // Each custom field value must be accompanied by its _fieldname key so that
@@ -34,6 +35,13 @@ const ACF_KEYS = {
 const WC_CATEGORY_IDS = {
   seleccionesNacionales: 148,
   otrosClubs: 147,
+} as const
+
+const WC_ATTRIBUTE_IDS = {
+  equipo: 4,
+  liga: 5,
+  jugador: 6,
+  ano: 7,
 } as const
 
 function resolveCategoryId(ligaValue: string): number {
@@ -68,6 +76,30 @@ function isValidRequiredTermId(value: string | null | undefined): boolean {
 function isValidOptionalTermId(value: string | null | undefined): boolean {
   if (value == null || value.trim() === '') return true
   return /^\d+$/.test(value.trim())
+}
+
+function resolveAttributeOption(
+  termId: string,
+  displayValue: string | null | undefined,
+  options: Parameters<typeof getTermLabelById>[0]
+): string {
+  const display = displayValue?.trim()
+  if (display) return display
+  return getTermLabelById(options, termId)
+}
+
+function buildAttribute(
+  id: number,
+  option: string,
+  name?: string
+): NonNullable<WcProductPayload['attributes']>[number] {
+  return {
+    id,
+    name,
+    options: [option],
+    visible: false,
+    variation: false,
+  }
 }
 
 // ── Main bridge function ────────────────────────────────────────────────────────
@@ -174,6 +206,52 @@ export async function createWcDraftForItem(itemId: string): Promise<BridgeResult
     }
   }
 
+  const ligaAttributeOption = ligaValue
+    ? resolveAttributeOption(ligaValue, shirt.liga_display, ligaOptions)
+    : ''
+  if (ligaValue && !ligaAttributeOption) {
+    return {
+      ok: false,
+      code: 'VALIDATION_ERROR',
+      error: `liga_attribute_option_missing: no hay label seguro para el term ID de liga "${ligaValue}". Actualiza wc-terms-mvp.ts o el display cache antes de crear el borrador.`,
+    }
+  }
+
+  const equipoAttributeOption = resolveAttributeOption(
+    shirt.equipo.trim(),
+    shirt.equipo_display,
+    equipoOptions
+  )
+  if (!equipoAttributeOption) {
+    return {
+      ok: false,
+      code: 'VALIDATION_ERROR',
+      error: `equipo_attribute_option_missing: no hay label seguro para el term ID de equipo "${shirt.equipo.trim()}". Actualiza wc-terms-mvp.ts o el display cache antes de crear el borrador.`,
+    }
+  }
+
+  const temporadaAttributeOption = resolveAttributeOption(
+    shirt.temporada.trim(),
+    shirt.temporada_display,
+    temporadaOptions
+  )
+  if (!temporadaAttributeOption) {
+    return {
+      ok: false,
+      code: 'VALIDATION_ERROR',
+      error: `temporada_attribute_option_missing: no hay label seguro para el term ID de temporada "${shirt.temporada.trim()}". Actualiza wc-terms-mvp.ts o el display cache antes de crear el borrador.`,
+    }
+  }
+
+  const jugadorAttributeOption = jugadorValue ? shirt.jugador_display?.trim() ?? '' : ''
+  if (jugadorValue && !jugadorAttributeOption) {
+    return {
+      ok: false,
+      code: 'VALIDATION_ERROR',
+      error: `jugador_attribute_option_missing: no hay label seguro para el term ID de jugador "${jugadorValue}". Actualiza el display cache o espera a S023 sync real antes de crear el borrador.`,
+    }
+  }
+
   // ── 6. Load latest approved ai_suggestion ─────────────────────────────────
   const { data: suggestions } = await supabase
     .from('ai_suggestions')
@@ -231,6 +309,16 @@ export async function createWcDraftForItem(itemId: string): Promise<BridgeResult
     : `<p>${descriptionText}</p>`
 
   const categoryId = resolveCategoryId(ligaValue)
+  const attributes: WcProductPayload['attributes'] = [
+    ...(ligaAttributeOption
+      ? [buildAttribute(WC_ATTRIBUTE_IDS.liga, ligaAttributeOption, 'Liga')]
+      : []),
+    buildAttribute(WC_ATTRIBUTE_IDS.equipo, equipoAttributeOption, 'Equipo'),
+    buildAttribute(WC_ATTRIBUTE_IDS.ano, temporadaAttributeOption, 'Año'),
+    ...(jugadorAttributeOption
+      ? [buildAttribute(WC_ATTRIBUTE_IDS.jugador, jugadorAttributeOption, 'Jugador')]
+      : []),
+  ]
 
   const payload: WcProductPayload = {
     name: suggestion.titulo_seo.trim(),
@@ -243,6 +331,7 @@ export async function createWcDraftForItem(itemId: string): Promise<BridgeResult
     manage_stock: true,
     stock_quantity: 1,
     categories: [{ id: categoryId }],
+    attributes,
     meta_data: [
       { key: 'liga', value: ligaValue },
       { key: '_liga', value: ACF_KEYS.liga },
@@ -283,6 +372,7 @@ export async function createWcDraftForItem(itemId: string): Promise<BridgeResult
       manage_stock: payload.manage_stock,
       stock_quantity: payload.stock_quantity,
       categories: payload.categories,
+      attributes: payload.attributes,
       meta_data: payload.meta_data,
     },
     bridge_version: BRIDGE_VERSION,

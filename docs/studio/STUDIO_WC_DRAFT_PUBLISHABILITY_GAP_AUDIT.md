@@ -1,5 +1,22 @@
 # STUDIO_WC_DRAFT_PUBLISHABILITY_GAP_AUDIT — S022C.5
 
+---
+
+## CONFIRMACIÓN ACF — S022C.8
+
+Pablo confirmó en WP Admin / ACF que los campos `Liga`, `Equipo`, `Jugador` y `Año` son campos ACF de tipo **Taxonomía**:
+
+| Campo | Tipo ACF | Crear términos | Guardar términos | Cargar términos | Retorno | Apariencia |
+|-------|----------|----------------|------------------|-----------------|---------|------------|
+| Liga | Taxonomía | Activado | Activado | Activado | ID de término | Select / UI ACF |
+| Equipo | Taxonomía | Activado | Activado | Activado | ID de término | Select / UI ACF |
+| Jugador | Taxonomía | Activado | Activado | Activado | ID de término | Select / UI ACF |
+| Año | Taxonomía | Activado | Activado | Activado | ID de término | Casilla de verificación |
+
+Implicación: escribir solo `wp_postmeta` mediante `meta_data` no basta para que ACF muestre los términos seleccionados cuando `save_terms/load_terms` están activos. Además del valor ACF en meta, el producto necesita relaciones reales en `wp_term_relationships`. S022C.8 añade `attributes[]` al payload WooCommerce como mecanismo complementario para que WooCommerce cree esas relaciones al crear el borrador.
+
+S023 debe reemplazar el mapa estático `studio/lib/wc-terms-mvp.ts` por una sincronización real de términos/categorías WooCommerce desde Studio.
+
 **Proyecto:** Catenaccio Vintage  
 **Fecha:** 2026-06-28  
 **Sesión:** S022C.5 — READ_ONLY_WC_DRAFT_PUBLISHABILITY_GAP_AUDIT  

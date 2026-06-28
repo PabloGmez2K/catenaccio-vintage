@@ -1,5 +1,85 @@
 # STUDIO_WC_DRAFT_BRIDGE_RESULT — S022C
 
+---
+
+### S022C.8 — TAXONOMY_RELATIONSHIP_PAYLOAD_PATCH
+
+**Resultado:** `READY_FOR_PABLO_TAXONOMY_DRAFT_TEST`
+**Fecha:** 2026-06-28
+**Modo:** IMPL / DRAFT_ONLY / NO_WC_CALL / NO_WC_UPDATE / NO_DEPLOY
+
+#### Causa raíz confirmada
+
+S022C.7 confirmó que el borrador 1856 tenía `meta_data` ACF correcto (`liga=177`, `equipo=179`, `ano_temporada=["180"]` y sus `_field_keys`), pero WP Admin no mostraba los campos ACF Taxonomy seleccionados. Pablo confirmó que Liga, Equipo, Jugador y Año son campos ACF de tipo Taxonomía con `save_terms` y `load_terms` activados y retorno por ID de término.
+
+El ajuste de S022C.8 mantiene los `meta_data` ACF y añade `attributes[]` al payload WooCommerce para que Woo cree también relaciones reales en `wp_term_relationships`.
+
+#### Cambios en payload
+
+**`studio/lib/wc/client.ts`:**
+- `WcProductPayload.attributes?: Array<{ id: number; name?: string; options: string[]; visible: boolean; variation: boolean }>`
+- `status: 'draft'` se mantiene literal e inmutable.
+
+**`studio/lib/wc/bridge.ts`:**
+- `BRIDGE_VERSION` pasa a `v2.1`.
+- Se añaden attributes complementarios:
+  - Liga: attribute id `5`
+  - Equipo: attribute id `4`
+  - Año/Temporada: attribute id `7`
+  - Jugador: attribute id `6` solo si hay term ID y label seguro
+- Todos los attributes van con `visible: false` y `variation: false`.
+- `wc_payload_snapshot` incluye ahora `attributes`, además de `categories`, `meta_data`, `manage_stock` y `stock_quantity`.
+
+#### Resolución de labels/options
+
+Woo REST espera `options` como nombres/slugs de términos, no IDs. El bridge resuelve cada opción así:
+- Usa primero el display cache del item (`liga_display`, `equipo_display`, `temporada_display`, `jugador_display`) si existe.
+- Si falta display cache, usa `wc-terms-mvp.ts` por `termId` mediante `getTermLabelById()`.
+- Si no hay label seguro para un term ID requerido, el bridge devuelve `VALIDATION_ERROR` antes de cualquier llamada Woo.
+
+Para el caso PSV validado por Pablo:
+- Liga: `Eredivisie`
+- Equipo: `PSV`
+- Año: `2007-09`
+
+#### Meta_data conservado
+
+Se conservan sin eliminar:
+- `liga`, `_liga`
+- `equipo`, `_equipo`
+- `jugador`, `_jugador`
+- `ano_temporada`, `_ano_temporada`
+- `talla`, `_talla`
+- medidas, condición, defectos, descripción y `rank_math_primary_product_cat`
+
+`attributes[]` es complementario: no reemplaza el contrato ACF meta existente.
+
+#### Validaciones
+
+| Check | Resultado |
+|-------|-----------|
+| `npm run typecheck` | PASS |
+| `npm run build` | PASS (8/8 rutas) |
+| `npm run lint` | PASS (0 warnings/errors; aviso de deprecación de `next lint`) |
+
+#### Qué NO se tocó
+
+- Ninguna llamada a WooCommerce
+- Ningún `POST`, `PUT`, `PATCH` o `DELETE`
+- Productos 1854, 1856 y 1731 no modificados
+- WP Admin no abierto
+- `.env.local` no modificado
+- Supabase schema no modificado
+- DRAFT_ONLY e idempotencia conservados
+
+#### Riesgo documentado
+
+WooCommerce REST suele aceptar `attributes[]` con `options` por nombre/slug y crear relaciones de taxonomía de producto, pero la validación final requiere un nuevo borrador controlado por Pablo en WP Admin. Si Woo no vincula los términos con esta estructura, S023 deberá resolverlo con sincronización real de términos/categorías y/o endpoint específico.
+
+#### Acción para Pablo
+
+Crear un nuevo item de prueba en Studio, aprobar SEO manual, pulsar **Crear borrador en WooCommerce** una sola vez y verificar en WP Admin que Liga, Equipo y Año aparecen seleccionados en el bloque ACF "Detalles del Producto".
+
 **Proyecto:** Catenaccio Vintage  
 **Fecha:** 2026-06-28  
 **Sesión:** S022C — STUDIO_WC_DRAFT_BRIDGE  

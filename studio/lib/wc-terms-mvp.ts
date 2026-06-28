@@ -223,6 +223,13 @@ export function resolveTermId(options: TermOption[], input: string): string {
   return match?.termId ?? ''
 }
 
+export function getTermLabelById(options: TermOption[], termId: string): string {
+  if (!termId.trim()) return ''
+  const match = options.find((o) => o.termId === termId.trim())
+  if (!match) return ''
+  return match.titleLabel !== undefined ? match.titleLabel : match.label
+}
+
 // Returns the titleLabel for a given input, matching by label, value, or alias.
 // If no titleLabel is defined on the match, returns the input as-is.
 // '' means the caller should omit this field from the title.

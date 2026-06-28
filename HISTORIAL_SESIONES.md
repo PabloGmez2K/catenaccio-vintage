@@ -1424,3 +1424,15 @@ Sesión 022A (2026-06-28, Claude Code Sonnet): LOCAL_APP_IMPLEMENTATION / NO_DEP
 **Siguiente paso:** Pablo comparte el `equipo_display` y `temporada_display` exactos del item que falló, o ejecuta lectura manual en Supabase de esos dos campos. Con esa evidencia, actualizar solo las entradas necesarias del mapa local; después Pablo abre Editar → Guardar para re-resolver term IDs y reintenta crear un único borrador.
 **agent_events ref:** 2026-06-28T23:45:00Z (wc_term_id_gap_for_first_draft)
 ---
+
+---
+**Sesion S022C.8** - 2026-06-28
+**Agente:** Codex
+**Modo:** IMPL / DRAFT_ONLY / TAXONOMY_RELATIONSHIP_PAYLOAD_PATCH / NO_WC_CALL / NO_DEPLOY
+**Resultado:** READY_FOR_PABLO_TAXONOMY_DRAFT_TEST
+**Que se hizo:** WcProductPayload acepta attributes[]; bridge.ts envia Liga id 5, Equipo id 4, Ano id 7 y Jugador id 6 solo con term ID y label seguro; meta_data ACF se conserva; snapshot incluye attributes/categories/meta_data/manage_stock/stock_quantity; S023 queda marcado para reemplazar wc-terms-mvp.ts por sync real.
+**Que se valido:** npm run typecheck PASS; npm run build PASS; npm run lint PASS.
+**Que NO se toco:** WooCommerce API, WP Admin, productos 1854/1856/1731, Supabase schema, .env.local, produccion, DRAFT_ONLY e idempotencia.
+**Siguiente paso:** Pablo crea un nuevo borrador controlado desde Studio y verifica en WP Admin que Liga/Equipo/Ano aparecen seleccionados en ACF.
+**agent_events ref:** 2026-06-28T23:59:58Z (wc_taxonomy_relationship_payload_patch)
+---
