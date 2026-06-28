@@ -1449,3 +1449,42 @@ Sesión 022A (2026-06-28, Claude Code Sonnet): LOCAL_APP_IMPLEMENTATION / NO_DEP
 **Siguiente paso:** S023 - taxonomy/category manager con sync real de terminos y categorias, resolucion de jugador y asignacion Leyendas/Nuevo/Otros Clubs desde Studio.
 **agent_events ref:** 2026-06-28T23:59:59Z (PABLO_TAXONOMY_DRAFT_OK_WITH_PLAYER_DEFERRED)
 ---
+---
+**Sesion S022C.9** - 2026-06-29
+**Agente:** Codex
+**Modo:** DOCS_ONLY / NO_CODE / NO_WC_CALL / NO_DEPLOY
+**Resultado:** READY_FOR_OPUS_STRATEGY_REVIEW
+**Tarea:** Documentar lecciones operativas de S022/S022C y preparar briefing estrategico Opus antes de S023.
+
+**Motivo:**
+S022C valido tecnicamente el bridge Studio -> WooCommerce, pero la sesion fue sucia: aparecieron capas sucesivas no previstas (term IDs, mapa local `wc-terms-mvp.ts`, ACF companion keys, `ano_temporada` array, categorias, stock, ACF Taxonomy, `wp_term_relationships`, `attributes[]`, jugador/Rivaldo). La decision operativa es no seguir implementando Studio hasta una revision Opus Max que defina S023-S030.
+
+**Archivos creados:**
+- `docs/studio/STUDIO_SUITE_BUILD_SYSTEM_LESSONS.md`
+- `docs/studio/STUDIO_OPUS_STRATEGY_BRIEF.md`
+
+**Archivos actualizados:**
+- `BACKLOG.md`
+- `CONTEXTO.md`
+- `HISTORIAL_SESIONES.md`
+- `agent_events.jsonl`
+- `docs/meta/SESSION_LEARNING_TRANSFER_QUEUE.md`
+
+**Decision clave:**
+No seguir implementando S023 antes de `OPUS_STRATEGY_REVIEW_BEFORE_S023_IMPLEMENTATION`. S023 ya existe y ya incluye `PLAYER_TERM_RESOLUTION`; se consolida sin duplicar backlog.
+
+**Que se valido:**
+- `git diff --check`
+- `agent_events.jsonl` parseable
+- secret scan del diff
+- `.env.local` ausente del diff
+- `git status -sb`
+- `git log --oneline -5`
+
+**Que NO se toco:**
+Codigo Studio runtime, WooCommerce API, WP Admin, productos, Supabase, `.env.local`, deploy, publicacion, plugins, temas, DB, wp-config.php.
+
+**Siguiente paso:**
+Abrir sesion Opus Max estrategica para definir TARGET architecture Studio/Woo/ACF, roadmap S023-S030, gates por sesion y criterios de validacion antes de implementar S023.
+**agent_events ref:** 2026-06-28T22:03:00Z (STUDIO_BUILD_SYSTEM_LESSONS_AND_OPUS_BRIEF)
+---

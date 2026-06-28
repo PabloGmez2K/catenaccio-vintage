@@ -148,3 +148,23 @@ precios, pedidos, proveedores sensibles). Solo señales saneadas. Ver `DATA_AND_
 - Estado: IMPORTED_TO_BRAIN
 - Siguiente accion: Evaluar absorcion en lafabrica-template via LAFABRICA_DOMAIN_PRODUCT_MODELING_GATE_FROM_CATENACCIO_S022A si el patron se valida en otra pantalla Studio.
 - Traza Brain: 2026-06-28 -> pablo-operating-brain EVID-003 + absorb log + POST_IDEAS + OFFER-12; recomendacion lafabrica registrada.
+---
+
+### SLT-006 - Woo/ACF integration gates from S022C
+
+- Fecha: 2026-06-29
+- Proyecto: catenaccio-vintage
+- Sesion/bloque: S022C.9 - DOCUMENT_STUDIO_BUILD_SYSTEM_LESSONS_AND_OPUS_BRIEF
+- project_value: Captura el cambio de metodo para Catenaccio Studio antes de S023: dejar de iterar por microparches y exigir diff de producto referencia, revision ACF, mapa de capas de datos y fixture completa antes de CODE.
+- lafabrica: Patron reusable para integraciones WooCommerce/ACF: `PRODUCT_REFERENCE_DIFF_GATE`, `ACF_CONFIG_GATE`, `DATA_LAYER_MAPPING_GATE`, `FULL_FIXTURE_TEST_GATE`, `NO_MICROPATCH_LOOP_GATE`.
+- brain:
+  - evidence: Evidencia saneada de integracion real Studio -> WooCommerce con ACF Taxonomy, categorias, stock y DRAFT_ONLY.
+  - skills: Diagnostico de sistemas e-commerce por capas; conversion de sesiones sucias en gates operativos reutilizables.
+  - service_angle: Arquitectura y estabilizacion de backoffices PIM/Studio para WooCommerce con ACF.
+  - content_angle: "Cuando WooCommerce no basta: como mapear root fields, ACF, taxonomias y term relationships antes de codear".
+  - portfolio_asset: Caso Catenaccio Studio como puente PIM -> WooCommerce draft-only con gates de integracion.
+- future_product: Checklist reusable para conectores de publicacion desde Studio/PIM hacia CMS/e-commerce legacy.
+- no_copy: Credenciales, datos reales de inventario, clientes, pedidos, precios privados, URLs privadas de admin, secretos y detalles operativos sensibles.
+- privacy_level: INTERNAL_ONLY
+- Estado: CANDIDATE
+- Siguiente accion: Revisar tras Opus S023 strategy; si el patron guia una sesion limpia de S023, promoverlo a lafabrica como guardrail de integraciones Woo/ACF.
