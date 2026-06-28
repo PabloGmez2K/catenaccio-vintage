@@ -34,7 +34,7 @@ export function buildTitle({
   if (season) parts.push(season)
   if (team) parts.push(team)
 
-  // Non-Replica authenticity label comes before version (e.g. "Match Worn Home Shirt")
+  // Pre-resolved titleLabel from getTitleLabel(); '' means omit (e.g. Original retail, No determinado)
   if (authenticityType && authenticityType !== 'Replica') {
     parts.push(authenticityType)
   }

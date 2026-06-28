@@ -929,3 +929,29 @@ Sesión 022A (2026-06-28, Claude Code Sonnet): LOCAL_APP_IMPLEMENTATION / NO_DEP
 **Siguiente paso:** Pablo valida local -> PABLO_LOCAL_FORM_OK -> S022B desbloqueado.
 **agent_events ref:** 2026-06-28T12:00:00Z (studio_form_domain_ux_patch)
 ---
+
+---
+**Sesion 022A.2C** - 2026-06-28
+**Agente:** Claude Code Sonnet
+**Modo:** LOCAL_APP_PATCH / NO_DEPLOY / NO_WC / NO_AI
+**Tipo:** patch / form-domain-labels-options / ux-refinement
+**Tarea:** STUDIO_FORM_DOMAIN_LABELS_AND_CANONICAL_OPTIONS_FIX
+
+**Resultado:** READY_FOR_PABLO_VALIDATION. Veredicto: READY_FOR_PABLO_LOCAL_FORM_OK.
+
+**Que se hizo:**
+- studio/lib/wc-terms-mvp.ts: TermOption extendida (value?, titleLabel?, helpText?); "Replica" → "Original retail / Fan version" con value:'Replica'; "No determinado" anadido; "Deadstock / BNWT" y "Player Issue / Authentic" con titleLabels. Todas las listas ordenadas alfabeticamente (excepto tallaOptions por escala). PSV Eindhoven titleLabel:'PSV', PSG titleLabel:'PSG'. getTitleLabel() exportada.
+- studio/lib/title-builder.ts: comentario actualizado; logica de filtraje 'Replica' mantenida como fallback.
+- studio/components/ItemForm.tsx: Liga convertida a datalist libre, Marca convertida a datalist libre. Select Autenticidad usa value={o.value ?? o.label}. computedTitle usa getTitleLabel() para equipo y autenticidad. Helpers anadidos: selecciones nacionales, autenticidad, terminos manuales. .field-help via CSS.
+- studio/app/inventory/actions.ts: esReplica reconoce 'Replica' y 'Original retail / Fan version'.
+- studio/styles/globals.css: clase .field-help anadida.
+- docs/studio/STUDIO_FORM_DOMAIN_LABELS_OPTIONS_FIX_RESULT.md creado.
+- BACKLOG.md, CONTEXTO.md, HISTORIAL_SESIONES.md, agent_events.jsonl actualizados.
+
+**Que se valido:** typecheck PASS (0 errores), build PASS (8 rutas), lint PASS (0 warnings/errors), git diff --check exit 0, secret scan CLEAN, scope CLEAN (sin schema/Woo/WP/Anthropic/deploy/.env.local).
+
+**Que NO se toco:** WooCommerce, WordPress, Anthropic, Vercel, cPanel, Supabase SQL, .env.local, service_role, produccion, S022B (sigue bloqueado).
+
+**Siguiente paso:** Pablo valida local: formulario /inventory/new, comprueba "Original retail / Fan version", entrada manual de liga/marca, titulo con "PSV" para PSV Eindhoven. Responde PABLO_LOCAL_FORM_OK o blockers concretos. Si OK → S022B desbloqueado.
+**agent_events ref:** 2026-06-28 (studio_form_domain_labels_options_fix)
+---

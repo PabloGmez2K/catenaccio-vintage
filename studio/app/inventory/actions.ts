@@ -122,8 +122,8 @@ export async function createInventoryItem(
   const temporadaTermId = resolveTermId(temporadaOptions, temporadaDisplay)
   const marcaTermId = marcaDisplay ? resolveTermId(marcaOptions, marcaDisplay) : ''
 
-  // es_replica and es_match_worn derived from authenticity_type
-  const esReplica = authenticityType === 'Replica'
+  // es_replica derived from authenticity_type; 'Replica' is the stored value for "Original retail / Fan version"
+  const esReplica = authenticityType === 'Replica' || authenticityType === 'Original retail / Fan version'
 
   const { data: item, error: itemError } = await supabase
     .from('inventory_items')
@@ -274,7 +274,7 @@ export async function updateInventoryItem(
   const temporadaTermId = resolveTermId(temporadaOptions, temporadaDisplay)
   const marcaTermId = marcaDisplay ? resolveTermId(marcaOptions, marcaDisplay) : ''
 
-  const esReplica = authenticityType === 'Replica'
+  const esReplica = authenticityType === 'Replica' || authenticityType === 'Original retail / Fan version'
 
   // Update inventory_items — RLS + owner_id check prevents cross-user edits
   const { error: itemError } = await supabase

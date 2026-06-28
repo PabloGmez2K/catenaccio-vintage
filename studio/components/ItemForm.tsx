@@ -14,6 +14,7 @@ import {
   shirtVersionOptions,
   authenticityTypeOptions,
   sleeveLengthOptions,
+  getTitleLabel,
 } from '@/lib/wc-terms-mvp'
 import {
   createInventoryItem,
@@ -123,10 +124,10 @@ export function ItemForm({
     () =>
       buildTitle({
         season: temporadaDisplay,
-        team: equipoDisplay,
+        team: getTitleLabel(equipoOptions, equipoDisplay),
         productType,
         shirtVersion,
-        authenticityType,
+        authenticityType: getTitleLabel(authenticityTypeOptions, authenticityType),
         sleeveLength,
         player: jugadorDisplay,
         number: numeroDorsal,
@@ -231,21 +232,27 @@ export function ItemForm({
 
           <div className="form-field">
             <label htmlFor="liga_display">Liga</label>
-            <select
+            <input
               id="liga_display"
               name="liga_display"
+              type="text"
+              list="liga-list"
               value={ligaDisplay}
               onChange={(e) => setLigaDisplay(e.target.value)}
-            >
-              <option value="">Sin liga / Selección nacional</option>
-              {ligaOptions
-                .filter((o) => o.label !== 'Sin liga / Selección nacional')
-                .map((o) => (
-                  <option key={o.label} value={o.label}>
-                    {o.label}
-                  </option>
-                ))}
-            </select>
+              placeholder="LaLiga, Premier League, Sin liga / Selección nacional…"
+              autoComplete="off"
+            />
+            <datalist id="liga-list">
+              {ligaOptions.map((o) => (
+                <option key={o.label} value={o.label} />
+              ))}
+            </datalist>
+            <p className="field-help">
+              Para selecciones nacionales, usa Liga = Sin liga / Selección nacional y Equipo = España, Francia, Brasil, Argentina…
+            </p>
+            <p className="field-help">
+              Si no aparece en la lista, puedes escribirlo. Studio lo guardará como pendiente de mapeo para Woo.
+            </p>
           </div>
 
           <div className={`form-field ${fe.equipo_display ? 'has-error' : ''}`}>
@@ -268,6 +275,9 @@ export function ItemForm({
               ))}
             </datalist>
             <FieldError msg={fe.equipo_display} />
+            <p className="field-help">
+              Si no aparece en la lista, puedes escribirlo. Studio lo guardará como pendiente de mapeo para Woo.
+            </p>
           </div>
 
           <div className={`form-field ${fe.temporada_display ? 'has-error' : ''}`}>
@@ -295,19 +305,24 @@ export function ItemForm({
           <div className="form-row">
             <div className="form-field">
               <label htmlFor="marca_display">Marca</label>
-              <select
+              <input
                 id="marca_display"
                 name="marca_display"
+                type="text"
+                list="marca-list"
                 value={marcaDisplay}
                 onChange={(e) => setMarcaDisplay(e.target.value)}
-              >
-                <option value="">— Seleccionar —</option>
+                placeholder="Adidas, Nike, Umbro…"
+                autoComplete="off"
+              />
+              <datalist id="marca-list">
                 {marcaOptions.map((o) => (
-                  <option key={o.label} value={o.label}>
-                    {o.label}
-                  </option>
+                  <option key={o.label} value={o.label} />
                 ))}
-              </select>
+              </datalist>
+              <p className="field-help">
+                Si no aparece en la lista, puedes escribirla. Studio la guardará como pendiente de mapeo para Woo.
+              </p>
             </div>
 
             <div className={`form-field ${fe.talla ? 'has-error' : ''}`}>
@@ -387,12 +402,15 @@ export function ItemForm({
                 onChange={(e) => setAuthenticityType(e.target.value)}
               >
                 {authenticityTypeOptions.map((o) => (
-                  <option key={o.label} value={o.label}>
+                  <option key={o.label} value={o.value ?? o.label}>
                     {o.label}
                   </option>
                 ))}
               </select>
               <FieldError msg={fe.authenticity_type} />
+              <p className="field-help">
+                Usa <strong>Original retail / Fan version</strong> para una camiseta original vendida al público — no significa falsa. Solo usa Player Issue, Match Issue o Match Worn si tienes indicios o prueba clara. Si dudas, usa <strong>No determinado</strong> y deja notas de autenticidad.
+              </p>
             </div>
           </div>
 

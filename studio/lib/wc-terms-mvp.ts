@@ -1,101 +1,98 @@
 // Canonical domain options for Catenaccio Studio forms.
 // Pablo sees `label`; server actions resolve `termId` internally.
 // termId = '' means the WC term ID is not yet known — S022C blocks publish if termId is needed.
+// value = internal stored value (defaults to label when omitted).
+// titleLabel = short form for title construction; '' means omit from title.
 
 export type TermOption = {
   label: string
+  value?: string      // stored in DB; defaults to label when omitted
   termId: string
   aliases?: string[]
+  titleLabel?: string // used in title; '' = omit; undefined = use label
+  helpText?: string
 }
 
 // ── Liga ──────────────────────────────────────────────────────────────────────
 
 export const ligaOptions: TermOption[] = [
   { label: 'Sin liga / Selección nacional', termId: '' },
-  { label: 'LaLiga', termId: '72', aliases: ['la liga', 'primera division', 'primera división'] },
-  { label: 'Premier League', termId: '95' },
-  { label: 'Serie A', termId: '51' },
-  { label: 'Eredivisie', termId: '177' },
   { label: 'Bundesliga', termId: '' },
-  { label: 'Ligue 1', termId: '' },
+  { label: 'Eredivisie', termId: '177' },
+  { label: 'LaLiga', termId: '72', aliases: ['la liga', 'primera division', 'primera división'] },
   { label: 'Liga Portugal', termId: '' },
+  { label: 'Ligue 1', termId: '' },
+  { label: 'Premier League', termId: '95' },
   { label: 'Primera División Argentina', termId: '' },
+  { label: 'Serie A', termId: '51' },
 ]
 
 // ── Equipo ────────────────────────────────────────────────────────────────────
 
 export const equipoOptions: TermOption[] = [
-  // España
-  { label: 'FC Barcelona', termId: '', aliases: ['barcelona', 'barça', 'barca'] },
-  { label: 'Real Madrid', termId: '' },
-  { label: 'Atlético de Madrid', termId: '', aliases: ['atletico', 'atlético'] },
-  { label: 'Valencia CF', termId: '', aliases: ['valencia'] },
-  { label: 'Sevilla FC', termId: '', aliases: ['sevilla'] },
-  { label: 'Real Sociedad', termId: '' },
-  { label: 'Athletic Club', termId: '', aliases: ['athletic bilbao'] },
-  { label: 'Villarreal CF', termId: '', aliases: ['villarreal'] },
-  { label: 'Betis', termId: '', aliases: ['real betis'] },
-  { label: 'Deportivo de La Coruña', termId: '', aliases: ['deportivo', 'celta', 'depor'] },
-  { label: 'Málaga CF', termId: '', aliases: ['malaga', 'málaga'] },
-  { label: 'Espanyol', termId: '' },
-  { label: 'Celta de Vigo', termId: '' },
-  { label: 'Rayo Vallecano', termId: '' },
-  { label: 'Racing de Santander', termId: '' },
-  // England
+  { label: 'AC Milan', termId: '', aliases: ['milan'] },
+  { label: 'Ajax', termId: '' },
+  { label: 'Alemania', termId: '', aliases: ['germany', 'deutschland'] },
+  { label: 'Argentina', termId: '' },
   { label: 'Arsenal', termId: '' },
-  { label: 'Chelsea', termId: '' },
-  { label: 'Liverpool', termId: '' },
-  { label: 'Manchester United', termId: '' },
-  { label: 'Manchester City', termId: '' },
-  { label: 'Tottenham Hotspur', termId: '', aliases: ['tottenham', 'spurs'] },
-  { label: 'Newcastle United', termId: '', aliases: ['newcastle'] },
-  { label: 'Everton', termId: '' },
+  { label: 'AS Roma', termId: '', aliases: ['roma'] },
   { label: 'Aston Villa', termId: '' },
-  { label: 'Leicester City', termId: '', aliases: ['leicester'] },
-  { label: 'West Ham United', termId: '', aliases: ['west ham'] },
-  { label: 'Leeds United', termId: '', aliases: ['leeds'] },
-  { label: 'Blackburn Rovers', termId: '' },
-  // Germany
+  { label: 'Athletic Club', termId: '', aliases: ['athletic bilbao'] },
+  { label: 'Atlético de Madrid', termId: '', aliases: ['atletico', 'atlético'] },
+  { label: 'Bayer Leverkusen', termId: '' },
   { label: 'Bayern Munich', termId: '', aliases: ['bayern münchen', 'bayern'] },
+  { label: 'Benfica', termId: '' },
+  { label: 'Betis', termId: '', aliases: ['real betis'] },
+  { label: 'Blackburn Rovers', termId: '' },
   { label: 'Borussia Dortmund', termId: '', aliases: ['bvb', 'dortmund'] },
   { label: 'Borussia Mönchengladbach', termId: '' },
-  { label: 'Schalke 04', termId: '' },
-  { label: 'Bayer Leverkusen', termId: '' },
-  { label: 'Werder Bremen', termId: '' },
-  // Italy
-  { label: 'AC Milan', termId: '', aliases: ['milan'] },
-  { label: 'Inter Milan', termId: '', aliases: ['inter', 'internazionale'] },
-  { label: 'Juventus', termId: '' },
-  { label: 'AS Roma', termId: '', aliases: ['roma'] },
-  { label: 'Lazio', termId: '', aliases: ['ss lazio'] },
-  { label: 'Napoli', termId: '', aliases: ['ssc napoli'] },
+  { label: 'Brasil', termId: '', aliases: ['brazil'] },
+  { label: 'Celta de Vigo', termId: '' },
+  { label: 'Chelsea', termId: '' },
+  { label: 'Colombia', termId: '' },
+  { label: 'Deportivo de La Coruña', termId: '', aliases: ['deportivo', 'depor'] },
+  { label: 'Espanyol', termId: '' },
+  { label: 'España', termId: '', aliases: ['spain', 'selección española'] },
+  { label: 'Everton', termId: '' },
+  { label: 'FC Barcelona', termId: '', aliases: ['barcelona', 'barça', 'barca'] },
+  { label: 'FC Porto', termId: '', aliases: ['porto'] },
+  { label: 'Feyenoord', termId: '' },
   { label: 'Fiorentina', termId: '' },
-  { label: 'Parma', termId: '' },
-  // France
-  { label: 'Paris Saint-Germain', termId: '', aliases: ['psg', 'paris sg'] },
+  { label: 'Francia', termId: '129', aliases: ['france'] },
+  { label: 'Inglaterra', termId: '', aliases: ['england'] },
+  { label: 'Inter Milan', termId: '', aliases: ['inter', 'internazionale'] },
+  { label: 'Italia', termId: '', aliases: ['italy'] },
+  { label: 'Juventus', termId: '' },
+  { label: 'Lazio', termId: '', aliases: ['ss lazio'] },
+  { label: 'Leeds United', termId: '', aliases: ['leeds'] },
+  { label: 'Leicester City', termId: '', aliases: ['leicester'] },
+  { label: 'Liverpool', termId: '' },
+  { label: 'Málaga CF', termId: '', aliases: ['malaga', 'málaga'] },
+  { label: 'Manchester City', termId: '' },
+  { label: 'Manchester United', termId: '' },
+  { label: 'Napoli', termId: '', aliases: ['ssc napoli'] },
+  { label: 'Newcastle United', termId: '', aliases: ['newcastle'] },
   { label: 'Olympique de Marseille', termId: '', aliases: ['marseille', 'om'] },
   { label: 'Olympique Lyonnais', termId: '', aliases: ['lyon', 'ol'] },
-  // Netherlands
-  { label: 'Ajax', termId: '' },
-  { label: 'PSV Eindhoven', termId: '', aliases: ['psv'] },
-  { label: 'Feyenoord', termId: '' },
-  // Portugal
-  { label: 'Benfica', termId: '' },
-  { label: 'FC Porto', termId: '', aliases: ['porto'] },
-  { label: 'Sporting CP', termId: '', aliases: ['sporting'] },
-  // Selecciones
-  { label: 'España', termId: '', aliases: ['spain', 'selección española'] },
-  { label: 'Francia', termId: '129', aliases: ['france'] },
-  { label: 'Alemania', termId: '', aliases: ['germany', 'deutschland'] },
-  { label: 'Italia', termId: '', aliases: ['italy'] },
-  { label: 'Inglaterra', termId: '', aliases: ['england'] },
-  { label: 'Portugal', termId: '' },
-  { label: 'Brasil', termId: '', aliases: ['brazil'] },
-  { label: 'Argentina', termId: '' },
-  { label: 'Colombia', termId: '' },
-  { label: 'Paraguay', termId: '' },
-  { label: 'Uruguay', termId: '' },
   { label: 'Países Bajos', termId: '', aliases: ['netherlands', 'holland', 'holanda'] },
+  { label: 'Paraguay', termId: '' },
+  { label: 'Paris Saint-Germain', termId: '', titleLabel: 'PSG', aliases: ['psg', 'paris sg'] },
+  { label: 'Parma', termId: '' },
+  { label: 'Portugal', termId: '' },
+  { label: 'PSV Eindhoven', termId: '', titleLabel: 'PSV', aliases: ['psv'] },
+  { label: 'Racing de Santander', termId: '' },
+  { label: 'Rayo Vallecano', termId: '' },
+  { label: 'Real Madrid', termId: '' },
+  { label: 'Real Sociedad', termId: '' },
+  { label: 'Schalke 04', termId: '' },
+  { label: 'Sevilla FC', termId: '', aliases: ['sevilla'] },
+  { label: 'Sporting CP', termId: '', aliases: ['sporting'] },
+  { label: 'Tottenham Hotspur', termId: '', aliases: ['tottenham', 'spurs'] },
+  { label: 'Uruguay', termId: '' },
+  { label: 'Valencia CF', termId: '', aliases: ['valencia'] },
+  { label: 'Villarreal CF', termId: '', aliases: ['villarreal'] },
+  { label: 'Werder Bremen', termId: '' },
+  { label: 'West Ham United', termId: '', aliases: ['west ham'] },
 ]
 
 // ── Temporada ─────────────────────────────────────────────────────────────────
@@ -117,24 +114,24 @@ export const temporadaOptions: TermOption[] = buildSeasonOptions()
 
 export const marcaOptions: TermOption[] = [
   { label: 'Adidas', termId: '' },
-  { label: 'Nike', termId: '' },
-  { label: 'Umbro', termId: '' },
-  { label: 'Puma', termId: '' },
-  { label: 'Kappa', termId: '' },
-  { label: 'Lotto', termId: '' },
-  { label: 'Reebok', termId: '' },
-  { label: 'Hummel', termId: '' },
-  { label: 'Le Coq Sportif', termId: '' },
-  { label: 'Diadora', termId: '' },
   { label: 'Asics', termId: '' },
+  { label: 'Diadora', termId: '' },
+  { label: 'Hummel', termId: '' },
   { label: 'Joma', termId: '' },
+  { label: 'Kappa', termId: '' },
+  { label: 'Le Coq Sportif', termId: '' },
+  { label: 'Lotto', termId: '' },
   { label: 'Meyba', termId: '' },
   { label: 'New Balance', termId: '' },
+  { label: 'Nike', termId: '' },
+  { label: 'Puma', termId: '' },
+  { label: 'Reebok', termId: '' },
+  { label: 'Umbro', termId: '' },
   { label: 'Under Armour', termId: '' },
-  { label: 'Otra', termId: '' },
 ]
 
 // ── Talla ─────────────────────────────────────────────────────────────────────
+// Order is size scale (XS → XXXL), not alphabetical — intentional.
 
 export const tallaOptions: TermOption[] = [
   { label: 'XS', termId: '' },
@@ -150,46 +147,56 @@ export const tallaOptions: TermOption[] = [
 // ── Condición ─────────────────────────────────────────────────────────────────
 
 export const condicionOptions: TermOption[] = [
-  { label: 'Mint', termId: '' },
-  { label: 'Excelente', termId: '' },
-  { label: 'Muy buena', termId: '' },
-  { label: 'Buena', termId: '' },
   { label: 'Aceptable', termId: '' },
+  { label: 'Buena', termId: '' },
+  { label: 'Excelente', termId: '' },
+  { label: 'Mint', termId: '' },
+  { label: 'Muy buena', termId: '' },
 ]
 
 // ── Product type ──────────────────────────────────────────────────────────────
 
 export const productTypeOptions: TermOption[] = [
+  { label: 'Accessories', termId: '' },
+  { label: 'Jacket', termId: '' },
   { label: 'Shirt', termId: '' },
   { label: 'Shorts', termId: '' },
-  { label: 'Jacket', termId: '' },
-  { label: 'Tracksuit', termId: '' },
   { label: 'Socks', termId: '' },
-  { label: 'Accessories', termId: '' },
+  { label: 'Tracksuit', termId: '' },
 ]
 
 // ── Shirt version ─────────────────────────────────────────────────────────────
 
 export const shirtVersionOptions: TermOption[] = [
-  { label: 'Home', termId: '' },
   { label: 'Away', termId: '' },
-  { label: 'Third', termId: '' },
   { label: 'Goalkeeper', termId: '' },
-  { label: 'Training', termId: '' },
+  { label: 'Home', termId: '' },
+  { label: 'None', termId: '' },
   { label: 'Pre-match', termId: '' },
   { label: 'Special', termId: '' },
-  { label: 'None', termId: '' },
+  { label: 'Third', termId: '' },
+  { label: 'Training', termId: '' },
 ]
 
 // ── Authenticity type ─────────────────────────────────────────────────────────
+// "Original retail / Fan version" is shown first as the default option.
+// Its stored value is 'Replica' for backward compatibility with existing DB records.
+// titleLabel: '' means it is omitted from the catalogue title.
 
 export const authenticityTypeOptions: TermOption[] = [
-  { label: 'Replica', termId: '' },
-  { label: 'Player Issue', termId: '' },
-  { label: 'Match Issue', termId: '' },
-  { label: 'Match Worn', termId: '' },
-  { label: 'Official Reissue', termId: '' },
-  { label: 'Deadstock', termId: '' },
+  {
+    label: 'Original retail / Fan version',
+    value: 'Replica',
+    termId: '',
+    titleLabel: '',
+    helpText: 'Camiseta original vendida al público. No significa falsa.',
+  },
+  { label: 'Deadstock / BNWT', termId: '', titleLabel: 'Deadstock' },
+  { label: 'Match Issue', termId: '', titleLabel: 'Match Issue' },
+  { label: 'Match Worn', termId: '', titleLabel: 'Match Worn' },
+  { label: 'No determinado', termId: '', titleLabel: '' },
+  { label: 'Official Reissue', termId: '', titleLabel: 'Official Reissue' },
+  { label: 'Player Issue / Authentic', termId: '', titleLabel: 'Player Issue' },
 ]
 
 // ── Sleeve length ─────────────────────────────────────────────────────────────
@@ -199,7 +206,7 @@ export const sleeveLengthOptions: TermOption[] = [
   { label: 'Long Sleeve', termId: '' },
 ]
 
-// ── Resolver ──────────────────────────────────────────────────────────────────
+// ── Resolvers ─────────────────────────────────────────────────────────────────
 
 export function resolveTermId(options: TermOption[], input: string): string {
   if (!input) return ''
@@ -207,7 +214,24 @@ export function resolveTermId(options: TermOption[], input: string): string {
   const match = options.find(
     (o) =>
       o.label.toLowerCase() === normalized ||
+      (o.value && o.value.toLowerCase() === normalized) ||
       o.aliases?.some((a) => a.toLowerCase() === normalized)
   )
   return match?.termId ?? ''
+}
+
+// Returns the titleLabel for a given input, matching by label, value, or alias.
+// If no titleLabel is defined on the match, returns the input as-is.
+// '' means the caller should omit this field from the title.
+export function getTitleLabel(options: TermOption[], input: string): string {
+  if (!input) return ''
+  const normalized = input.toLowerCase().trim()
+  const match = options.find(
+    (o) =>
+      o.label.toLowerCase() === normalized ||
+      (o.value && o.value.toLowerCase() === normalized) ||
+      o.aliases?.some((a) => a.toLowerCase() === normalized)
+  )
+  if (!match) return input
+  return match.titleLabel !== undefined ? match.titleLabel : input
 }
