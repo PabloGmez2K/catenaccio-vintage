@@ -1436,3 +1436,16 @@ Sesión 022A (2026-06-28, Claude Code Sonnet): LOCAL_APP_IMPLEMENTATION / NO_DEP
 **Siguiente paso:** Pablo crea un nuevo borrador controlado desde Studio y verifica en WP Admin que Liga/Equipo/Ano aparecen seleccionados en ACF.
 **agent_events ref:** 2026-06-28T23:59:58Z (wc_taxonomy_relationship_payload_patch)
 ---
+
+---
+**Sesion S022C.8.CLOSE** - 2026-06-28
+**Agente:** Codex
+**Modo:** DOCS_ONLY / CLOSE_TAXONOMY_DRAFT_VALIDATION / NO_WC_CALL / NO_DEPLOY
+**Resultado:** APPROVE_S022C8_CLOSED
+**Validacion de Pablo:** Nuevo borrador WooCommerce creado desde Studio tras commit 95b9b49. En WP Admin aparecen Liga, Equipo, Ano, talla, medidas, condicion y defectos; categoria = Otros Clubs; inventario = 1; estado = Borrador; no publicado.
+**Fallo diferido:** Jugador/Rivaldo no aparecio. No bloquea S022C.8; queda para S023 como PLAYER_TERM_RESOLUTION. Causa probable: requiere termId + label seguro o sync real de pa_jugador; el puente no inventa jugador.
+**Cambios docs:** STUDIO_WC_DRAFT_BRIDGE_RESULT.md, STUDIO_WC_DRAFT_PUBLISHABILITY_GAP_AUDIT.md, BACKLOG.md, CONTEXTO.md, HISTORIAL_SESIONES.md y agent_events.jsonl.
+**Que NO se toco:** codigo, WooCommerce API, WP Admin, productos, Supabase, .env.local, deploy, publicacion.
+**Siguiente paso:** S023 - taxonomy/category manager con sync real de terminos y categorias, resolucion de jugador y asignacion Leyendas/Nuevo/Otros Clubs desde Studio.
+**agent_events ref:** 2026-06-28T23:59:59Z (PABLO_TAXONOMY_DRAFT_OK_WITH_PLAYER_DEFERRED)
+---

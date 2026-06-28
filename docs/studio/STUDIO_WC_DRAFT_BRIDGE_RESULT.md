@@ -4,7 +4,7 @@
 
 ### S022C.8 — TAXONOMY_RELATIONSHIP_PAYLOAD_PATCH
 
-**Resultado:** `READY_FOR_PABLO_TAXONOMY_DRAFT_TEST`
+**Resultado:** `APPROVE_S022C8_CLOSED`
 **Fecha:** 2026-06-28
 **Modo:** IMPL / DRAFT_ONLY / NO_WC_CALL / NO_WC_UPDATE / NO_DEPLOY
 
@@ -79,6 +79,35 @@ WooCommerce REST suele aceptar `attributes[]` con `options` por nombre/slug y cr
 #### Acción para Pablo
 
 Crear un nuevo item de prueba en Studio, aprobar SEO manual, pulsar **Crear borrador en WooCommerce** una sola vez y verificar en WP Admin que Liga, Equipo y Año aparecen seleccionados en el bloque ACF "Detalles del Producto".
+
+#### PABLO_TAXONOMY_DRAFT_OK
+
+Pablo ejecutó un test real después del commit `95b9b49 fix(studio): add Woo taxonomy attributes to draft payload` y creó un nuevo borrador WooCommerce desde Studio.
+
+Validación en WP Admin:
+- Liga aparece seleccionada.
+- Equipo aparece seleccionado.
+- Año aparece seleccionado.
+- Talla aparece.
+- Medidas aparecen.
+- Condición aparece.
+- Defectos aparecen.
+- Categoría = Otros Clubs.
+- Inventario = 1.
+- Estado = Borrador.
+- No publicado.
+
+Veredicto: `attributes[] + meta_data ACF` queda validado para Liga, Equipo y Año. S022C.8 se cierra como `APPROVE_S022C8_CLOSED`.
+
+Fallo diferido:
+- Jugador = Rivaldo no apareció.
+- No se trata como blocker de S022C.8.
+- Queda pendiente para S023 como `PLAYER_TERM_RESOLUTION`.
+- Causa probable: jugador requiere termId + label seguro en el mapa local o, preferiblemente, sync real de `pa_jugador`. S022C.8 está diseñado para no inventar jugador si no puede resolverlo con seguridad.
+
+Nota operativa:
+- `studio/lib/wc-terms-mvp.ts` sigue siendo un puente provisional. S023 debe reemplazarlo por sincronización real de términos/categorías WooCommerce.
+- El producto de prueba no debe publicarse si contiene datos falsos de equipo/temporada usados solo por la limitación actual de IDs.
 
 **Proyecto:** Catenaccio Vintage  
 **Fecha:** 2026-06-28  

@@ -17,6 +17,32 @@ Implicación: escribir solo `wp_postmeta` mediante `meta_data` no basta para que
 
 S023 debe reemplazar el mapa estático `studio/lib/wc-terms-mvp.ts` por una sincronización real de términos/categorías WooCommerce desde Studio.
 
+### PABLO_TAXONOMY_DRAFT_OK — cierre S022C.8
+
+Pablo validó un nuevo borrador real creado desde Studio tras `95b9b49`. La combinación `attributes[] + meta_data ACF` funciona para las taxonomías críticas del MVP:
+
+| Campo | Resultado WP Admin |
+|-------|--------------------|
+| Liga | Seleccionada |
+| Equipo | Seleccionado |
+| Año | Seleccionado |
+| Talla | Visible |
+| Medidas | Visibles |
+| Condición | Visible |
+| Defectos | Visibles |
+| Categoría | Otros Clubs |
+| Inventario | 1 |
+| Estado | Borrador / no publicado |
+
+Fallo diferido a S023:
+- Jugador = Rivaldo no apareció.
+- Se registra como `PLAYER_TERM_RESOLUTION`.
+- No bloquea S022C.8 porque el puente ya resuelve Liga/Equipo/Año y mantiene el contrato DRAFT_ONLY.
+- S023 debe sincronizar `pa_jugador`, resolver termId + label de jugador, evitar el mapa manual y permitir asignar términos/categorías desde Studio.
+
+Producto de prueba:
+- No debe publicarse si contiene datos falsos de equipo/temporada usados solo por la limitación actual de IDs.
+
 **Proyecto:** Catenaccio Vintage  
 **Fecha:** 2026-06-28  
 **Sesión:** S022C.5 — READ_ONLY_WC_DRAFT_PUBLISHABILITY_GAP_AUDIT  
