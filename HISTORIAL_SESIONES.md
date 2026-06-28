@@ -32,6 +32,32 @@ Cross-referencia con `agent_events.jsonl` para detalle de eventos.
 <!-- APPEND ENTRADAS AQUÍ — no modificar lo de arriba -->
 
 ---
+**Sesión 022A.1** — 2026-06-28
+**Agente:** Claude Code (Sonnet)
+**Modo:** READ_ONLY_DIAGNOSIS / NO_CODE / NO_REMOTE_WRITE
+**Tipo:** diagnosis / plan / ask
+**Tarea:** Diagnosticar los blockers UX/dominio de S022A y definir el plan ejecutable para S022A.2 CODE.
+
+**Decisiones clave:**
+- Veredicto: `FIX_BLOCKER_FIRST_WITH_PLAN`. S022A técnico funciona pero el formulario no es usable como producto.
+- 6 blockers identificados: IDs técnicos visibles, pérdida de form state, sin edición, sin opciones canónicas, sin título auto-generado, sin campo Versión.
+- Ruta 4 (híbrida) elegida: `wc-terms-mvp.ts` con term IDs conocidos del probe S007 + listas hardcoded. Sin credenciales WC en S022A. Resolución de IDs pendientes → S022C.
+- Pablo NUNCA ve term IDs. Resolución interna en Server Action.
+- Liga → SELECT 7 opciones. Equipo → datalist 21+ opciones. Jugador → texto libre. Temporada → input + datalist. Marca → SELECT. Versión → SELECT nuevo campo (Home/Away/Third/GK/Training/Pre-match/Edición especial).
+- Título autogenerado: patrón EN `[Temporada] [Equipo] [Versión] Shirt – [Jugador] #[Número] – ([Talla])`. Se guarda en `referencia`. Override manual permitido.
+- Form state: Server Action devuelve `{ fieldErrors, formKey, values }`. `<form key={formKey}>` fuerza remount con defaultValues del estado.
+- Edición mínima: ruta `/inventory/[id]/edit` + `updateInventoryItem` action. Blocker de S022A.2.
+- Schema change requerido: `ALTER TABLE football_shirt_details ADD COLUMN version_camisa TEXT;` — Pablo ejecuta manualmente antes de S022A.2 CODE.
+- Productos existentes de WC: no bloquea S022A.2. Importación diferida a S025+.
+- S022B permanece BLOQUEADO hasta PABLO_LOCAL_FORM_OK tras S022A.2.
+
+**Qué se validó:** git preflight PASS (main, 0 ahead/0 behind, HEAD d94a9fd). Lectura proporcional completa: STUDIO_DATA_MODEL.md, STUDIO_WC_BRIDGE_CONTRACT.md, STUDIO_WC_PAYLOAD_SPEC.md, STUDIO_WC_TERM_ID_RESOLUTION_PLAN.md, DECISIONS.md (DEC-13, DEC-14), BACKLOG.md, CONTEXTO.md, HISTORIAL_SESIONES.md, agent_events.jsonl, ItemForm.tsx, actions.ts, STUDIO_CREATE_ITEM_FORM_RESULT.md. Plan emitido. Sin código tocado. Sin secretos. Sin remote write.
+**Qué NO se tocó:** studio/ (ningún archivo de código), SQL canónico, .env.local, WooCommerce, WordPress, Supabase remoto, Vercel, credenciales.
+**Siguiente paso:** S022A.2 — FORM_DOMAIN_UX_PATCH. Prerequisito manual de Pablo: ALTER TABLE en Supabase. Luego sesión CODE.
+**agent_events ref:** 2026-06-28T00:00:00Z (studio_form_domain_ux_fix_plan)
+---
+
+---
 **Sesión 019** — 2026-06-27  
 **Agente:** Claude Code (Sonnet)  
 **Modo:** LOCAL_SCHEMA_DESIGN_ONLY / DOCS_AND_SQL_PLAN / NO_REMOTE_WRITE  
