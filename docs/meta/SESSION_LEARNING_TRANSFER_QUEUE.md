@@ -145,5 +145,6 @@ precios, pedidos, proveedores sensibles). Solo señales saneadas. Ver `DATA_AND_
 - future_product: Checklist reusable para cualquier vertical donde el operador valide formularios internos antes de publicar a un canal externo.
 - no_copy: Datos comerciales reales, clientes, ventas, precios, proveedores, credenciales o detalles privados de inventario.
 - privacy_level: INTERNAL_ONLY
-- Estado: CANDIDATE
-- Siguiente accion: Validar el gate en la proxima pantalla Studio con ambiguedad de dominio; si reduce microfixes, promover a lafabrica-template.
+- Estado: IMPORTED_TO_BRAIN
+- Siguiente accion: Evaluar absorcion en lafabrica-template via LAFABRICA_DOMAIN_PRODUCT_MODELING_GATE_FROM_CATENACCIO_S022A si el patron se valida en otra pantalla Studio.
+- Traza Brain: 2026-06-28 -> pablo-operating-brain EVID-003 + absorb log + POST_IDEAS + OFFER-12; recomendacion lafabrica registrada.
