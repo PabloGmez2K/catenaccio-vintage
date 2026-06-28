@@ -1,6 +1,6 @@
 import type { SuggestionContext } from '@/lib/ai/suggestion-context'
 
-export const MANUAL_PROMPT_VERSION = 'studio_manual_seo_v1'
+export const MANUAL_PROMPT_VERSION = 'studio_manual_seo_v2'
 
 // Builds the full SEO prompt for Pablo to copy and paste into ChatGPT / Claude.
 // Input is the sanitized SuggestionContext — no coste, proveedor, notas_compra,
@@ -8,8 +8,64 @@ export const MANUAL_PROMPT_VERSION = 'studio_manual_seo_v1'
 export function buildManualSeoPrompt(ctx: SuggestionContext): string {
   const lines: string[] = []
 
+  // ── CONTEXTO DEL PROJECT CHATGPT ──────────────────────────────────────────
+  lines.push('=== CONTEXTO DE ESTE PROMPT ===')
+  lines.push('')
+  lines.push('Este prompt viene de Catenaccio Studio (backoffice interno).')
+  lines.push('')
+  lines.push('Si estás en el Project ChatGPT "Catenaccio Vintage":')
+  lines.push('  → Revisa primero las reglas actuales del repo antes de redactar.')
+  lines.push('  → Documentos prioritarios a leer:')
+  lines.push('      - docs/studio/STUDIO_SEO_CONTENT_RULES.md       ← REGLAS CANÓNICAS')
+  lines.push('      - docs/studio/STUDIO_MANUAL_SEO_PROMPT_WORKFLOW_RESULT.md')
+  lines.push('      - docs/studio/STUDIO_PRODUCT_FORM_MODELING_PLAYBOOK.md')
+  lines.push('  → Si el repo ha cambiado desde tu última sesión, prioriza la versión actual del repo.')
+  lines.push('')
+  lines.push('Si no puedes leer GitHub (sesión fuera del Project):')
+  lines.push('  → Usa las reglas incluidas en la sección REGLAS FALLBACK de este prompt.')
+  lines.push('')
+  lines.push('El resultado se pegará manualmente en Studio. Respeta el formato de salida exacto.')
+  lines.push('')
+  lines.push('=== FIN CONTEXTO ===')
+  lines.push('')
+
+  // ── ROL ───────────────────────────────────────────────────────────────────
   lines.push('ROL: Eres un redactor experto en camisetas de fútbol vintage y SEO para e-commerce.')
   lines.push('')
+
+  // ── REGLAS FALLBACK (si no hay acceso a GitHub) ───────────────────────────
+  lines.push('=== REGLAS FALLBACK (usar si no puedes leer el repo) ===')
+  lines.push('')
+  lines.push('TÍTULO (inglés, máx. 70 caracteres):')
+  lines.push('  Formato: "YYYY-YY Club Version Shirt (Size)"')
+  lines.push('  Ejemplo: "2007-09 PSV Away Shirt (XXL)"')
+  lines.push('  Con jugador: "2005-06 Arsenal Home L/S Shirt - Henry #14 (L)"')
+  lines.push('  Variantes: L/S para manga larga; GK Shirt para porteros.')
+  lines.push('  No usar Match Worn / Player Issue / Authentic / Rare salvo que los datos lo indiquen.')
+  lines.push('')
+  lines.push('DESCRIPCIÓN LARGA (español, mín. 100 palabras, texto plano):')
+  lines.push('  Estructura: identificación → diseño/detalles → conservación → talla/medidas → personalización → cierre comercial.')
+  lines.push('  Tono: profesional, coleccionismo vintage, sin hipérboles ni historia inventada.')
+  lines.push('  Si falta un dato: omitirlo, no inventarlo.')
+  lines.push('')
+  lines.push('PRECIO:')
+  lines.push('  Valor de mercado vintage. No usar coste de compra. Si no hay base: "no aplica".')
+  lines.push('')
+  lines.push('CLAIMS SENSIBLES (no negociables):')
+  lines.push('  - "Match Worn" solo si authenticity_type = match_worn.')
+  lines.push('  - "Player Issue" solo si authenticity_type = player_issue.')
+  lines.push('  - No afirmar certificado, procedencia, rareza extrema ni autenticidad reforzada sin dato.')
+  lines.push('  - Parches/etiquetas/sponsor solo si constan en los campos tiene_parches / tiene_etiquetas / sponsor.')
+  lines.push('  - No inventar comparables exactos de precio.')
+  lines.push('')
+  lines.push('EXCLUIR SIEMPRE del output:')
+  lines.push('  coste, proveedor, notas_compra, ubicación física, carpeta local, notas internas,')
+  lines.push('  owner_id, workspace_id, emails, secretos, nombres de sesiones de agente.')
+  lines.push('')
+  lines.push('=== FIN REGLAS FALLBACK ===')
+  lines.push('')
+
+  // ── RESTRICCIONES ─────────────────────────────────────────────────────────
   lines.push('RESTRICCIONES ESTRICTAS:')
   lines.push('- Usa SOLO los datos proporcionados. No inventes información.')
   lines.push('- No menciones precios de coste, proveedores ni procedencia.')

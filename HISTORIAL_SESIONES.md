@@ -1145,3 +1145,41 @@ Sesión 022A (2026-06-28, Claude Code Sonnet): LOCAL_APP_IMPLEMENTATION / NO_DEP
 **Siguiente paso:** Pablo ejecuta el flujo manualmente (copiar prompt → ChatGPT/Claude → pegar → guardar) y confirma `PABLO_MANUAL_CONTENT_OK`. S022C desbloqueada cuando haya ≥1 suggestion `editado_aprobado`.
 **agent_events ref:** 2026-06-28T18:00:00Z (manual_seo_prompt_workflow)
 ---
+
+---
+**Sesión S022B.2** — 2026-06-28
+**Agente:** Claude Code Sonnet 4.6
+**Modo:** LOCAL_DOCS_AND_MINIMAL_PATCH / NO_API / NO_WC / NO_DEPLOY
+**Tipo:** docs / minimal-patch
+**Tarea:** SEO_CONTENT_RULES_AND_PROMPT_STANDARDIZATION — Crear guía canónica de reglas SEO y estandarizar el prompt generado por Studio.
+
+**Decisiones clave:**
+- Preferencia operador confirmada: Project ChatGPT "Catenaccio Vintage" como herramienta principal (puede leer GitHub y aplicar reglas del repo). Claude API dormida para futuro.
+- El prompt debe referenciar explícitamente `STUDIO_SEO_CONTENT_RULES.md`, `STUDIO_MANUAL_SEO_PROMPT_WORKFLOW_RESULT.md` y `STUDIO_PRODUCT_FORM_MODELING_PLAYBOOK.md` para que el Project ChatGPT los lea antes de redactar.
+- Si no hay acceso a GitHub: reglas fallback embebidas directamente en el prompt (autosuficiente).
+- `MANUAL_PROMPT_VERSION` bumpeado de `studio_manual_seo_v1` a `studio_manual_seo_v2`.
+- Formato de salida: 4 delimitadores exactos. Sin cambios en el formato (compatibilidad con Studio).
+
+**Qué se hizo:**
+- Creado `docs/studio/STUDIO_SEO_CONTENT_RULES.md`: 9 secciones (objetivo, título EN/formato canónico, descripción ES, descripción corta, precio, notas internas, claims sensibles, formato de salida, checklist de 12 puntos).
+- Modificado `studio/lib/seo/manual-seo-prompt.ts`: añadida sección CONTEXTO al inicio (Project ChatGPT + docs del repo), añadida sección REGLAS FALLBACK completa (título, descripción, precio, claims sensibles, lista de campos excluidos). Resto del prompt sin cambios.
+- Creado `docs/studio/STUDIO_SEO_CONTENT_RULES_AND_PROMPT_STANDARDIZATION_RESULT.md`.
+- Actualizado BACKLOG.md (S022B.2 → [x] COMPLETADO), CONTEXTO.md (sesión appended), HISTORIAL_SESIONES.md (esta entrada), agent_events.jsonl.
+
+**Qué se validó:**
+- typecheck: PASS (0 errores)
+- build (8 rutas): PASS
+- lint: PASS (0 warnings/errores)
+- git diff --check: PASS
+- Secret scan (real credentials): CLEAN (falso positivo en scan amplio — coincidencia era texto instructivo)
+- Scope check: CLEAN (solo docs/studio/ + studio/lib/seo/)
+- Datos sensibles en prompt: EXCLUIDOS
+- API calls: NINGUNA
+- WC/WP/Supabase remoto: NO TOCADO
+
+**Qué NO se tocó:**
+- WooCommerce, WordPress, WP Admin, Supabase remoto, inventory_items, football_shirt_details, Anthropic API, .env.local, STUDIO_AI_ENABLED, deploy, producción, service_role, schema, ai-actions, manual-seo-actions, componentes UI.
+
+**Siguiente paso:** Pablo prueba el flujo manual SEO con una camiseta usando el Project ChatGPT "Catenaccio Vintage" y confirma `PABLO_MANUAL_CONTENT_OK` → S022C desbloqueada.
+**agent_events ref:** 2026-06-28T19:00:00Z (seo_content_rules_and_prompt_standardization)
+---
