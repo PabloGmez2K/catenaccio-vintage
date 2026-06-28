@@ -228,7 +228,30 @@ El precio `inventory_items.precio_publicado_web` (que lee el bridge) se fija en 
 
 ---
 
-## 14. Veredicto
+## 15. S022C.2 — WC_TERM_ID_GAP_FOR_FIRST_DRAFT
+
+**Resultado:** `STOP`
+
+Durante el test real controlado de S022C, Studio bloqueó correctamente antes de llamar a WooCommerce con:
+
+```text
+equipo_term_id_required: el equipo no tiene term ID numérico resuelto. Completa el campo equipo con un valor reconocido.
+```
+
+No se creó ningún borrador WooCommerce y no se ejecutó `POST /wc/v3/products`.
+
+**Diagnóstico de sesión:**
+- `studio/lib/wc-terms-mvp.ts` mantiene `Francia = 129` y `2014-15 = 139`; el resto de equipos/temporadas del mapa MVP siguen vacíos salvo que se resuelvan explícitamente.
+- La lectura local de Supabase con anon key queda bloqueada por RLS (`permission denied for table inventory_items`) y no hay `SUPABASE_SERVICE_ROLE_KEY` en `.env.local`; por tanto no se pudo leer de forma fiable el `equipo_display` / `temporada_display` del item real usado en el test.
+- Lectura WooCommerce controlada por `GET /wp-json/wc/v3/products/attributes/4/terms?per_page=100` y `GET /wp-json/wc/v3/products/attributes/7/terms?per_page=100` funcionó. Ejemplos confirmados: `Real Madrid = 70`, `FC Barcelona = 170`, `Manchester United = 164`, `2014-15 = 139`, `2012-13 = 69`, `2000-02 = 66`.
+
+**Decisión:** no se actualiza `wc-terms-mvp.ts` porque falta evidencia fiable del equipo/temporada del primer test. No se inventan term IDs ni se usa fallback textual.
+
+**Acción para Pablo:** devolver el `equipo_display` y `temporada_display` exactos del item que falló, o ejecutar una consulta manual en Supabase sobre ese item y compartir solo esos dos valores no sensibles. Con esos dos valores, la siguiente sesión actualizará únicamente las entradas necesarias en `wc-terms-mvp.ts`; después Pablo deberá abrir `Editar` → `Guardar` para que `updateInventoryItem` reescriba `football_shirt_details.equipo` / `temporada` con los nuevos term IDs antes de intentar crear el borrador una sola vez.
+
+---
+
+## 16. Veredicto
 
 `READY_FOR_PABLO_WC_DRAFT_TEST`
 

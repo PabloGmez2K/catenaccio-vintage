@@ -1303,3 +1303,45 @@ Sesión 022A (2026-06-28, Claude Code Sonnet): LOCAL_APP_IMPLEMENTATION / NO_DEP
 **Siguiente paso:** commit + push → Pablo configura .env.local → `npm run dev` → ficha con contenido SEO → guardar con precio → verificar warning desaparece → crear borrador WC → verificar WP Admin → APPROVE_E2E_LOOP_PROVEN.
 **agent_events ref:** 2026-06-28T23:30:00Z (price_from_manual_seo_flow)
 ---
+
+---
+**Sesión S022C.2** — 2026-06-28
+**Agente:** Codex
+**Modo:** FIX_BLOCKER_FIRST / WC_TERM_ID_GAP_FOR_FIRST_DRAFT / NO_WC_POST
+**Tipo:** diagnóstico controlado / cierre documental
+**Tarea:** Resolver el bloqueo `equipo_term_id_required` del primer intento real de borrador WooCommerce.
+
+**Resultado:**
+- El bloqueo observado es correcto: el bridge paró antes de WooCommerce porque `football_shirt_details.equipo` no contenía un term ID numérico.
+- No se creó ningún borrador y no se llamó `POST /wp-json/wc/v3/products`.
+- No se pudo identificar con evidencia fiable el `equipo_display` / `temporada_display` del item real: Supabase con anon key devolvió `permission denied for table inventory_items` y no hay `SUPABASE_SERVICE_ROLE_KEY` local.
+- Se ejecutó lectura Woo controlada de términos vía Application Password ya configurada, sin imprimir secretos:
+  - `GET /wp-json/wc/v3/products/attributes/4/terms?per_page=100` PASS.
+  - `GET /wp-json/wc/v3/products/attributes/7/terms?per_page=100` PASS.
+  - Ejemplos confirmados: Real Madrid=70, FC Barcelona=170, Manchester United=164, 2014-15=139, 2012-13=69, 2000-02=66.
+
+**Decisión clave:**
+- No se actualizó `studio/lib/wc-terms-mvp.ts` porque faltaba el equipo/temporada exacto del item. No se inventan IDs y no se usa nombre textual como fallback.
+
+**Qué se hizo:**
+- Revisados `studio/lib/wc-terms-mvp.ts`, `studio/app/inventory/actions.ts`, `docs/studio/STUDIO_WC_TERM_ID_RESOLUTION_PLAN.md` y `docs/studio/STUDIO_WC_DRAFT_BRIDGE_RESULT.md`.
+- Documentado STOP en `docs/studio/STUDIO_WC_DRAFT_BRIDGE_RESULT.md`, BACKLOG, CONTEXTO, HISTORIAL y `agent_events.jsonl`.
+
+**Qué se validó:**
+- `npm run typecheck`: PASS.
+- `npm run build`: PASS (8 rutas).
+- `npm run lint`: PASS (0 warnings/errors).
+- `git diff --check`: WARN por política local LF→CRLF; comprobación directa de líneas nuevas sin trailing whitespace real.
+- Secret scan sobre diff: CLEAN (sin secretos reales; solo placeholders/documentación histórica en scan amplio).
+- `agent_events.jsonl`: VALID (53 líneas parseables).
+
+**Qué NO se tocó:**
+- `studio/lib/wc-terms-mvp.ts` (sin cambio de mapa).
+- WooCommerce products: ningún POST, DELETE, publish ni edición.
+- Pedidos, clientes, emails, métodos de pago, impuestos, envíos.
+- WordPress Admin, plugins, temas, DB, wp-config.php.
+- `.env.local` y secretos.
+
+**Siguiente paso:** Pablo comparte el `equipo_display` y `temporada_display` exactos del item que falló, o ejecuta lectura manual en Supabase de esos dos campos. Con esa evidencia, actualizar solo las entradas necesarias del mapa local; después Pablo abre Editar → Guardar para re-resolver term IDs y reintenta crear un único borrador.
+**agent_events ref:** 2026-06-28T23:45:00Z (wc_term_id_gap_for_first_draft)
+---
