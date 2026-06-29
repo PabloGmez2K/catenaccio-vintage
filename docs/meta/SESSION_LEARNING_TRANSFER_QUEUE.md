@@ -82,8 +82,10 @@ precios, pedidos, proveedores sensibles). Solo señales saneadas. Ver `DATA_AND_
 - future_product: Capa de observabilidad SEO para Cauvera o proyectos marketplace futuros.
 - no_copy: Credenciales OAuth reales, token local, datos de búsqueda reales de catenacciovintage.com.
 - privacy_level: INTERNAL_ONLY
-- Estado: CANDIDATE
-- Siguiente acción: Validar en un segundo proyecto (Bijuymoda Suite o similar) → si funciona → promover a lafabrica como patrón estándar. Ver BACKLOG LATER: LAFABRICA_TRANSFER_GSC_CONNECTOR_PATTERN.
+- Estado: IMPORTED_TO_BOTH
+- Traza Brain: 2026-06-20 → skills anotados en pablo-operating-brain EVID-003 (Sesión 5 Brain); 2026-06-29 → confirmado absorbido, status actualizado.
+- Traza Lafabrica: 2026-06-29 → PATTERN-11 en ECOSYSTEM_LEARNING_PATTERNS.md (GSC_API_READONLY_CONNECTOR), promovido desde CANDIDATE-02 tras validación en Bijuymoda Suite S102.
+- Siguiente acción: Ninguna.
 
 ---
 
@@ -124,8 +126,9 @@ precios, pedidos, proveedores sensibles). Solo señales saneadas. Ver `DATA_AND_
 - future_product: Checklist reusable para conectores de deploy en hosting compartido dentro de lafabrica/Cauvera.
 - no_copy: Credenciales cPanel, valores de entorno, dominio/hosting especifico, rutas privadas locales.
 - privacy_level: INTERNAL_ONLY
-- Estado: CANDIDATE
-- Siguiente accion: Revisar tras THEME_SHADOW_VISUAL_VALIDATION; si el release completo pasa, promover a patron operacional reusable.
+- Estado: IMPORTED_TO_BRAIN
+- Traza Brain: 2026-06-29 → pablo-operating-brain EVID-003 ext. (shadow sync quirks + hash guardrail, INTERNAL_ONLY). Lafabrica pendiente hasta THEME_SHADOW_VISUAL_VALIDATION.
+- Siguiente accion: Revisar tras THEME_SHADOW_VISUAL_VALIDATION para promover CANDIDATE-01 en lafabrica a PATTERN estable si el release completo pasa.
 
 ---
 
@@ -166,5 +169,7 @@ precios, pedidos, proveedores sensibles). Solo señales saneadas. Ver `DATA_AND_
 - future_product: Checklist reusable para conectores de publicacion desde Studio/PIM hacia CMS/e-commerce legacy.
 - no_copy: Credenciales, datos reales de inventario, clientes, pedidos, precios privados, URLs privadas de admin, secretos y detalles operativos sensibles.
 - privacy_level: INTERNAL_ONLY
-- Estado: CANDIDATE
-- Siguiente accion: Revisar tras Opus S023 strategy; si el patron guia una sesion limpia de S023, promoverlo a lafabrica como guardrail de integraciones Woo/ACF.
+- Estado: IMPORTED_TO_BRAIN
+- Traza Brain: 2026-06-29 → pablo-operating-brain EVID-003 ext. (Woo/ACF integration gates, INTERNAL_ONLY), POST_IDEAS, OFFER-12 refuerzo.
+- Traza Lafabrica: CANDIDATE-03 en ECOSYSTEM_LEARNING_PATTERNS.md pendiente validacion en S023.
+- Siguiente accion: Revisar tras S023; si los gates guian una sesion limpia, promover CANDIDATE-03 a PATTERN en lafabrica como guardrail de integraciones Woo/ACF.
