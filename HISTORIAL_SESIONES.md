@@ -1236,6 +1236,56 @@ Sesión 022A (2026-06-28, Claude Code Sonnet): LOCAL_APP_IMPLEMENTATION / NO_DEP
 - Preferencia operador confirmada: Project ChatGPT "Catenaccio Vintage" como herramienta principal (puede leer GitHub y aplicar reglas del repo). Claude API dormida para futuro.
 - El prompt debe referenciar explícitamente `STUDIO_SEO_CONTENT_RULES.md`, `STUDIO_MANUAL_SEO_PROMPT_WORKFLOW_RESULT.md` y `STUDIO_PRODUCT_FORM_MODELING_PLAYBOOK.md` para que el Project ChatGPT los lea antes de redactar.
 - Si no hay acceso a GitHub: reglas fallback embebidas directamente en el prompt (autosuficiente).
+
+---
+
+---
+**Sesión S023-STRATEGY** — 2026-06-29
+**Agente:** Claude Code Opus 4.8
+**Modo:** STRATEGIC_REQUIRED / DOCS_ONLY / NO_CODE
+**Tipo:** strategic / arquitectura
+**Tarea:** OPUS_MAX_STUDIO_SUITE_ARCHITECTURE_REVIEW — Definir arquitectura, roadmap y gates de la suite Catenaccio Studio antes de implementar S023.
+
+**Diagnóstico S022C:**
+- Funcionó (validado): DRAFT_ONLY, idempotencia, precio desde flujo SEO manual, talla/condición/medidas/defectos, categoría automática (Otros Clubs/Selecciones), stock unitario (`manage_stock:true`/`qty:1`), e hidratación de Liga/Equipo/Año en WP Admin vía `attributes[] + meta_data ACF` (v2.1, `PABLO_TAXONOMY_DRAFT_OK`).
+- Falló / deuda: `studio/lib/wc-terms-mvp.ts` es un mapa estático con `termId:''` en ~95% de equipos/temporadas/ligas (confirmado leyendo el archivo). Cada camiseta nueva exige crear término a mano en WP Admin + parchear el mapa + re-editar + re-guardar. Jugador/Rivaldo sin resolver. El diagnóstico cambió varias veces durante la implementación (sesión sucia).
+- Causa raíz: no es un bug de código, es falta de contrato de integración. Studio no tiene conocimiento vivo del vocabulario de taxonomías de WooCommerce.
+
+**Decisiones clave (arquitectura target):**
+- DEC-A1 — Fuente de verdad partida: Supabase/Studio = datos de producto; WooCommerce = identidad de términos (term IDs/slugs de `pa_*` + category IDs).
+- DEC-A2 — Caché de taxonomías en Supabase sincronizada read-only desde WC; lectura en runtime desde la caché, no GET a Woo por render. Write-through al crear términos.
+- DEC-A3 — `wc-terms-mvp.ts` DEPRECATED; se reemplaza por la caché (se conservan opciones de presentación, se eliminan los term IDs manuales).
+- DEC-A4 — Creación controlada de términos desde Studio (`POST .../terms`) con dedupe.
+- DEC-A5 — Categorías por selección (no creación automática); heurística + override para Leyendas/Nuevo.
+- DEC-A8/A9 — Frontera WP/Studio definida; publicar sigue manual en WP Admin (DRAFT_ONLY) hasta S030 (publish controlado con preflight + confirmación Pablo + rollback).
+- S023 descompuesta en S023A–E (una tarea por sesión). Roadmap S024–S030 con agente/gate/validación por fase. 5 gates formalizados.
+
+**Primer bloque implementable (S023A):**
+- WC_TAXONOMY_CATEGORY_READ_SYNC: tablas de caché (`wc_taxonomies`/`wc_terms`/`wc_categories`) + sync read-only del vocabulario WC existente (attrs 4/5/6/7 + categorías). Agente Codex. NO escribe en Woo. NO toca bridge/form/`wc-terms-mvp.ts`. Fixture = vocabulario completo real. Test Pablo: Real Madrid→70 / FC Barcelona→170 sin editar `.ts`; counts caché == WC. SQL aplicado manual por Pablo.
+
+**Documentos creados:**
+- `docs/studio/STUDIO_TARGET_ARCHITECTURE.md`
+- `docs/studio/STUDIO_ROADMAP_S023_S030.md`
+- `docs/studio/STUDIO_SESSION_GATES.md`
+
+**Documentos modificados:** `BACKLOG.md`, `CONTEXTO.md`, `HISTORIAL_SESIONES.md`, `agent_events.jsonl`.
+
+**Qué NO se tocó:**
+- Código / Studio runtime, `studio/lib/wc-terms-mvp.ts`, `bridge.ts`, `client.ts`, formulario.
+- WooCommerce, WP Admin, productos (1854/1856/1731), términos, categorías, publicación.
+- Supabase (schema y remoto), `.env.local`, secretos, Vercel, cPanel.
+
+**Validaciones:**
+- Lectura proporcional del repo: 15 fuentes obligatorias + `bridge.ts` + `wc-terms-mvp.ts` reales.
+- git diff --check: PASS
+- agent_events.jsonl: parseable (VALID)
+- secret scan del diff: CLEAN; `.env.local` no aparece
+- archivos de código modificados: ninguno (solo docs + ledgers de cierre)
+
+**Veredicto:** `READY_FOR_S023A_IMPLEMENTATION`
+**Siguiente paso:** Abrir S023A — WC_TAXONOMY_CATEGORY_READ_SYNC (Codex, read-only contra WC, gate `DATA_LAYER_MAPPING`).
+**agent_events ref:** 2026-06-29 (studio_suite_architecture_review)
+---
 - `MANUAL_PROMPT_VERSION` bumpeado de `studio_manual_seo_v1` a `studio_manual_seo_v2`.
 - Formato de salida: 4 delimitadores exactos. Sin cambios en el formato (compatibilidad con Studio).
 
