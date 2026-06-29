@@ -1580,3 +1580,37 @@ Abrir sesion Opus Max estrategica para definir TARGET architecture Studio/Woo/AC
 **Siguiente paso:** Pablo aplica `docs/studio/STUDIO_WC_TERM_CACHE_SCHEMA.sql` en Supabase SQL Editor, dispara `POST /inventory/sync`, ejecuta `scripts/studio/verify_wc_term_cache.sql` y confirma PASS + `wc_post_called=false`. Solo entonces abrir S023B.
 **agent_events ref:** 2026-06-29T20:05:00Z (S023A_WC_TAXONOMY_CATEGORY_READ_SYNC)
 ---
+
+---
+**Sesion S023A.CLOSE** - 2026-06-29
+**Agente:** Codex
+**Modo:** DOCS_ONLY / VALIDATION_CLOSE / NO_CODE / NO_WC_CALL / NO_SUPABASE_CHANGE / NO_DEPLOY
+**Resultado:** APPROVE_READY_FOR_S023B
+**Tarea:** Cerrar documentalmente S023A tras validacion manual de Pablo.
+
+**Validacion manual Pablo:**
+- SQL aplicado en Supabase: PASS.
+- Sync ejecutada desde Studio: PASS.
+- Respuesta de sync: `ok=true`, `wc_get_called=true`, `wc_post_called=false`.
+- Verificador SQL: PASS completo.
+- Counts reales: categorias=5; taxonomias requeridas=4/4; `pa_equipo`=22; `pa_liga`=6; `pa_jugador`=18; `pa_ano`=19.
+- Terminos conocidos PASS: Real Madrid=70; FC Barcelona=170; 2014-15=139.
+
+**Que se hizo:**
+Se actualizo el cierre documental de S023A a `APPROVE_READY_FOR_S023B`, se marco S023A completado en BACKLOG y se dejo S023B como siguiente bloque sin abrirlo.
+
+**Que se valido:**
+- `git status -sb`: limpio antes de editar.
+- `git log --oneline -5`: HEAD incluye `5bec3d7`.
+- `git diff --check`: PASS.
+- `agent_events.jsonl`: parseable.
+- Secret scan: CLEAN.
+- Scope: solo archivos documentales permitidos; no code files modified.
+
+**Que NO se toco:**
+Codigo, SQL, WooCommerce, WP Admin, Supabase remoto por agente, `.env.local`, productos, deploy, publicacion ni S023B.
+
+**Siguiente paso:**
+Abrir S023B - TERM_CACHE_BACKED_OPTIONS en una sesion separada.
+**agent_events ref:** 2026-06-29T20:24:00Z (S023A_MANUAL_VALIDATION_CLOSE)
+---

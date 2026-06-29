@@ -5,7 +5,7 @@
 **Sesion:** S023A - WC_TAXONOMY_CATEGORY_READ_SYNC
 **Modo:** IMPL / READ_ONLY_WC / ADDITIVE_SUPABASE_SCHEMA / NO_WOO_WRITE / NO_PUBLISH
 **Agente:** Codex
-**Veredicto tecnico:** READY_FOR_PABLO_SQL_APPLY
+**Veredicto funcional:** APPROVE_READY_FOR_S023B
 
 ---
 
@@ -20,6 +20,22 @@ S023A implementa la base tecnica para cachear en Supabase el vocabulario vivo de
 - categorias de producto WooCommerce
 
 El sync contra WooCommerce es estrictamente read-only: solo `GET`. No hay endpoints de escritura a Woo en esta sesion.
+
+Tras validacion manual de Pablo, S023A queda cerrado como `APPROVE_READY_FOR_S023B`.
+
+Validacion manual confirmada:
+
+- SQL aplicado en Supabase: PASS.
+- Sync ejecutada desde Studio: PASS.
+- Respuesta de sync: `ok=true`, `wc_get_called=true`, `wc_post_called=false`.
+- Verificador SQL: PASS completo.
+- `wc_categories`: 5 filas.
+- `wc_taxonomies`: 4/4 requeridas (`pa_equipo`, `pa_liga`, `pa_jugador`, `pa_ano`).
+- `wc_terms pa_equipo`: 22 filas.
+- `wc_terms pa_liga`: 6 filas.
+- `wc_terms pa_jugador`: 18 filas.
+- `wc_terms pa_ano`: 19 filas.
+- Terminos conocidos: Real Madrid -> 70 PASS; FC Barcelona -> 170 PASS; 2014-15 -> 139 PASS.
 
 ---
 
@@ -38,7 +54,7 @@ El sync contra WooCommerce es estrictamente read-only: solo `GET`. No hay endpoi
 | Archivo | Cambio |
 |---------|--------|
 | `studio/lib/types.ts` | Tipos de filas cacheadas: `WcTaxonomyCacheRow`, `WcTermCacheRow`, `WcCategoryCacheRow`. |
-| `BACKLOG.md` | S023A queda en estado `READY_FOR_PABLO_SQL_APPLY`. |
+| `BACKLOG.md` | S023A queda completado como `APPROVE_READY_FOR_S023B`. |
 | `CONTEXTO.md` | Append de sesion. |
 | `HISTORIAL_SESIONES.md` | Append de sesion. |
 | `agent_events.jsonl` | Evento JSONL de cierre. |
@@ -170,9 +186,9 @@ No se ejecuto sync real desde el agente. No se llamo WooCommerce.
 
 ---
 
-## 9. Siguiente paso
+## 9. Cierre y siguiente paso
 
-S023B solo se abre si Pablo confirma:
+Pablo confirmo las seis condiciones de cierre:
 
 1. SQL aplicado en Supabase.
 2. Sync ejecutado correctamente.
@@ -181,4 +197,6 @@ S023B solo se abre si Pablo confirma:
 5. Ningun producto modificado.
 6. Nada publicado.
 
-Veredicto funcional esperado tras confirmacion de Pablo: `APPROVE_READY_FOR_S023B`.
+S023A queda `APPROVE_READY_FOR_S023B`.
+
+Siguiente bloque: S023B - `TERM_CACHE_BACKED_OPTIONS`. No se abre en esta sesion.
