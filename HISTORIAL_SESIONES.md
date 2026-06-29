@@ -1538,3 +1538,45 @@ Codigo Studio runtime, WooCommerce API, WP Admin, productos, Supabase, `.env.loc
 Abrir sesion Opus Max estrategica para definir TARGET architecture Studio/Woo/ACF, roadmap S023-S030, gates por sesion y criterios de validacion antes de implementar S023.
 **agent_events ref:** 2026-06-28T22:03:00Z (STUDIO_BUILD_SYSTEM_LESSONS_AND_OPUS_BRIEF)
 ---
+
+---
+**Sesion S023A** - 2026-06-29
+**Agente:** Codex
+**Modo:** IMPL / READ_ONLY_WC / ADDITIVE_SUPABASE_SCHEMA / NO_WOO_WRITE / NO_PUBLISH
+**Resultado:** READY_FOR_PABLO_SQL_APPLY
+**Tarea:** Implementar la base tecnica para sincronizar en Supabase una cache local del vocabulario existente de WooCommerce: `pa_equipo`, `pa_liga`, `pa_ano`, `pa_jugador` y categorias de producto.
+
+**Gate:**
+- `DATA_LAYER_MAPPING_GATE`: PASS. Las capas quedan mapeadas como Woo GET source -> Supabase cache -> runtime futuro S023B/E. No hay capa desconocida.
+
+**Que se hizo:**
+- Creado `docs/studio/STUDIO_WC_TERM_CACHE_SCHEMA.sql` con tablas aditivas `wc_taxonomies`, `wc_terms`, `wc_categories`, IDs reales de Woo, `synced_at`, `source`, RLS y GRANTs para `authenticated`.
+- Creado `studio/lib/wc/taxonomy-sync.ts`: servicio server-side que usa solo GET a Woo, pagina terminos/categorias, normaliza filas y hace upsert en Supabase.
+- Creado `studio/app/inventory/sync/route.ts`: endpoint autenticado `POST /inventory/sync` que devuelve summary seguro.
+- Creado `scripts/studio/verify_wc_term_cache.sql`: verificador read-only de taxonomias, counts y checks Real Madrid=70, FC Barcelona=170, 2014-15=139.
+- Creado `docs/studio/STUDIO_WC_TAXONOMY_SYNC_RESULT.md`: runbook de aplicar SQL, ejecutar sync y verificar.
+- Actualizado `studio/lib/types.ts` con tipos de cache.
+- Actualizado BACKLOG con estado `READY_FOR_PABLO_SQL_APPLY`.
+
+**Que se valido:**
+- `npm run typecheck`: PASS.
+- `npm run build`: PASS (8 rutas; incluye `/inventory/sync`).
+- `npm run lint`: PASS (0 warnings/errors; aviso de deprecacion de `next lint`).
+- `git diff --check`: PASS.
+- JSONL: PASS (63 lineas validas).
+- Secret scan: CLEAN (sin tokens/credenciales reales en archivos nuevos ni diff).
+
+**Que NO se toco:**
+- No se ejecuto sync real desde el agente.
+- No se llamo WooCommerce.
+- No se llamo ningun POST/PUT/PATCH/DELETE a Woo.
+- No se modificaron productos, terminos ni categorias Woo.
+- No se modifico WordPress/WP Admin.
+- No se modifico Supabase remoto.
+- No se modifico `.env.local`.
+- No se tocaron `studio/lib/wc/client.ts`, `studio/lib/wc/bridge.ts`, `studio/lib/wc-terms-mvp.ts`, `studio/components/ItemForm.tsx`, DRAFT_ONLY ni idempotencia.
+- No se deployo ni publico nada.
+
+**Siguiente paso:** Pablo aplica `docs/studio/STUDIO_WC_TERM_CACHE_SCHEMA.sql` en Supabase SQL Editor, dispara `POST /inventory/sync`, ejecuta `scripts/studio/verify_wc_term_cache.sql` y confirma PASS + `wc_post_called=false`. Solo entonces abrir S023B.
+**agent_events ref:** 2026-06-29T20:05:00Z (S023A_WC_TAXONOMY_CATEGORY_READ_SYNC)
+---

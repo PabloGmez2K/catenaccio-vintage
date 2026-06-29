@@ -123,3 +123,34 @@ export interface AiSuggestion {
   review_notes: string | null
   created_at: string
 }
+
+export interface WcTaxonomyCacheRow {
+  id: number
+  slug: 'pa_equipo' | 'pa_liga' | 'pa_jugador' | 'pa_ano'
+  name: string
+  label_studio: string | null
+  source: 'wc_sync' | 'studio_created'
+  synced_at: string
+}
+
+export interface WcTermCacheRow {
+  id: number
+  taxonomy_id: number
+  taxonomy_slug: WcTaxonomyCacheRow['slug']
+  name: string
+  slug: string
+  count: number
+  source: 'wc_sync' | 'studio_created'
+  synced_at: string
+}
+
+export interface WcCategoryCacheRow {
+  id: number
+  name: string
+  slug: string
+  parent: number | null
+  count: number
+  is_curatorial: boolean
+  source: 'wc_sync' | 'studio_created'
+  synced_at: string
+}
