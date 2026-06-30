@@ -5,7 +5,7 @@
 **Sesión:** S023C — CONTROLLED_TERM_CREATION
 **Modo:** ASK→CODE / WC_TERM_WRITE_ONLY / NO_PRODUCT_WRITE / NO_PUBLISH / NO_UI_POLISH
 **Agente:** Claude Code (Sonnet)
-**Veredicto:** `READY_FOR_PABLO_TERM_CREATION_TEST`
+**Veredicto:** `APPROVE_READY_FOR_S023D`
 **Depende de:** `STUDIO_TARGET_ARCHITECTURE.md`, `STUDIO_TERM_CACHE_BACKED_OPTIONS_RESULT.md` (S023B), `STUDIO_WC_TAXONOMY_SYNC_RESULT.md` (S023A), `STUDIO_SESSION_GATES.md`
 
 ---
@@ -23,6 +23,22 @@ de jugador desde este código. Queda para S023D.
 
 No se creó ningún producto. No se publicó nada. No se tocó `pa_jugador`, categorías, ni el bridge de
 producto.
+
+---
+
+## 1.1 Validacion manual de Pablo
+
+Pablo valido funcionalmente S023C y declara el bloque como validado.
+
+- Creacion controlada de termino desde Studio: validada.
+- Dedupe: validado como funcional.
+- Validacion de Supabase: suficiente para cerrar S023C.
+- Familiarizacion con Supabase: seguira de forma progresiva; no se profundiza mas en esta sesion.
+- No se reporta creacion de producto.
+- No se reporta publicacion.
+- No se reportan problemas con categorias ni jugador.
+
+S023C queda cerrado como `APPROVE_READY_FOR_S023D`.
 
 ---
 
@@ -173,11 +189,14 @@ ejecutó desde el agente. La creación de término real queda para el test de Pa
 
 ## 12. Siguiente paso
 
-Si Pablo confirma en esta sesión: término creado o detectado sin duplicar, caché actualizada, visible
-en WP Admin, sin productos ni publicación → **`APPROVE_READY_FOR_S023D`** (PLAYER_TERM_RESOLUTION).
+Abrir **S023D - PLAYER_TERM_RESOLUTION** en una sesion nueva.
 
-Si el dedupe falla o la caché no se actualiza → `FIX_BLOCKER_FIRST` dentro de S023C.
+No mezclar con S023D:
+
+- UX inteligente de sugerencias de taxonomias.
+- Studio Taxonomy Universe Manager.
+- Herramientas internas de generacion de prompts.
 
 ---
 
-*Sesión S023C — 2026-06-30 — Claude Code (Sonnet). ASK→CODE / WC_TERM_WRITE_ONLY / NO_PRODUCT_WRITE / NO_PUBLISH / NO_UI_POLISH.*
+*Sesion S023C - 2026-06-30 - Claude Code (Sonnet) + cierre Codex. ASK->CODE / WC_TERM_WRITE_ONLY / NO_PRODUCT_WRITE / NO_PUBLISH / NO_UI_POLISH. Validacion manual Pablo: APPROVE_READY_FOR_S023D.*

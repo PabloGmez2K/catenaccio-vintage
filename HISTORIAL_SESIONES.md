@@ -1709,3 +1709,35 @@ Creados `studio/lib/wc/term-create.ts` (`createControlledTerm`), `studio/app/inv
 Pablo crea un término de prueba (recomendado: descartable, p.ej. equipo "ZZZ Studio Test Team") desde Studio, confirma `created=true` la primera vez y `existing=true` (mismo ID) al repetir, verifica en WP Admin → si PASS, abre S023D PLAYER_TERM_RESOLUTION.
 **agent_events ref:** ver entrada `S023C` en agent_events.jsonl
 ---
+
+## Sesion S023C.CLOSE - MANUAL_VALIDATION_CLOSE_AND_FUTURE_TAXONOMY_IDEAS
+
+**Fecha:** 2026-06-30
+**Agente:** Codex
+**Modo:** DOCS_ONLY / VALIDATION_CLOSE / NO_CODE / NO_WC_CALL / NO_SUPABASE_CHANGE / NO_DEPLOY
+**Resultado:** APPROVE_READY_FOR_S023D
+**Tarea:** Cerrar documentalmente S023C tras validacion manual de Pablo y registrar ideas futuras de UX/inteligencia de taxonomias.
+
+**Validacion manual Pablo:**
+- Creacion controlada de termino desde Studio validada.
+- Dedupe funcional validado.
+- Validacion de Supabase suficiente para cerrar S023C.
+- Pablo no quiere profundizar ahora en Supabase; la familiarizacion seguira progresivamente.
+- No se reporta creacion de producto ni publicacion.
+- No se reporta problema con categorias ni jugador.
+
+**Que se hizo:**
+Se actualizo el resultado S023C a `APPROVE_READY_FOR_S023D`, se marco S023C como cerrado en BACKLOG, se dejo S023D como siguiente bloque recomendado y se registraron tres ideas futuras: smart suggestions de taxonomias, taxonomy universe manager y herramientas internas de generacion de prompts.
+
+**Que se valido:**
+- `git status -sb`: main ahead 1, sin cambios previos antes de editar.
+- `git log --oneline -8`: HEAD `7979f23 feat(studio): controlled WooCommerce term creation (S023C)`.
+- Validaciones finales de cierre ejecutadas tras editar: `git diff --check`, JSONL parseable, secret scan, scope permitido y no code files modified.
+
+**Que NO se toco:**
+Codigo, Studio runtime, SQL, WooCommerce, WP Admin, Supabase remoto, `.env.local`, productos, terminos, categorias, deploy, publicacion, S023D, UX inteligente, universe manager ni prompt tools.
+
+**Siguiente paso:**
+Abrir S023D - PLAYER_TERM_RESOLUTION en una sesion nueva.
+**agent_events ref:** 2026-06-30T15:00:00Z (S023C.CLOSE)
+---

@@ -194,3 +194,24 @@ precios, pedidos, proveedores sensibles). Solo señales saneadas. Ver `DATA_AND_
 - privacy_level: INTERNAL_ONLY
 - Estado: CANDIDATE
 - Siguiente accion: Reabrir en S028 LANDING_ARCHITECTURE; no implementar ni mezclar con S023C.
+
+---
+
+### SLT-008 - Studio internal catalog intelligence and prompt tools
+
+- Fecha: 2026-06-30
+- Proyecto: catenaccio-vintage
+- Sesion/bloque: S023C.CLOSE - Manual validation close and future taxonomy ideas
+- project_value: Captura que Studio puede evolucionar desde term creation operativa hacia herramientas internas de inteligencia de catalogo: sugerencias contextuales, universe manager y generacion de prompts sin integrar API IA al principio.
+- lafabrica: Patron candidato para backoffices AI-first: antes de integrar IA por API, exponer herramientas NO-API que convierten datos reales del dominio en prompts accionables para agentes externos.
+- brain:
+  - evidence: Validacion de un flujo controlado de taxonomias que abre camino a inteligencia de catalogo sin aumentar riesgo operativo inmediato.
+  - skills: Separacion entre operacion critica inmediata y oportunidades futuras de producto/IA.
+  - service_angle: Herramientas internas de catalog intelligence y prompt workflows para ecommerce vertical.
+  - content_angle: "Antes de automatizar con IA: crea herramientas que conviertan tu catalogo en buenos prompts".
+  - portfolio_asset: Futuro caso Catenaccio Studio como PIM con capa de inteligencia interna progresiva.
+- future_product: Modulo reusable de prompt generation tools y taxonomy universe manager para verticales con taxonomias ricas.
+- no_copy: Datos reales de inventario, oportunidades comerciales concretas, precios privados, clientes, credenciales, URLs privadas de admin.
+- privacy_level: INTERNAL_ONLY
+- Estado: CANDIDATE
+- Siguiente accion: Reabrir tras S023D/S023E o en S028 LANDING_ARCHITECTURE; no implementar en el flujo critico actual.
