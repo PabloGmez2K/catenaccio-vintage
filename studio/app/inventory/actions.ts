@@ -10,6 +10,7 @@ import {
   resolveTermId,
 } from '@/lib/wc-terms-mvp'
 import { loadCachedTerms, matchCachedTermId } from '@/lib/wc/term-cache'
+import { loadCachedCategories } from '@/lib/wc/category-cache'
 
 export type ActionState = {
   error?: string
@@ -43,6 +44,27 @@ function snapshotValues(fd: FormData): Record<string, string> {
     if (typeof val === 'string') out[key] = val
   })
   return out
+}
+
+// Resolves the optional WC category override (S023E) against the wc_categories cache.
+// Empty → null (the bridge applies the liga-based heuristic). A non-empty value must
+// exist in the cache (the selector only offers cached options); anything else is rejected
+// so Studio never persists an invented category id. Returns the cached name as display cache.
+async function resolveCategorySelection(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  formData: FormData
+): Promise<
+  | { ok: true; categoria: number | null; categoriaDisplay: string | null }
+  | { ok: false }
+> {
+  const raw = str(formData, 'categoria')
+  if (!raw) return { ok: true, categoria: null, categoriaDisplay: null }
+  const id = Number(raw)
+  if (!Number.isInteger(id) || id <= 0) return { ok: false }
+  const categories = await loadCachedCategories(supabase)
+  const match = categories.find((c) => c.id === id)
+  if (!match) return { ok: false }
+  return { ok: true, categoria: match.id, categoriaDisplay: match.name }
 }
 
 // ── createInventoryItem ───────────────────────────────────────────────────────
@@ -130,6 +152,15 @@ export async function createInventoryItem(
   // TermCreateButton (S023D) and re-saved.
   const jugadorTermId = jugadorDisplay ? matchCachedTermId(cachedTerms.pa_jugador, jugadorDisplay) : ''
 
+  // WC category override (S023E): optional, validated against the wc_categories cache.
+  const categorySel = await resolveCategorySelection(supabase, formData)
+  if (!categorySel.ok) {
+    return {
+      fieldErrors: { categoria: 'Categoría no reconocida. Vuelve a seleccionarla de la lista.' },
+      values: snapshotValues(formData),
+    }
+  }
+
   // es_replica derived from authenticity_type; 'Replica' is the stored value for "Original retail / Fan version"
   const esReplica = authenticityType === 'Replica' || authenticityType === 'Original retail / Fan version'
 
@@ -175,6 +206,8 @@ export async function createInventoryItem(
     marca: marcaTermId || null,
     marca_display: marcaDisplay,
     condicion,
+    categoria: categorySel.categoria,
+    categoria_display: categorySel.categoriaDisplay,
     jugador: jugadorTermId || null,
     jugador_display: jugadorDisplay,
     numero_dorsal: str(formData, 'numero_dorsal'),
@@ -284,6 +317,15 @@ export async function updateInventoryItem(
   const marcaTermId = marcaDisplay ? resolveTermId(marcaOptions, marcaDisplay) : ''
   const jugadorTermId = jugadorDisplay ? matchCachedTermId(cachedTerms.pa_jugador, jugadorDisplay) : ''
 
+  // WC category override (S023E): optional, validated against the wc_categories cache.
+  const categorySel = await resolveCategorySelection(supabase, formData)
+  if (!categorySel.ok) {
+    return {
+      fieldErrors: { categoria: 'Categoría no reconocida. Vuelve a seleccionarla de la lista.' },
+      values: snapshotValues(formData),
+    }
+  }
+
   const esReplica = authenticityType === 'Replica' || authenticityType === 'Original retail / Fan version'
 
   // Update inventory_items — RLS + owner_id check prevents cross-user edits
@@ -327,6 +369,8 @@ export async function updateInventoryItem(
       marca: marcaTermId || null,
       marca_display: marcaDisplay,
       condicion,
+      categoria: categorySel.categoria,
+      categoria_display: categorySel.categoriaDisplay,
       jugador: jugadorTermId || null,
       jugador_display: jugadorDisplay,
       numero_dorsal: str(formData, 'numero_dorsal'),

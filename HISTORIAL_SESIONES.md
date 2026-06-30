@@ -1815,3 +1815,56 @@ Codigo, Studio runtime, SQL, WooCommerce, WP Admin, Supabase remoto, `.env.local
 Abrir S023E - CATEGORY_SELECTOR_IN_STUDIO en una sesion nueva.
 **agent_events ref:** 2026-07-01T01:00:00Z (S023D.CLOSE)
 ---
+
+## Sesion S023E — CATEGORY_SELECTOR_IN_STUDIO
+
+**Fecha:** 2026-07-01
+**Agente:** Claude Code (Opus 4.8)
+**Modo:** ASK→CODE / CATEGORY_MODELING / NO_WC_CATEGORY_CREATION / NO_PRODUCT_PUBLISH / NO_DEPLOY / QUALITY_PASS_REQUIRED
+**Veredicto:** `READY_FOR_PABLO_SQL_APPLY` → tras aplicar SQL: `READY_FOR_PABLO_CATEGORY_SELECTOR_TEST`
+
+**Que se hizo:**
+Selector de categoria WooCommerce en el formulario de Studio, alimentado por la cache `wc_categories`
+(S023A). Heuristica por liga como default ("Automatica": liga vacia → Selecciones 148; con liga →
+Otros Clubs 147) + override manual explicito (Leyendas/Nuevo). El override se persiste y el bridge lo
+envia; `rank_math_primary_product_cat` sigue la misma categoria (mismo `categoryId`).
+
+- `studio/lib/wc/category-cache.ts` (nuevo): `DEFAULT_CATEGORY_IDS`, `resolveHeuristicCategoryId`,
+  `resolveCategoryId(ligaValue, selected)` (override o heuristica, nunca inventa id),
+  `loadCachedCategories`, `getCategorySelectorData`. Unica fuente de la heuristica.
+- `docs/studio/STUDIO_CATEGORY_SELECTOR_SCHEMA.sql` (nuevo): SQL ADITIVO (`ADD COLUMN IF NOT EXISTS
+  categoria INTEGER`, `categoria_display TEXT` en `football_shirt_details`). Sin DROP/TRUNCATE/DELETE.
+  Aplicar manualmente por Pablo ANTES de usar el form.
+- `studio/lib/wc/bridge.ts`: eliminado `WC_CATEGORY_IDS`/`resolveCategoryId` locales; importa
+  `resolveCategoryId` del helper; `categoryId = resolveCategoryId(ligaValue, shirt.categoria ?? null)`.
+- `studio/app/inventory/actions.ts`: `resolveCategorySelection` valida el override contra la cache;
+  `createInventoryItem`/`updateInventoryItem` persisten `categoria`/`categoria_display`.
+- `studio/components/ItemForm.tsx`: `<select>` de categoria + hint reactivo de recomendacion;
+  props `categoryOptions`/`recommendedCategoryNames`.
+- `studio/app/inventory/new/page.tsx` + `[id]/edit/page.tsx`: cargan la cache y pasan props.
+- `studio/app/inventory/[id]/page.tsx`: fila read-only "Categoria WC".
+- `studio/lib/types.ts`: `FootballShirtDetails` + `categoria`/`categoria_display`.
+
+**Que se valido:**
+- `npm run typecheck`: PASS. `npm run build`: PASS (8/8 rutas). `npm run lint`: PASS (0 issues).
+- `git diff --check`: PASS. Secret scan del diff: CLEAN. SQL aditivo (sin operaciones destructivas).
+- Gates: DOMAIN_PRODUCT_MODELING (critico) PASS, ACF_CONFIG PASS, DATA_LAYER PASS, NO_MICROPATCH PASS,
+  PRODUCT_REFERENCE_DIFF N/A.
+- Quality pass: `categories[]` y `rank_math_primary_product_cat` comparten `categoryId`; categorias
+  solo desde `wc_categories`; no se inventan IDs; no se crean categorias; Liga/Equipo/Ano/Jugador y
+  DRAFT_ONLY intactos; backward-compat sin override / pre-SQL.
+
+**Que NO se toco:**
+WooCommerce (sin GET/POST por agente), categorias Woo (no creadas), productos (no creados/publicados),
+WP Admin, Supabase remoto, `.env.local`, `client.ts`, `taxonomy-sync.ts`, `term-cache.ts`,
+`term-create.ts`, `wc-terms-mvp.ts`, deploy, S024.
+
+**Regresion potencial documentada:** el guardado escribe `categoria`/`categoria_display`; si se usa el
+form antes de aplicar el SQL, fallaria por columna inexistente. Por eso el primer paso del test es
+aplicar el SQL (idempotente, `IF NOT EXISTS`).
+
+**Siguiente paso:**
+Pablo aplica `docs/studio/STUDIO_CATEGORY_SELECTOR_SCHEMA.sql`, crea un borrador con override (Leyendas)
+y verifica en WP Admin categoria + primary cat + sin regresion. Si PASS: cierre S023E y fase S023.
+**agent_events ref:** 2026-07-01T02:00:00Z (S023E)
+---

@@ -6,6 +6,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createWcDraftProduct } from './client'
 import { loadCachedTerms, matchCachedTermLabel } from './term-cache'
+import { resolveCategoryId } from './category-cache'
 import type { WcProductPayload } from './client'
 
 const BRIDGE_VERSION = 'v2.1'
@@ -27,15 +28,11 @@ const ACF_KEYS = {
   descripcion_del_producto: 'field_66b9f077d1375',
 } as const
 
-// WooCommerce product category IDs — confirmed in S022C.5.
-// liga === '' → no league → assumed national team → Selecciones Nacionales.
-// liga !== '' → club in a known league → Otros Clubs.
-// Leyendas (149) and Nuevo (22) require curatorial judgment — Pablo assigns manually in WP Admin.
-// S023 will add a category selector to Studio UI to handle Leyendas.
-const WC_CATEGORY_IDS = {
-  seleccionesNacionales: 148,
-  otrosClubs: 147,
-} as const
+// WooCommerce product category resolution lives in ./category-cache (resolveCategoryId):
+// an explicit Studio override (football_shirt_details.categoria, selected from the
+// wc_categories cache in S023E) wins; otherwise the liga-based heuristic applies
+// (liga '' → Selecciones Nacionales; liga set → Otros Clubs). Leyendas/Nuevo are now
+// selectable from Studio instead of only WP Admin.
 
 const WC_ATTRIBUTE_IDS = {
   equipo: 4,
@@ -43,10 +40,6 @@ const WC_ATTRIBUTE_IDS = {
   jugador: 6,
   ano: 7,
 } as const
-
-function resolveCategoryId(ligaValue: string): number {
-  return ligaValue === '' ? WC_CATEGORY_IDS.seleccionesNacionales : WC_CATEGORY_IDS.otrosClubs
-}
 
 export type BridgeResult =
   | { ok: true; wcProductId: number }
@@ -313,7 +306,10 @@ export async function createWcDraftForItem(itemId: string): Promise<BridgeResult
     ? descriptionText
     : `<p>${descriptionText}</p>`
 
-  const categoryId = resolveCategoryId(ligaValue)
+  // Category: explicit Studio override (shirt.categoria, selected from wc_categories cache)
+  // wins; null falls back to the liga-based heuristic. rank_math_primary_product_cat below
+  // reuses the same categoryId, so primary category always follows the chosen category.
+  const categoryId = resolveCategoryId(ligaValue, shirt.categoria ?? null)
   const attributes: WcProductPayload['attributes'] = [
     ...(ligaAttributeOption
       ? [buildAttribute(WC_ATTRIBUTE_IDS.liga, ligaAttributeOption, 'Liga')]

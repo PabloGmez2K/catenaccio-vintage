@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { AppShell } from '@/components/AppShell'
 import { ErrorState } from '@/components/ErrorState'
 import { ItemForm, type ItemFormDefaults } from '@/components/ItemForm'
+import { getCategorySelectorData } from '@/lib/wc/category-cache'
 
 export default async function EditItemPage({
   params,
@@ -42,6 +43,8 @@ export default async function EditItemPage({
 
   const shirt = data.football_shirt_details
 
+  const { options: categoryOptions, recommendedNames } = await getCategorySelectorData(supabase)
+
   const defaultValues: ItemFormDefaults = {
     referencia: data.referencia ?? '',
     coste: data.coste != null ? String(data.coste) : '',
@@ -57,6 +60,7 @@ export default async function EditItemPage({
     marca_display: shirt?.marca_display ?? '',
     talla: shirt?.talla ?? '',
     condicion: shirt?.condicion ?? '',
+    categoria: shirt?.categoria != null ? String(shirt.categoria) : '',
     product_type: shirt?.product_type ?? 'Shirt',
     shirt_version: shirt?.shirt_version ?? 'Home',
     authenticity_type: shirt?.authenticity_type ?? 'Replica',
@@ -77,7 +81,13 @@ export default async function EditItemPage({
 
   return (
     <AppShell>
-      <ItemForm mode="edit" itemId={id} defaultValues={defaultValues} />
+      <ItemForm
+        mode="edit"
+        itemId={id}
+        defaultValues={defaultValues}
+        categoryOptions={categoryOptions}
+        recommendedCategoryNames={recommendedNames}
+      />
     </AppShell>
   )
 }

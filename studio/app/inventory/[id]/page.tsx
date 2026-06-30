@@ -218,6 +218,12 @@ export default async function InventoryItemPage({
                 <span className="field-value">{shirt.marca_display}</span>
               </div>
             )}
+            <div className="field-row">
+              <span className="field-label">Categoría WC</span>
+              <span className="field-value">
+                {shirt.categoria_display ?? 'Automática (según liga)'}
+              </span>
+            </div>
 
             {/* Player / personalisation */}
             {shirt.jugador_display && (

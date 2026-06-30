@@ -33,6 +33,7 @@ export interface ItemFormDefaults {
   marca_display?: string
   talla?: string
   condicion?: string
+  categoria?: string
   product_type?: string
   shirt_version?: string
   authenticity_type?: string
@@ -57,10 +58,19 @@ export interface ItemFormDefaults {
   notas_internas?: string
 }
 
+interface CategoryOption {
+  id: number
+  name: string
+}
+
 interface ItemFormProps {
   mode?: 'create' | 'edit'
   itemId?: string
   defaultValues?: ItemFormDefaults
+  // WC categories from the Supabase cache (S023A/E). Empty if the cache is not synced yet.
+  categoryOptions?: CategoryOption[]
+  // Heuristic recommendation names resolved server-side from the cache (Otros Clubs / Selecciones).
+  recommendedCategoryNames?: { withLiga: string | null; withoutLiga: string | null }
 }
 
 function FieldError({ msg }: { msg?: string }) {
@@ -72,6 +82,8 @@ export function ItemForm({
   mode = 'create',
   itemId,
   defaultValues = {},
+  categoryOptions = [],
+  recommendedCategoryNames,
 }: ItemFormProps) {
   const serverAction = mode === 'edit' ? updateInventoryItem : createInventoryItem
   const [state, formAction, isPending] = useActionState<ActionState, FormData>(
@@ -89,6 +101,7 @@ export function ItemForm({
   const [marcaDisplay, setMarcaDisplay] = useState(defaultValues.marca_display ?? '')
   const [talla, setTalla] = useState(defaultValues.talla ?? '')
   const [condicion, setCondicion] = useState(defaultValues.condicion ?? '')
+  const [categoria, setCategoria] = useState(defaultValues.categoria ?? '')
   const [productType, setProductType] = useState(defaultValues.product_type ?? 'Shirt')
   const [shirtVersion, setShirtVersion] = useState(defaultValues.shirt_version ?? 'Home')
   const [authenticityType, setAuthenticityType] = useState(
@@ -159,6 +172,13 @@ export function ItemForm({
   }
 
   const isShirt = productType === 'Shirt'
+
+  // Heuristic recommendation shown when the category is left "Automática" (S023E).
+  // Reactive to liga: liga present → Otros Clubs; liga empty → Selecciones.
+  // Mirrors resolveHeuristicCategoryId in lib/wc/category-cache.ts.
+  const recommendedCategory = ligaDisplay.trim()
+    ? recommendedCategoryNames?.withLiga
+    : recommendedCategoryNames?.withoutLiga
 
   // ── Render ───────────────────────────────────────────────────────────────
 
@@ -368,6 +388,48 @@ export function ItemForm({
               ))}
             </select>
             <FieldError msg={fe.condicion} />
+          </div>
+
+          <div className={`form-field ${fe.categoria ? 'has-error' : ''}`}>
+            <label htmlFor="categoria">Categoría WooCommerce</label>
+            <select
+              id="categoria"
+              name="categoria"
+              value={categoria}
+              onChange={(e) => setCategoria(e.target.value)}
+            >
+              <option value="">Automática (según liga)</option>
+              {categoryOptions.map((c) => (
+                <option key={c.id} value={String(c.id)}>
+                  {c.name}
+                </option>
+              ))}
+            </select>
+            <FieldError msg={fe.categoria} />
+            {categoria === '' && recommendedCategory && (
+              <p className="field-help">
+                Recomendada automáticamente: <strong>{recommendedCategory}</strong>. Cámbiala si la
+                camiseta encaja mejor en otra categoría (p.ej. Leyendas).
+              </p>
+            )}
+            {categoria === '' && !recommendedCategory && (
+              <p className="field-help">
+                Con “Automática”, Studio elige la categoría según la liga (Otros Clubs con liga,
+                Selecciones sin liga).
+              </p>
+            )}
+            {categoria !== '' && (
+              <p className="field-help">
+                Override manual: se enviará esta categoría al borrador y como categoría primaria de
+                Rank Math.
+              </p>
+            )}
+            {categoryOptions.length === 0 && (
+              <p className="field-help">
+                No hay categorías en caché. Ejecuta el sync de taxonomías para poblar
+                <code> wc_categories</code> y poder elegir manualmente.
+              </p>
+            )}
           </div>
         </section>
 

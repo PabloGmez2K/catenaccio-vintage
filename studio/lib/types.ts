@@ -66,6 +66,10 @@ export interface FootballShirtDetails {
   marca: string | null
   marca_display: string | null
   condicion: string
+  // WooCommerce product category (S023E) — explicit override selected from the
+  // wc_categories cache. null = follow the liga-based heuristic in the bridge.
+  categoria: number | null
+  categoria_display: string | null
   // Player / personalisation
   jugador: string | null
   jugador_display: string | null
