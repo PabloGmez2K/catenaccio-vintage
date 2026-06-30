@@ -173,3 +173,24 @@ precios, pedidos, proveedores sensibles). Solo señales saneadas. Ver `DATA_AND_
 - Traza Brain: 2026-06-29 → pablo-operating-brain EVID-003 ext. (Woo/ACF integration gates, INTERNAL_ONLY), POST_IDEAS, OFFER-12 refuerzo.
 - Traza Lafabrica: CANDIDATE-03 en ECOSYSTEM_LEARNING_PATTERNS.md pendiente validacion en S023.
 - Siguiente accion: Revisar tras S023; si los gates guian una sesion limpia, promover CANDIDATE-03 a PATTERN en lafabrica como guardrail de integraciones Woo/ACF.
+
+---
+
+### SLT-007 - Football knowledge graph + programmatic landings opportunity
+
+- Fecha: 2026-06-30
+- Proyecto: catenaccio-vintage
+- Sesion/bloque: S023B.CLOSE - Manual validation close and future ideas
+- project_value: Captura una oportunidad estrategica futura conectada con el vocabulario vivo de taxonomias: explorador Liga -> Equipo -> Temporada -> Jugadores y agente de analisis de valor/rareza para catalogo Catenaccio.
+- lafabrica: Patron candidato para convertir caches operativas de dominio en superficies exploratorias y landings programaticas orientadas a SEO/AI search.
+- brain:
+  - evidence: Validacion de que una cache de terminos puede ser base de conocimiento de catalogo, no solo infraestructura de formularios.
+  - skills: Identificacion de producto futuro a partir de una validacion tecnica-operativa.
+  - service_angle: Catalogos inteligentes y landings programaticas para ecommerce vertical.
+  - content_angle: "De taxonomias internas a conocimiento publicable: como un PIM puede alimentar SEO y asistentes IA".
+  - portfolio_asset: Futuro caso Catenaccio Studio como catalogo inteligente para camisetas vintage.
+- future_product: Modulo reusable de knowledge graph ligero para verticales con taxonomias ricas, conectado a landings y agentes de analisis.
+- no_copy: Inventario real, estrategia comercial privada, oportunidades de compra/venta concretas, precios privados, datos de clientes, credenciales.
+- privacy_level: INTERNAL_ONLY
+- Estado: CANDIDATE
+- Siguiente accion: Reabrir en S028 LANDING_ARCHITECTURE; no implementar ni mezclar con S023C.

@@ -48,6 +48,7 @@ Hipótesis no verificadas del SEED:
 5. ✅ Ventana admin cerrada. `catenaccio-studio-agent` verificado como `shop_manager` (Sesión 008b).
 6. ~~**Sesión 010A — SERVER_FILESYSTEM_READONLY_DISCOVERY:** intentado vía WebDAV — **BLOCKED** (puertos 2077/2078 bloqueados por Raiola).~~
 7. ✅ **Sesión 010B — SERVER_FILESYSTEM_READONLY_DISCOVERY COMPLETADO** vía cPanel UAPI Token. `functions.php` (62KB), `filtro-camisetas.php`, `catenaccio-offcanvas-menu.php` leídos. Veredicto: **APPROVE_A0_MIGRATION_PLAN_PREP**. Script: `scripts/filesystem/cpanel_uapi_probe.py`.
+
 8. **Siguiente acción (agente):** A0_MIGRATION_PLAN — plan técnico completo con código real. Desbloqueado.
 9. **Acción Pablo (sin agente, ya posible):** CARRITO_MICUENTA_QUICKWIN — reemplazar widgets Pro en Carrito y Mi Cuenta por shortcodes `[woocommerce_cart]` y `[woocommerce_my_account]` en WP Admin → Elementor. 10 min.
 
@@ -212,3 +213,5 @@ SesiÃ³n S022C.9 (2026-06-29, Codex): DOCS_ONLY / build-system lessons. S022C q
 Sesion S023A (2026-06-29, Codex): IMPL / READ_ONLY_WC / ADDITIVE_SUPABASE_SCHEMA / NO_WOO_WRITE. Implementada base tecnica de cache Woo taxonomy/category en Supabase: SQL canonico, servicio GET-only, endpoint autenticado, verificador SQL y runbook. Validado typecheck/build/lint/diff-check, JSONL PASS y secret scan CLEAN. No se llamo Woo, no se modifico Supabase remoto, no se tocaron productos, bridge, formulario, wc-terms-mvp.ts, .env.local ni publicacion. Pendiente Pablo: aplicar SQL, disparar sync, ejecutar verificador y confirmar PASS antes de S023B.
 
 Sesion S023A.CLOSE (2026-06-29, Codex): DOCS_ONLY / VALIDATION_CLOSE / NO_CODE. Pablo valido manualmente S023A: SQL aplicado en Supabase, sync desde Studio con `ok=true`, `wc_get_called=true`, `wc_post_called=false`, y verificador SQL PASS completo (categorias=5; taxonomias=4/4; pa_equipo=22; pa_liga=6; pa_jugador=18; pa_ano=19; Real Madrid=70, FC Barcelona=170, 2014-15=139). S023A queda `APPROVE_READY_FOR_S023B`. No se toco codigo, SQL, WooCommerce, Supabase remoto por agente, .env.local, productos, deploy ni publicacion. Siguiente: abrir S023B en una sesion separada.
+
+Sesion S023B.CLOSE (2026-06-30, Codex): DOCS_ONLY / VALIDATION_CLOSE / NO_CODE. Pablo valido manualmente S023B: `APPROVE_READY_FOR_S023C`. Se cerro documentalmente `TERM_CACHE_BACKED_OPTIONS`; Liga/Equipo/Ano quedan conectados a la cache Supabase `wc_terms` de S023A. Siguiente bloque recomendado: abrir S023C `CONTROLLED_TERM_CREATION` en nueva sesion. No se abrio S023C, no se toco codigo, WooCommerce, Supabase remoto, productos, terminos ni publicacion.

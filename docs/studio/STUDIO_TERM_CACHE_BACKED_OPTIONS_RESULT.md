@@ -5,7 +5,7 @@
 **Sesión:** S023B — TERM_CACHE_BACKED_OPTIONS
 **Modo:** ASK→CODE / LOCAL_CODE / NO_WC_CALL_BY_AGENT / NO_TERM_CREATION / NO_PUBLISH
 **Agente:** Claude Code (Sonnet)
-**Veredicto:** `READY_FOR_PABLO_CACHE_BACKED_DRAFT_TEST`
+**Veredicto:** `APPROVE_READY_FOR_S023C`
 **Depende de:** `STUDIO_WC_TAXONOMY_SYNC_RESULT.md` (S023A), `STUDIO_TARGET_ARCHITECTURE.md`, `STUDIO_SESSION_GATES.md`, `STUDIO_WC_DRAFT_BRIDGE_RESULT.md`
 
 ---
@@ -25,6 +25,20 @@ como fuente de term IDs.
   labels/aliases/titleLabel/helpText (datalist del formulario, alias matching,
   título autogenerado).
 - No se creó ningún término nuevo. No se llamó a WooCommerce desde el agente.
+
+## 1.1 Validacion manual de Pablo
+
+Pablo probo S023B en Studio y confirma `APPROVE_READY_FOR_S023C`.
+
+- Liga, Equipo y Ano siguen disponibles en el formulario de Studio.
+- La resolucion real de Liga/Equipo/Ano ya usa la cache Supabase `wc_terms` creada en S023A.
+- El flujo queda aprobado para pasar a S023C.
+- No se abrio S023C en esta sesion.
+
+El alcance diferido se mantiene sin cambios:
+
+- `pa_jugador` / Rivaldo sigue diferido a S023D.
+- La creacion controlada de terminos sigue diferida a S023C.
 
 ---
 
@@ -133,11 +147,14 @@ Si el equipo elegido resuelve su term ID sin haber sido parcheado a mano en
 
 ## 9. Siguiente paso
 
-- Si Pablo valida PASS → abrir **S023C — CONTROLLED_TERM_CREATION** en una sesión
-  nueva.
-- Si falla por resolución/caché → `FIX_BLOCKER_FIRST` dentro de S023B (no abrir S023C).
-- Si aparece jugador/Rivaldo como bloqueante → diferir a S023D, no mezclar con S023B.
+Abrir **S023C — CONTROLLED_TERM_CREATION** en una sesion nueva.
+
+No mezclar con S023C:
+
+- Mejora de UI para distinguir terminos existentes en Woo/cache vs pendientes/no creados.
+- Explorador estrategico Liga → Equipo → Temporada → Jugadores.
+- Jugador/Rivaldo, que sigue diferido a S023D.
 
 ---
 
-*Sesión S023B — 2026-06-30 — Claude Code (Sonnet). ASK→CODE / LOCAL_CODE / NO_WC_CALL_BY_AGENT / NO_TERM_CREATION / NO_PUBLISH.*
+*Sesion S023B — 2026-06-30 — Claude Code (Sonnet) + cierre Codex. ASK→CODE / LOCAL_CODE / NO_WC_CALL_BY_AGENT / NO_TERM_CREATION / NO_PUBLISH. Validacion manual Pablo: APPROVE_READY_FOR_S023C.*
