@@ -1777,3 +1777,41 @@ La primera edicion de `actions.ts` solo sustituyo el stub en `updateInventoryIte
 Pablo crea/edita una camiseta completa con Jugador=Rivaldo, usa "Crear termino en Woo" si no resuelve desde cache, guarda, crea un unico borrador Woo y confirma en WP Admin que Jugador aparece seleccionado sin regresion en Liga/Equipo/Ano. Si PASS: cierre documental S023D y se abre S023E CATEGORY_SELECTOR_IN_STUDIO. No marcar S023D como completado hasta esa validacion.
 **agent_events ref:** 2026-07-01T00:00:00Z (S023D)
 ---
+
+## Sesion S023D.CLOSE - PLAYER_TERM_VALIDATION_CLOSE
+
+**Fecha:** 2026-07-01
+**Agente:** Claude Code (Sonnet)
+**Modo:** DOCS_ONLY / VALIDATION_CLOSE / NO_CODE / NO_WC_CALL / NO_SUPABASE_CHANGE / NO_DEPLOY
+
+**Validacion de Pablo:**
+Pablo valido S023D con resultado `APPROVE_READY_FOR_S023E`.
+
+- Jugador/Rivaldo queda validado funcionalmente: el campo Jugador resuelve a un term ID real y aparece seleccionado en WP Admin al crear un borrador Woo.
+- El flujo de jugador (resolucion contra `wc_terms` + creacion controlada) queda aprobado para pasar a S023E.
+- No se reporta regresion en Liga/Equipo/Ano.
+- No se reporta publicacion.
+- No se reporta creacion ni modificacion de producto fuera del borrador de prueba.
+- No se abrio S023E en esta sesion.
+
+**Que se hizo:**
+Cierre documental de S023D tras la validacion manual de Pablo.
+
+- `docs/studio/STUDIO_PLAYER_TERM_RESOLUTION_RESULT.md`: veredicto actualizado de `READY_FOR_PABLO_PLAYER_TERM_TEST` a `APPROVE_READY_FOR_S023E`; anadida seccion `§1.1 Validacion manual de Pablo`; §12 (Veredicto) actualizada.
+- `BACKLOG.md`: S023D marcado `[x]` DONE / `APPROVE_READY_FOR_S023E`; S023E marcado como siguiente bloque NEXT/recomendado.
+- `CONTEXTO.md`: entrada breve de cierre anadida (append-only, sin editar entradas previas).
+- `agent_events.jsonl`: linea de cierre `S023D.CLOSE` anadida.
+
+**Que se valido:**
+- `git diff --check`: PASS.
+- `agent_events.jsonl`: parseable.
+- Secret scan del diff: CLEAN.
+- Scope confirmado: solo los 5 archivos de documentacion permitidos (`STUDIO_PLAYER_TERM_RESOLUTION_RESULT.md`, `BACKLOG.md`, `CONTEXTO.md`, `HISTORIAL_SESIONES.md`, `agent_events.jsonl`). Ningun archivo de codigo modificado.
+
+**Que NO se toco:**
+Codigo, Studio runtime, SQL, WooCommerce, WP Admin, Supabase remoto, `.env.local`, productos, terminos, categorias, deploy, publicacion, S023E, selector de categorias.
+
+**Siguiente paso:**
+Abrir S023E - CATEGORY_SELECTOR_IN_STUDIO en una sesion nueva.
+**agent_events ref:** 2026-07-01T01:00:00Z (S023D.CLOSE)
+---

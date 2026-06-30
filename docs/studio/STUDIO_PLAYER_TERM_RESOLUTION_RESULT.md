@@ -5,7 +5,7 @@
 **Sesión:** S023D — PLAYER_TERM_RESOLUTION
 **Modo:** ASK→CODE / WC_TERM_WRITE_ONLY / NO_PRODUCT_WRITE / NO_PUBLISH / NO_UI_POLISH / QUALITY_PASS_REQUIRED
 **Agente:** Claude Code (Sonnet)
-**Veredicto:** `READY_FOR_PABLO_PLAYER_TERM_TEST`
+**Veredicto:** `APPROVE_READY_FOR_S023E`
 **Depende de:** `STUDIO_TERM_CACHE_BACKED_OPTIONS_RESULT.md` (S023B), `STUDIO_CONTROLLED_TERM_CREATION_RESULT.md` (S023C), `STUDIO_WC_TAXONOMY_SYNC_RESULT.md` (S023A), `STUDIO_TARGET_ARCHITECTURE.md`, `STUDIO_SESSION_GATES.md`
 
 ---
@@ -28,6 +28,21 @@ creación controlada (S023C, extendida aquí a `pa_jugador`) permite añadirlo d
 
 No se creó ningún producto. No se publicó nada. No se creó ningún término real desde el agente. No
 se tocó `bridge.ts`, `client.ts`, `taxonomy-sync.ts`, `term-cache.ts`, `types.ts` ni el schema SQL.
+
+## 1.1 Validación manual de Pablo
+
+Pablo validó S023D en Studio y declara el bloque como validado: `APPROVE_READY_FOR_S023E`.
+
+- Jugador/Rivaldo queda validado funcionalmente: el campo Jugador resuelve a un term ID real y
+  aparece seleccionado en WP Admin al crear un borrador Woo, cerrando el fallo diferido de S022C.8.
+- El flujo de jugador (resolución contra `wc_terms` + creación controlada vía `TermCreateButton`)
+  queda aprobado para pasar a S023E.
+- No se reporta regresión en Liga/Equipo/Año.
+- No se reporta publicación.
+- No se reporta creación ni modificación de producto fuera del borrador de prueba.
+- No se abrió S023E en esta sesión de validación.
+
+S023D queda cerrado como `APPROVE_READY_FOR_S023E`.
 
 ---
 
@@ -217,13 +232,13 @@ publicó ningún producto para validar técnicamente.
 
 ## 12. Veredicto
 
-`READY_FOR_PABLO_PLAYER_TERM_TEST`
+`APPROVE_READY_FOR_S023E`
 
 La implementación técnica está completa y validada localmente (typecheck/build/lint PASS, scope
-confirmado, quality pass sin hallazgos pendientes). S023D **no se marca como completado** hasta que
-Pablo valide el caso Rivaldo en WP Admin. Si PASS: cierre documental de S023D (validación manual) y
-después se abre **S023E — CATEGORY_SELECTOR_IN_STUDIO**, no antes.
+confirmado, quality pass sin hallazgos pendientes), y Pablo validó funcionalmente el caso Rivaldo en
+WP Admin (§1.1). S023D queda cerrado. Siguiente bloque: **S023E — CATEGORY_SELECTOR_IN_STUDIO**, en
+una sesión nueva.
 
 ---
 
-*Sesión S023D — 2026-07-01 — Claude Code (Sonnet). ASK→CODE / WC_TERM_WRITE_ONLY / NO_PRODUCT_WRITE / NO_PUBLISH / NO_UI_POLISH / QUALITY_PASS_REQUIRED.*
+*Sesión S023D — 2026-07-01 — Claude Code (Sonnet). ASK→CODE / WC_TERM_WRITE_ONLY / NO_PRODUCT_WRITE / NO_PUBLISH / NO_UI_POLISH / QUALITY_PASS_REQUIRED. Validación manual Pablo: APPROVE_READY_FOR_S023E.*
