@@ -9,6 +9,7 @@ import {
   marcaOptions,
   resolveTermId,
 } from '@/lib/wc-terms-mvp'
+import { loadCachedTerms, matchCachedTermId } from '@/lib/wc/term-cache'
 
 export type ActionState = {
   error?: string
@@ -110,16 +111,19 @@ export async function createInventoryItem(
     return { fieldErrors, values: snapshotValues(formData) }
   }
 
-  // Resolve WC term IDs from display labels — unknown IDs stored as ''
+  // Resolve WC term IDs from display labels against the Supabase taxonomy cache
+  // (S023A/S023B) — unmatched terms stored as ''. marca has no synced WC taxonomy
+  // and keeps resolving against the local presentation map (always '' today).
   const ligaDisplay = str(formData, 'liga_display')
   const marcaDisplay = str(formData, 'marca_display')
   const jugadorDisplay = str(formData, 'jugador_display')
   const shirtVersion = req(formData, 'shirt_version') || 'Home'
   const sleeveLength = req(formData, 'sleeve_length') || 'Short Sleeve'
 
-  const ligaTermId = ligaDisplay ? resolveTermId(ligaOptions, ligaDisplay) : ''
-  const equipoTermId = resolveTermId(equipoOptions, equipoDisplay)
-  const temporadaTermId = resolveTermId(temporadaOptions, temporadaDisplay)
+  const cachedTerms = await loadCachedTerms(supabase, ['pa_liga', 'pa_equipo', 'pa_ano'])
+  const ligaTermId = ligaDisplay ? matchCachedTermId(cachedTerms.pa_liga, ligaDisplay, ligaOptions) : ''
+  const equipoTermId = matchCachedTermId(cachedTerms.pa_equipo, equipoDisplay, equipoOptions)
+  const temporadaTermId = matchCachedTermId(cachedTerms.pa_ano, temporadaDisplay, temporadaOptions)
   const marcaTermId = marcaDisplay ? resolveTermId(marcaOptions, marcaDisplay) : ''
 
   // es_replica derived from authenticity_type; 'Replica' is the stored value for "Original retail / Fan version"
@@ -269,9 +273,10 @@ export async function updateInventoryItem(
   const shirtVersion = req(formData, 'shirt_version') || 'Home'
   const sleeveLength = req(formData, 'sleeve_length') || 'Short Sleeve'
 
-  const ligaTermId = ligaDisplay ? resolveTermId(ligaOptions, ligaDisplay) : ''
-  const equipoTermId = resolveTermId(equipoOptions, equipoDisplay)
-  const temporadaTermId = resolveTermId(temporadaOptions, temporadaDisplay)
+  const cachedTerms = await loadCachedTerms(supabase, ['pa_liga', 'pa_equipo', 'pa_ano'])
+  const ligaTermId = ligaDisplay ? matchCachedTermId(cachedTerms.pa_liga, ligaDisplay, ligaOptions) : ''
+  const equipoTermId = matchCachedTermId(cachedTerms.pa_equipo, equipoDisplay, equipoOptions)
+  const temporadaTermId = matchCachedTermId(cachedTerms.pa_ano, temporadaDisplay, temporadaOptions)
   const marcaTermId = marcaDisplay ? resolveTermId(marcaOptions, marcaDisplay) : ''
 
   const esReplica = authenticityType === 'Replica' || authenticityType === 'Original retail / Fan version'

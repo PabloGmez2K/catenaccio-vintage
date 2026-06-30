@@ -1614,3 +1614,35 @@ Codigo, SQL, WooCommerce, WP Admin, Supabase remoto por agente, `.env.local`, pr
 Abrir S023B - TERM_CACHE_BACKED_OPTIONS en una sesion separada.
 **agent_events ref:** 2026-06-29T20:24:00Z (S023A_MANUAL_VALIDATION_CLOSE)
 ---
+
+## Sesion S023B - TERM_CACHE_BACKED_OPTIONS
+
+**Fecha:** 2026-06-30
+**Agente:** Claude Code (Sonnet)
+**Modo:** ASK→CODE / LOCAL_CODE / NO_WC_CALL_BY_AGENT / NO_TERM_CREATION / NO_PUBLISH / PABLO_DRAFT_TEST
+
+**Que se hizo:**
+Conectada la cache Supabase `wc_terms` (creada en S023A) al flujo real de Studio para que Liga/Equipo/Ano se resuelvan contra ella en vez de contra `studio/lib/wc-terms-mvp.ts`.
+
+- Creado `studio/lib/wc/term-cache.ts`: `loadCachedTerms()` lee `wc_terms` por `taxonomy_slug` (RLS `authenticated`); `matchCachedTermId()` resuelve label visible -> term ID por match exacto case-insensitive de `name`/`slug`, con fallback de alias via las opciones de `wc-terms-mvp.ts`; `matchCachedTermLabel()` resuelve term ID -> nombre cacheado. Nunca inventa IDs.
+- `studio/app/inventory/actions.ts` (`createInventoryItem`/`updateInventoryItem`): liga/equipo/temporada se resuelven con `matchCachedTermId()` contra la cache en vez de `resolveTermId()` sobre el mapa estatico. Marca sigue igual (sin taxonomia WC sincronizada).
+- `studio/lib/wc/bridge.ts`: `resolveAttributeOption()` usa la cache (`cachedTerms.pa_liga/pa_equipo/pa_ano`) como fallback de label cuando falta `*_display`. Se elimino el import operativo de `equipoOptions`/`ligaOptions`/`temporadaOptions`/`getTermLabelById`. Mensajes de error actualizados.
+- `studio/lib/wc-terms-mvp.ts`: comentario de depreciacion explicito (termId ya no se lee operativamente para liga/equipo/temporada); `getTermLabelById()` eliminado por quedar sin uso.
+- `docs/studio/STUDIO_TERM_CACHE_BACKED_OPTIONS_RESULT.md` creado con detalle de gates, archivos, validaciones e instrucciones de test para Pablo.
+
+**Que se valido:**
+- `npm run typecheck`: PASS.
+- `npm run build`: PASS (8/8 rutas).
+- `npm run lint`: PASS (0 issues).
+- `git diff --check`: PASS.
+- Secret scan del diff: CLEAN.
+
+**Que NO se toco:**
+WooCommerce (ninguna llamada GET/POST/PUT/PATCH/DELETE desde el agente), terminos WC, categorias, Supabase remoto, `.env.local`, esquema S023A, `studio/components/ItemForm.tsx`, `studio/lib/wc/client.ts`, `studio/lib/wc/taxonomy-sync.ts`, `studio/app/inventory/sync/route.ts`, jugador/Rivaldo, selector de categorias, publicacion.
+
+**Veredicto:** READY_FOR_PABLO_CACHE_BACKED_DRAFT_TEST
+
+**Siguiente paso:**
+Pablo crea un borrador de un equipo que ya existia en WC pero tenia `termId:''` en `wc-terms-mvp.ts` (p.ej. Real Madrid) y confirma en WP Admin que Liga/Equipo/Ano resuelven solos. Si PASS -> abrir S023C CONTROLLED_TERM_CREATION. Si falla por resolucion/cache -> FIX_BLOCKER_FIRST dentro de S023B.
+**agent_events ref:** ver entrada `S023B` en agent_events.jsonl
+---

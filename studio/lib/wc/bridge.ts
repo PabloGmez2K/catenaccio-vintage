@@ -4,8 +4,8 @@
 // Idempotent: stops immediately if wc_product_id is already set.
 
 import { createClient } from '@/lib/supabase/server'
-import { equipoOptions, getTermLabelById, ligaOptions, temporadaOptions } from '@/lib/wc-terms-mvp'
 import { createWcDraftProduct } from './client'
+import { loadCachedTerms, matchCachedTermLabel } from './term-cache'
 import type { WcProductPayload } from './client'
 
 const BRIDGE_VERSION = 'v2.1'
@@ -81,11 +81,11 @@ function isValidOptionalTermId(value: string | null | undefined): boolean {
 function resolveAttributeOption(
   termId: string,
   displayValue: string | null | undefined,
-  options: Parameters<typeof getTermLabelById>[0]
+  cachedTerms: Parameters<typeof matchCachedTermLabel>[0]
 ): string {
   const display = displayValue?.trim()
   if (display) return display
-  return getTermLabelById(options, termId)
+  return matchCachedTermLabel(cachedTerms, termId)
 }
 
 function buildAttribute(
@@ -206,40 +206,45 @@ export async function createWcDraftForItem(itemId: string): Promise<BridgeResult
     }
   }
 
+  // Term identity resolution: prefer the *_display cache saved at item-save time;
+  // fall back to the Supabase wc_terms cache (S023A) for legacy items saved before
+  // display caching existed. wc-terms-mvp.ts is no longer consulted here.
+  const cachedTerms = await loadCachedTerms(supabase, ['pa_liga', 'pa_equipo', 'pa_ano'])
+
   const ligaAttributeOption = ligaValue
-    ? resolveAttributeOption(ligaValue, shirt.liga_display, ligaOptions)
+    ? resolveAttributeOption(ligaValue, shirt.liga_display, cachedTerms.pa_liga)
     : ''
   if (ligaValue && !ligaAttributeOption) {
     return {
       ok: false,
       code: 'VALIDATION_ERROR',
-      error: `liga_attribute_option_missing: no hay label seguro para el term ID de liga "${ligaValue}". Actualiza wc-terms-mvp.ts o el display cache antes de crear el borrador.`,
+      error: `liga_attribute_option_missing: no hay label seguro para el term ID de liga "${ligaValue}". Edita el item con un valor de liga reconocido o ejecuta el sync de taxonomías antes de crear el borrador.`,
     }
   }
 
   const equipoAttributeOption = resolveAttributeOption(
     shirt.equipo.trim(),
     shirt.equipo_display,
-    equipoOptions
+    cachedTerms.pa_equipo
   )
   if (!equipoAttributeOption) {
     return {
       ok: false,
       code: 'VALIDATION_ERROR',
-      error: `equipo_attribute_option_missing: no hay label seguro para el term ID de equipo "${shirt.equipo.trim()}". Actualiza wc-terms-mvp.ts o el display cache antes de crear el borrador.`,
+      error: `equipo_attribute_option_missing: no hay label seguro para el term ID de equipo "${shirt.equipo.trim()}". Edita el item con un valor de equipo reconocido o ejecuta el sync de taxonomías antes de crear el borrador.`,
     }
   }
 
   const temporadaAttributeOption = resolveAttributeOption(
     shirt.temporada.trim(),
     shirt.temporada_display,
-    temporadaOptions
+    cachedTerms.pa_ano
   )
   if (!temporadaAttributeOption) {
     return {
       ok: false,
       code: 'VALIDATION_ERROR',
-      error: `temporada_attribute_option_missing: no hay label seguro para el term ID de temporada "${shirt.temporada.trim()}". Actualiza wc-terms-mvp.ts o el display cache antes de crear el borrador.`,
+      error: `temporada_attribute_option_missing: no hay label seguro para el term ID de temporada "${shirt.temporada.trim()}". Edita el item con un valor de temporada reconocido o ejecuta el sync de taxonomías antes de crear el borrador.`,
     }
   }
 

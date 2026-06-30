@@ -1,13 +1,21 @@
 // Canonical domain options for Catenaccio Studio forms.
-// Pablo sees `label`; server actions resolve `termId` internally.
-// termId = '' means the WC term ID is not yet known — S022C blocks publish if termId is needed.
+// Pablo sees `label`.
+//
+// DEPRECATED (S023B): for liga/equipo/temporada, `termId` below is historical
+// residue and is NOT read by any operative code path anymore. Term identity for
+// pa_liga/pa_equipo/pa_ano is resolved at runtime against the Supabase wc_terms
+// cache (see studio/lib/wc/term-cache.ts), which is synced from WooCommerce
+// (S023A). This file remains the source of presentation data only: `label`,
+// `value`, `aliases` (used by term-cache.ts to resolve alias → canonical label),
+// `titleLabel`, and `helpText`. Missing-term creation is S023C.
+//
 // value = internal stored value (defaults to label when omitted).
 // titleLabel = short form for title construction; '' means omit from title.
 
 export type TermOption = {
   label: string
   value?: string      // stored in DB; defaults to label when omitted
-  termId: string
+  termId: string       // presentational legacy field — see DEPRECATED note above
   aliases?: string[]
   titleLabel?: string // used in title; '' = omit; undefined = use label
   helpText?: string
@@ -221,13 +229,6 @@ export function resolveTermId(options: TermOption[], input: string): string {
       o.aliases?.some((a) => a.toLowerCase() === normalized)
   )
   return match?.termId ?? ''
-}
-
-export function getTermLabelById(options: TermOption[], termId: string): string {
-  if (!termId.trim()) return ''
-  const match = options.find((o) => o.termId === termId.trim())
-  if (!match) return ''
-  return match.titleLabel !== undefined ? match.titleLabel : match.label
 }
 
 // Returns the titleLabel for a given input, matching by label, value, or alias.
