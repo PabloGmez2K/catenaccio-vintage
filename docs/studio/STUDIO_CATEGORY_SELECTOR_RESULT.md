@@ -5,7 +5,7 @@
 **Sesión:** S023E — CATEGORY_SELECTOR_IN_STUDIO
 **Modo:** ASK→CODE / CATEGORY_MODELING / NO_WC_CATEGORY_CREATION / NO_PRODUCT_PUBLISH / NO_DEPLOY / QUALITY_PASS_REQUIRED
 **Agente:** Claude Code (Opus 4.8)
-**Veredicto:** `READY_FOR_PABLO_SQL_APPLY` → tras aplicar SQL: `READY_FOR_PABLO_CATEGORY_SELECTOR_TEST`
+**Veredicto:** `APPROVE_S023_COMPLETE`
 **Depende de:** `STUDIO_WC_TAXONOMY_SYNC_RESULT.md` (S023A, caché `wc_categories`), `STUDIO_TARGET_ARCHITECTURE.md` (DEC-A5), `STUDIO_SESSION_GATES.md`, `STUDIO_PLAYER_TERM_RESOLUTION_RESULT.md` (S023D)
 
 ---
@@ -33,6 +33,21 @@ duplicada/implícita en `bridge.ts`.
 
 **Backward-compat:** `categoria = null` ⇒ el bridge aplica la heurística actual idéntica a hoy. Items
 legacy y camisetas sin override no cambian de comportamiento.
+
+---
+
+## 1.1 Validación manual de Pablo
+
+Pablo valida S023E con veredicto `APPROVE_S023_COMPLETE`:
+
+- SQL aditivo aplicado correctamente.
+- Selector de categoría WooCommerce validado en Studio.
+- Categoría asignada y `rank_math_primary_product_cat` validados en WooCommerce/Rank Math.
+- Sin regresión reportada en Liga/Equipo/Año/Jugador.
+- Producto de prueba permanece como borrador; no publicado.
+- Validación extra: Pablo creó `Ronaldinho` como jugador desde Studio y se creó correctamente en Woo.
+
+Con esta validación, S023E queda cerrado y la fase S023 queda completa.
 
 ---
 
@@ -203,11 +218,12 @@ no destructivo. Liga/Equipo/Año/Jugador no se rompen.
 
 ## 13. Veredicto
 
-`READY_FOR_PABLO_SQL_APPLY` → tras aplicar el SQL aditivo: `READY_FOR_PABLO_CATEGORY_SELECTOR_TEST`.
+`APPROVE_S023_COMPLETE`.
 
-La implementación técnica está completa y validada localmente (typecheck/build/lint PASS, gates PASS,
-quality pass sin hallazgos pendientes), pero requiere que Pablo aplique el SQL aditivo antes de usar
-el formulario y ejecute el test real en WP Admin. Cierra S023E (y, con el PASS de Pablo, la fase S023).
+La implementación técnica quedó validada localmente (typecheck/build/lint PASS, gates PASS,
+quality pass sin hallazgos pendientes) y Pablo validó manualmente el SQL aplicado, el selector de
+categoría, la categoría primaria Rank Math, la ausencia de regresión en Liga/Equipo/Año/Jugador y la
+creación de `Ronaldinho` como jugador desde Studio. S023E y la fase S023 quedan cerradas.
 
 ---
 
