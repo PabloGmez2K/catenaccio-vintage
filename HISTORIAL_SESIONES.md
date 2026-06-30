@@ -1741,3 +1741,39 @@ Codigo, Studio runtime, SQL, WooCommerce, WP Admin, Supabase remoto, `.env.local
 Abrir S023D - PLAYER_TERM_RESOLUTION en una sesion nueva.
 **agent_events ref:** 2026-06-30T15:00:00Z (S023C.CLOSE)
 ---
+
+## Sesion S023D - PLAYER_TERM_RESOLUTION
+
+**Fecha:** 2026-07-01
+**Agente:** Claude Code (Sonnet)
+**Modo:** ASK->CODE / WC_TERM_WRITE_ONLY / NO_PRODUCT_WRITE / NO_PUBLISH / NO_UI_POLISH / QUALITY_PASS_REQUIRED
+
+**Que se hizo:**
+Aplicado el patron ya validado en S023B (resolucion contra `wc_terms`) y S023C (creacion controlada) a `pa_jugador`, cerrando el fallo diferido de S022C.8 (Jugador/Rivaldo no aparecia en WP Admin).
+
+- `studio/lib/wc/term-create.ts`: anadido `pa_jugador: 6` a `CONTROLLED_TAXONOMIES`. Comentario de cabecera actualizado (ya no dice que jugador esta fuera de scope). Mensaje `unsupported_taxonomy` actualizado. Sin cambios en la logica de dedupe de 2 capas.
+- `studio/components/TermCreateButton.tsx`: union type `ControlledTaxonomySlug` ampliado con `'pa_jugador'`.
+- `studio/app/inventory/actions.ts`: en `createInventoryItem` y `updateInventoryItem`, `pa_jugador` anadido a `loadCachedTerms`; nuevo `jugadorTermId = jugadorDisplay ? matchCachedTermId(cachedTerms.pa_jugador, jugadorDisplay) : ''` (sin aliasOptions, vocabulario abierto); el stub `jugador: jugadorDisplay ? '' : null` sustituido por `jugador: jugadorTermId || null` en ambos paths (mismo patron que `liga`/`marca`). `jugador_display` preservado. Resolucion de Liga/Equipo/Ano sin cambios.
+- `studio/components/ItemForm.tsx`: anadido `<TermCreateButton taxonomySlug="pa_jugador" label={jugadorDisplay} />` bajo el campo Jugador, mismo patron que Liga/Equipo/Temporada.
+- `bridge.ts` no se toco: ya estaba preparado para jugador desde S022C.8 (`ACF_KEYS.jugador`, `WC_ATTRIBUTE_IDS.jugador=6`, attributes/meta_data condicional).
+- No se creo lista estatica de jugadores en `wc-terms-mvp.ts` (vocabulario abierto, decision explicita).
+
+**Bug detectado y corregido en el quality pass post-CODE:**
+La primera edicion de `actions.ts` solo sustituyo el stub en `updateInventoryItem`; la edicion dirigida a `createInventoryItem` fallo silenciosamente por una diferencia de indentacion entre el bloque `.insert()` (4 espacios) y el bloque `.update()` (6 espacios). Detectado con `grep -n "jugador:" actions.ts` antes de pasar a validaciones, y corregido. Documentado en `STUDIO_PLAYER_TERM_RESOLUTION_RESULT.md §7`.
+
+**Que se valido:**
+- `npm run typecheck`: PASS.
+- `npm run build`: PASS (8/8 rutas).
+- `npm run lint`: PASS (0 issues).
+- `git diff --check`: PASS.
+- `agent_events.jsonl`: parseable (68 lineas antes del cierre de esta sesion).
+- Secret scan del diff: CLEAN.
+- Scope confirmado: exactamente los 4 archivos previstos (`term-create.ts`, `TermCreateButton.tsx`, `actions.ts`, `ItemForm.tsx`).
+
+**Que NO se toco:**
+`bridge.ts`, `client.ts`, `taxonomy-sync.ts`, `term-cache.ts`, `types.ts`, `wc-terms-mvp.ts`, schema SQL Supabase, `.env.local`, WP Admin, Vercel, cPanel. No se llamo a WooCommerce desde el agente. No se creo ningun termino real. No se crearon productos. No se publico nada. No se toco Supabase remoto. No hubo regresion en Liga/Equipo/Ano. No se mezclo con S023E, categorias, smart suggestions, universe manager ni prompt tools.
+
+**Siguiente paso:**
+Pablo crea/edita una camiseta completa con Jugador=Rivaldo, usa "Crear termino en Woo" si no resuelve desde cache, guarda, crea un unico borrador Woo y confirma en WP Admin que Jugador aparece seleccionado sin regresion en Liga/Equipo/Ano. Si PASS: cierre documental S023D y se abre S023E CATEGORY_SELECTOR_IN_STUDIO. No marcar S023D como completado hasta esa validacion.
+**agent_events ref:** 2026-07-01T00:00:00Z (S023D)
+---

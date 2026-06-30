@@ -1,6 +1,7 @@
-// S023C — Controlled WooCommerce term creation with dedupe + write-through to wc_terms.
-// Scope: pa_liga / pa_equipo / pa_ano only. pa_jugador is out of scope (S023D) and is
-// structurally unreachable here — CONTROLLED_TAXONOMIES only maps the three S023C slugs.
+// S023C/D — Controlled WooCommerce term creation with dedupe + write-through to wc_terms.
+// Scope: pa_liga / pa_equipo / pa_ano / pa_jugador. pa_jugador added in S023D — jugador is
+// open vocabulary (no static option list), so controlled creation is the only way to add a
+// missing player term without inventing IDs.
 // Only ever calls GET/POST .../products/attributes/{id}/terms — never /products.
 
 import { createClient } from '@/lib/supabase/server'
@@ -11,6 +12,7 @@ const CONTROLLED_TAXONOMIES = {
   pa_liga: 5,
   pa_equipo: 4,
   pa_ano: 7,
+  pa_jugador: 6,
 } as const
 
 export type ControlledTaxonomySlug = keyof typeof CONTROLLED_TAXONOMIES
@@ -52,7 +54,7 @@ export async function createControlledTerm(
     return {
       ok: false,
       code: 'unsupported_taxonomy',
-      error: `unsupported_taxonomy: "${taxonomySlug}" no está soportado en S023C. Solo pa_liga, pa_equipo, pa_ano.`,
+      error: `unsupported_taxonomy: "${taxonomySlug}" no está soportado. Solo pa_liga, pa_equipo, pa_ano, pa_jugador.`,
     }
   }
   const slug = taxonomySlug as ControlledTaxonomySlug

@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import { createTermAction } from '@/app/inventory/term-actions'
 
-type ControlledTaxonomySlug = 'pa_liga' | 'pa_equipo' | 'pa_ano'
+type ControlledTaxonomySlug = 'pa_liga' | 'pa_equipo' | 'pa_ano' | 'pa_jugador'
 
 // Explicit, single-purpose action: creates (or detects) one WC term for the
 // label currently typed in the field above it. Never fires on its own —

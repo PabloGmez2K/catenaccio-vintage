@@ -120,11 +120,15 @@ export async function createInventoryItem(
   const shirtVersion = req(formData, 'shirt_version') || 'Home'
   const sleeveLength = req(formData, 'sleeve_length') || 'Short Sleeve'
 
-  const cachedTerms = await loadCachedTerms(supabase, ['pa_liga', 'pa_equipo', 'pa_ano'])
+  const cachedTerms = await loadCachedTerms(supabase, ['pa_liga', 'pa_equipo', 'pa_ano', 'pa_jugador'])
   const ligaTermId = ligaDisplay ? matchCachedTermId(cachedTerms.pa_liga, ligaDisplay, ligaOptions) : ''
   const equipoTermId = matchCachedTermId(cachedTerms.pa_equipo, equipoDisplay, equipoOptions)
   const temporadaTermId = matchCachedTermId(cachedTerms.pa_ano, temporadaDisplay, temporadaOptions)
   const marcaTermId = marcaDisplay ? resolveTermId(marcaOptions, marcaDisplay) : ''
+  // jugador is open vocabulary — no static option list, no alias fallback. Resolved purely
+  // against the WC term cache (S023A/D); unmatched names stay null until created via
+  // TermCreateButton (S023D) and re-saved.
+  const jugadorTermId = jugadorDisplay ? matchCachedTermId(cachedTerms.pa_jugador, jugadorDisplay) : ''
 
   // es_replica derived from authenticity_type; 'Replica' is the stored value for "Original retail / Fan version"
   const esReplica = authenticityType === 'Replica' || authenticityType === 'Original retail / Fan version'
@@ -171,7 +175,7 @@ export async function createInventoryItem(
     marca: marcaTermId || null,
     marca_display: marcaDisplay,
     condicion,
-    jugador: jugadorDisplay ? '' : null,
+    jugador: jugadorTermId || null,
     jugador_display: jugadorDisplay,
     numero_dorsal: str(formData, 'numero_dorsal'),
     nombre_dorsal: str(formData, 'nombre_dorsal'),
@@ -273,11 +277,12 @@ export async function updateInventoryItem(
   const shirtVersion = req(formData, 'shirt_version') || 'Home'
   const sleeveLength = req(formData, 'sleeve_length') || 'Short Sleeve'
 
-  const cachedTerms = await loadCachedTerms(supabase, ['pa_liga', 'pa_equipo', 'pa_ano'])
+  const cachedTerms = await loadCachedTerms(supabase, ['pa_liga', 'pa_equipo', 'pa_ano', 'pa_jugador'])
   const ligaTermId = ligaDisplay ? matchCachedTermId(cachedTerms.pa_liga, ligaDisplay, ligaOptions) : ''
   const equipoTermId = matchCachedTermId(cachedTerms.pa_equipo, equipoDisplay, equipoOptions)
   const temporadaTermId = matchCachedTermId(cachedTerms.pa_ano, temporadaDisplay, temporadaOptions)
   const marcaTermId = marcaDisplay ? resolveTermId(marcaOptions, marcaDisplay) : ''
+  const jugadorTermId = jugadorDisplay ? matchCachedTermId(cachedTerms.pa_jugador, jugadorDisplay) : ''
 
   const esReplica = authenticityType === 'Replica' || authenticityType === 'Original retail / Fan version'
 
@@ -322,7 +327,7 @@ export async function updateInventoryItem(
       marca: marcaTermId || null,
       marca_display: marcaDisplay,
       condicion,
-      jugador: jugadorDisplay ? '' : null,
+      jugador: jugadorTermId || null,
       jugador_display: jugadorDisplay,
       numero_dorsal: str(formData, 'numero_dorsal'),
       nombre_dorsal: str(formData, 'nombre_dorsal'),

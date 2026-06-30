@@ -496,6 +496,7 @@ export function ItemForm({
                 onChange={(e) => setJugadorDisplay(e.target.value)}
                 placeholder="Raúl, Zidane, Henry…"
               />
+              <TermCreateButton taxonomySlug="pa_jugador" label={jugadorDisplay} />
             </div>
             <div className="form-field">
               <label htmlFor="numero_dorsal">Número dorsal</label>
