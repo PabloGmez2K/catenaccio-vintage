@@ -1242,6 +1242,24 @@ body {
   flex-wrap: wrap;
 }
 
+.term-create-action {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+
+.term-create-result {
+  font-size: 12px;
+  color: #065f46;
+}
+
+.term-create-error {
+  font-size: 12px;
+  color: #991b1b;
+}
+
 .manual-seo-submit-row .btn-primary.btn-sm,
 .manual-seo-submit-row .btn-secondary.btn-sm {
   margin-left: 0;

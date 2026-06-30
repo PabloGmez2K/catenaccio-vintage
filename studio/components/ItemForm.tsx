@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useActionState } from 'react'
 import Link from 'next/link'
 import { buildTitle } from '@/lib/title-builder'
+import { TermCreateButton } from '@/components/TermCreateButton'
 import {
   ligaOptions,
   equipoOptions,
@@ -253,6 +254,7 @@ export function ItemForm({
             <p className="field-help">
               Si no aparece en la lista, puedes escribirlo. Studio lo guardará como pendiente de mapeo para Woo.
             </p>
+            <TermCreateButton taxonomySlug="pa_liga" label={ligaDisplay} />
           </div>
 
           <div className={`form-field ${fe.equipo_display ? 'has-error' : ''}`}>
@@ -278,6 +280,7 @@ export function ItemForm({
             <p className="field-help">
               Si no aparece en la lista, puedes escribirlo. Studio lo guardará como pendiente de mapeo para Woo.
             </p>
+            <TermCreateButton taxonomySlug="pa_equipo" label={equipoDisplay} />
           </div>
 
           <div className={`form-field ${fe.temporada_display ? 'has-error' : ''}`}>
@@ -300,6 +303,7 @@ export function ItemForm({
               ))}
             </datalist>
             <FieldError msg={fe.temporada_display} />
+            <TermCreateButton taxonomySlug="pa_ano" label={temporadaDisplay} />
           </div>
 
           <div className="form-row">

@@ -1676,3 +1676,36 @@ Codigo, Studio runtime, SQL, WooCommerce, WP Admin, Supabase remoto, `.env.local
 Abrir S023C - CONTROLLED_TERM_CREATION en una sesion nueva.
 **agent_events ref:** 2026-06-30T13:00:00Z (S023B.CLOSE)
 ---
+
+**Sesión S023C** — 2026-06-30
+**Agente:** Claude Code (Sonnet)
+**Modo:** ASK→CODE / WC_TERM_WRITE_ONLY / NO_PRODUCT_WRITE / NO_PUBLISH / NO_UI_POLISH
+**Tipo:** impl
+**Tarea:** CONTROLLED_TERM_CREATION — crear términos faltantes de pa_liga/pa_equipo/pa_ano desde Studio con dedupe y write-through a wc_terms.
+
+**Decisiones clave:**
+- Mapa de taxonomías controladas fijo en `term-create.ts`: solo `pa_liga`(5)/`pa_equipo`(4)/`pa_ano`(7). `pa_jugador` excluido a nivel estructural, no solo de UI.
+- Dedupe en 2 capas antes del POST: caché Supabase `wc_terms`, luego GET en vivo a Woo (`search=`). El POST solo es alcance final; si Woo igual rechaza por nombre duplicado (`data.resource_id`), se trata como existente en vez de error.
+- Acción explícita y desacoplada del guardado del item: botón "Crear término en Woo" (`TermCreateButton.tsx`) bajo Liga/Equipo/Temporada en `ItemForm.tsx`, vía Server Action `createTermAction`. No se dispara al escribir ni al guardar.
+- `bridge.ts`, `client.ts` y la resolución de term ID en `actions.ts` (S023B) quedan sin tocar — un término recién creado se resuelve solo al guardar el item porque la caché ya tiene la fila nueva.
+
+**Que se hizo:**
+Creados `studio/lib/wc/term-create.ts` (`createControlledTerm`), `studio/app/inventory/term-actions.ts` (Server Action), `studio/components/TermCreateButton.tsx` (UI). Modificados `studio/components/ItemForm.tsx` (3 botones) y `studio/styles/globals.css` (CSS mínimo). Documentado en `docs/studio/STUDIO_CONTROLLED_TERM_CREATION_RESULT.md`.
+
+**Que se valido:**
+- `npm run typecheck`: PASS.
+- `npm run build`: PASS (8/8 rutas).
+- `npm run lint`: PASS (0 issues).
+- `git diff --check`: PASS.
+- Secret scan del diff: CLEAN.
+- Ningún término creado realmente — el agente no llamó a WooCommerce en esta sesión.
+
+**Que NO se toco:**
+`bridge.ts`, `client.ts`, `taxonomy-sync.ts`, `sync/route.ts`, `actions.ts` (guardado de item), `wc-terms-mvp.ts`, esquema SQL S023A, jugador/Rivaldo, categorías, productos, publicación, `.env.local`, Supabase remoto.
+
+**Veredicto:** READY_FOR_PABLO_TERM_CREATION_TEST
+
+**Siguiente paso:**
+Pablo crea un término de prueba (recomendado: descartable, p.ej. equipo "ZZZ Studio Test Team") desde Studio, confirma `created=true` la primera vez y `existing=true` (mismo ID) al repetir, verifica en WP Admin → si PASS, abre S023D PLAYER_TERM_RESOLUTION.
+**agent_events ref:** ver entrada `S023C` en agent_events.jsonl
+---
