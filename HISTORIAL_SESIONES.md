@@ -1952,3 +1952,25 @@ Preflight de completitud en `/inventory/[id]` antes de crear borrador Woo. Helpe
 
 Pablo valido `PABLO_PREFLIGHT_OK`: caso incompleto con blockers correctos; SEO/precio bloquea crear borrador; medidas quedan como warning; caso listo/ya con borrador muestra READY, 0 bloqueos y 0 avisos. Nota de idempotencia visible y borrador existente ID 1861 visible. No se publico producto, no se reporto regresion S023B/C/D/E/S024A y S025 queda como siguiente bloque recomendado, no abierto.
 **agent_events ref:** 2026-07-01T07:00:00Z (S024.CLOSE)
+
+---
+
+## Sesion S025-STRATEGY - ROADMAP_REORDER_OPERATIONS_CONTROL
+
+**Fecha:** 2026-07-01
+**Agente:** Claude Code (Opus 4.8)
+**Modo:** STRATEGIC_REQUIRED / ROADMAP_REORDER / NO_CODE / NO_WC_WRITE / NO_SUPABASE_WRITE / NO_DEPLOY
+**Veredicto:** `REORDER_TO_S025A_OPERATIONS_CONTROL`
+
+Revision de roadmap tras cerrar S024. Pregunta: ¿imagenes ahora o control operativo antes? **Respuesta: control operativo antes; imagenes NO ahora.** Confirmado contra el repo y el codigo.
+
+**Hallazgo (verificado en codigo):** Studio crea items y borradores Woo pero no controla su ciclo de vida. Superficie real = `createInventoryItem`, `updateInventoryItem` (solo local, no llega a Woo), `createWcDraft` (create-only, idempotente por `wc_product_id IS NULL`, DRAFT_ONLY). **No existe** archivar/borrar item, transicion de estados (el enum tiene 12 estados pero no hay UI que los mueva), update/PUT a Woo, ni lectura del estado real de Woo (grep limpio en `actions.ts` + `lib/wc/`). Borradores de prueba 1854/1856/1861 acumulados sin limpieza desde Studio. Studio es local (`STUDIO_VERCEL_DEPLOY_MINIMAL` diferido) -> el flujo movil que quiere Pablo esta bloqueado por deploy, no por imagenes.
+
+**Reorden:** se inserta la fase **S025 — Studio Operations Control**, descompuesta por clase de riesgo (read/local -> Woo-write): S025A console+estado Woo read-only (Codex) → S025B lifecycle+soft-archive local (Sonnet) → S025C cleanup drafts Woo SHADOW_FIRST/trash reversible (Sonnet+gate Opus) → S025D edit+resync PUT (Sonnet) ; E audit de campos-como-atributos y F export Vinted paralelizables. Los bloques de feature se desplazan +1: S026 imagenes, S027 stock, S028 Rank Math, S029 landings, S030 drift full, S031 publish. La parte read-only del antiguo S029 se adelanta a S025A. `STUDIO_ARCHIVE_OR_DELETE_ITEM_ACTION` promovido a S025B.
+
+**Distinciones clave:** borrar item Studio (soft-archive local, S025B) ≠ trash producto Woo (reversible, S025C); edit-after-draft esta roto hoy (idempotencia create-only) y se arregla en S025D; flujo movil = S025B + DEPLOY + S026 + S031 (capstone multi-bloque, no razon para adelantar imagenes).
+
+**Primer bloque implementable:** S025A INVENTORY_CONSOLE_AND_WOO_STATE_READONLY (Codex, GET-only, gate DATA_LAYER_MAPPING). Prompt completo emitido en el cierre.
+
+**Cierre:** BACKLOG (S025 fase + reorden +1 + promocion archive), CONTEXTO (1 parrafo), este historial, agent_events (1 linea), doc nuevo `docs/studio/STUDIO_POST_S024_ROADMAP_REORDER.md` (≤120 lineas). Validaciones: `git diff --check` PASS, JSONL parseable, secret scan CLEAN, no code files modified. No se toco codigo, WooCommerce, Supabase remoto, .env.local, SQL, deploy ni produccion.
+**agent_events ref:** 2026-07-01T08:00:00Z (S025-STRATEGY)
