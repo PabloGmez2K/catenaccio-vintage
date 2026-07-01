@@ -71,6 +71,10 @@ El create+attach tarda unos segundos (sideload de imágenes en Woo) y la UI no c
 
 **Nota de performance (no implementada, ver `S026B_PERFORMANCE_REVIEW` en `BACKLOG.md`):** revisar más adelante bajar el tamaño objetivo del WebP, limitar el número inicial de imágenes, mover el attach a cola/background job, o progreso por fases.
 
-## 11. Veredicto
+## 11. Fix de microcopy (misma sesión)
 
-`READY_FOR_S026B_CLOSE_AFTER_PABLO_OK`. S026B queda validado funcionalmente por Pablo; el fix de UX de esta sesión no cambia la lógica de attach ni el flag.
+Pablo confirmó `PABLO_S026B_LOADING_UX_OK` y detectó un texto obsoleto en `WcDraftPanel`: seguía diciendo "Las imágenes se añaden manualmente desde WP Admin" incluso con el attach automático ya funcionando. El hint ahora depende de `attachImagesEnabled`: con el flag ON indica que las imágenes de Studio se adjuntarán automáticamente; con el flag OFF mantiene el aviso de que hay que añadirlas manualmente. Sin cambios en `bridge.ts`, payload ni flag.
+
+## 12. Veredicto
+
+`READY_FOR_S026B_CLOSE`. S026B queda validado funcionalmente por Pablo; los fixes de UX/copy de esta sesión no cambian la lógica de attach ni el flag.

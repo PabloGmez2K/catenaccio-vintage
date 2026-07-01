@@ -157,8 +157,10 @@ export function WcDraftPanel({
           </div>
 
           <p className="wc-draft-hint">
-            Crea un borrador (no publicado) en WooCommerce.
-            Las imágenes se añaden manualmente desde WP Admin.
+            Crea un borrador no publicado en WooCommerce.{' '}
+            {attachImagesEnabled
+              ? 'Las imágenes de Studio se adjuntarán automáticamente.'
+              : 'El adjuntado automático de imágenes está desactivado; podrás añadirlas manualmente desde WP Admin.'}{' '}
             Pablo es el único que puede publicar.
           </p>
         </div>
