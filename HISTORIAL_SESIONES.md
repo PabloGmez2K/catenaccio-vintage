@@ -1974,3 +1974,31 @@ Revision de roadmap tras cerrar S024. Pregunta: ¿imagenes ahora o control opera
 
 **Cierre:** BACKLOG (S025 fase + reorden +1 + promocion archive), CONTEXTO (1 parrafo), este historial, agent_events (1 linea), doc nuevo `docs/studio/STUDIO_POST_S024_ROADMAP_REORDER.md` (≤120 lineas). Validaciones: `git diff --check` PASS, JSONL parseable, secret scan CLEAN, no code files modified. No se toco codigo, WooCommerce, Supabase remoto, .env.local, SQL, deploy ni produccion.
 **agent_events ref:** 2026-07-01T08:00:00Z (S025-STRATEGY)
+
+---
+
+## Sesion S025 - BACKOFFICE_INVENTORY_OPERATIONS_V0
+
+**Fecha:** 2026-07-01
+**Agente:** Claude Code (Opus 4.8)
+**Modo:** ASK_TO_CODE / PRODUCT_BACKOFFICE_V0 / LOCAL_CODE / NO_WOO_WRITE / NO_DELETE / NO_PUBLISH / NO_DEPLOY / QUALITY_PASS_REQUIRED
+**Veredicto:** `CODE_BACKOFFICE_V0_NO_SQL` -> `READY_FOR_PABLO_BACKOFFICE_V0_TEST`
+
+Replantea S025: en vez de una consola read-only aislada (S025A), reconvierte `/inventory` en un **backoffice / work queue** real. Se descarta la rama `wip/s025a-readonly-console` (no validada por Pablo) como base de UI: no cherry-pick de su tabla, no se repite la pantalla de datos crudos de Woo.
+
+**FASE ASK:** el schema aplicado ya soporta lo necesario -> no hace falta SQL. Soft-archive via `status='archivada'` (enum existente) + `item_lifecycle_events` (tabla existente, escribible por el bridge); venta/reserva = estados existentes; canal Woo = `wc_status`/`wc_product_id`; Vinted = columnas listas pero sin uso runtime -> diferido a S025F/S027. No se inventan columnas.
+
+**Implementado (sin Woo write, sin borrar, sin publicar):**
+1. `/inventory` reconvertida a work queue: Referencia · Estado operativo Studio · **Canal web derivado** (Sin Woo/Borrador/Publicado/Error, sin GET a Woo) · Coste · Precio web · Margen · Fotos · Alta · Acciones. Marcador "requiere accion" (dot rojo + resalte de fila) para error de sync o item activo sin precio web ni borrador.
+2. Filtros server-side por `?filter=` (Links, sin estado cliente): Activos (default, oculta archivados) / Requiere accion / Sin web / Con borrador / En web / Vendidas / Archivadas, con contadores. Orden: requiere-accion primero.
+3. Acciones por fila: Ficha, Editar, Web (`?p=<id>`), WP Admin (`/wp-admin/post.php?post=<id>&action=edit`) — externas solo si hay `wc_product_id` + `WP_SITE_URL`.
+4. **Soft-archive / restore local no destructivo:** server actions (`archiveItem`/`restoreItem`) que flipean `status` y registran el estado previo en `item_lifecycle_events`; restore recupera ese estado (fallback `comprada`). owner_id + RLS, idempotente, `revalidatePath('/inventory')`.
+
+**Diseno:** helper puro `operational-view.ts` (deriveWebChannel / requiresAction / operationalBucket) sin I/O. NO se duplica titulo/precio de Woo (Studio no fetchea Woo; `referencia` y `precio_publicado_web` son campos propios de Studio). "Drift" real NO se simula (requiere GET vivo -> S030). `bridge.ts`/`actions.ts`/`client.ts` intactos -> DRAFT_ONLY e idempotencia create-only sin tocar.
+
+**Archivos** — nuevos: `studio/lib/inventory/operational-view.ts`, `studio/app/inventory/lifecycle-actions.ts`, `studio/components/InventoryFilters.tsx`, `studio/components/InventoryRowActions.tsx`; modificados: `studio/app/inventory/page.tsx`, `studio/components/InventoryTable.tsx`, `studio/styles/globals.css`.
+
+**Validaciones:** typecheck PASS · build PASS (8/8, `/inventory` 1.34 kB) · lint PASS (0 issues) · `git diff --check` PASS · secret scan CLEAN. No se llamo Woo por agente, no se creo/borro/publico producto, no se toco Supabase remoto / `.env.local` / SQL / deploy / produccion.
+
+**Siguiente:** Pablo prueba en local (`cd studio && npm run dev`): work queue legible en 5s, filtros y contadores, marcador requiere-accion, archivar/restaurar (verifica que el item vuelve a su estado previo), links WP Admin/frontend. Confirma `PABLO_BACKOFFICE_V0_OK` -> cierre LITE.
+**agent_events ref:** 2026-07-01T09:00:00Z (S025)

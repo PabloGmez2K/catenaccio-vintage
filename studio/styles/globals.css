@@ -1491,3 +1491,142 @@ body {
   padding: 5px 8px;
   font-size: 12px;
 }
+
+/* ── Inventory work queue (S025 backoffice) ─────────────────────── */
+
+.inv-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.inv-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.inv-filter:hover {
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.inv-filter--active {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+  color: #fff;
+}
+
+.inv-filter--attention:not(.inv-filter--active) {
+  border-color: #fca5a5;
+  color: #991b1b;
+}
+
+.inv-filter-count {
+  display: inline-block;
+  min-width: 16px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.08);
+  font-size: 11px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.inv-filter--active .inv-filter-count {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.inv-empty-filter {
+  padding: 32px 16px;
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 13px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+/* Row attention marker */
+.inventory-table tbody tr.row-attention {
+  background: #fff9f9;
+}
+
+.inventory-table tbody tr.row-attention:hover {
+  background: #fff1f1;
+}
+
+.attention-dot {
+  color: #dc2626;
+  font-size: 10px;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+/* Per-row actions */
+.row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+}
+
+.row-action-link {
+  color: var(--color-primary);
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.row-action-link:hover {
+  text-decoration: underline;
+}
+
+.row-action-btn {
+  padding: 3px 9px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.row-action-btn:hover:not(:disabled) {
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.row-action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.row-action-btn--danger {
+  border-color: #fca5a5;
+  color: #b91c1c;
+}
+
+.row-action-btn--danger:hover:not(:disabled) {
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.row-action-error {
+  color: #991b1b;
+  font-size: 11px;
+  flex-basis: 100%;
+}
