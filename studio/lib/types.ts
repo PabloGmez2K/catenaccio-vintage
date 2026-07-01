@@ -158,3 +158,26 @@ export interface WcCategoryCacheRow {
   source: 'wc_sync' | 'studio_created'
   synced_at: string
 }
+
+// ── Media assets (S026A — local upload → Supabase Storage) ───────────────────
+// Reuses the media_assets table designed in STUDIO_DATA_MODEL.md / S019 and
+// applied in Supabase during S020D. storage_bucket/storage_path/public_url
+// were "future" columns there; S026A is the first code to populate them.
+
+export type MediaUploadStatus = 'local' | 'uploading' | 'uploaded_storage' | 'wc_assigned'
+
+export interface MediaAsset {
+  id: string
+  item_id: string
+  filename: string
+  sort_order: number
+  is_primary: boolean
+  storage_bucket: string | null
+  storage_path: string | null
+  public_url: string | null
+  mime_type: string | null
+  size_bytes: number | null
+  wc_media_id: number | null
+  upload_status: MediaUploadStatus
+  created_at: string
+}

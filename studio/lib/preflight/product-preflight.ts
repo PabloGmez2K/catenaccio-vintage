@@ -19,6 +19,7 @@ export type PreflightGroupId =
   | 'categoria'
   | 'seo_precio'
   | 'estado_fisico'
+  | 'imagenes'
   | 'publicabilidad'
 
 export interface PreflightCheck {
@@ -80,6 +81,8 @@ export interface PreflightInput {
   precioPublicadoWeb: number | null
   shirt: PreflightShirtInput | null
   approvedSeo: PreflightSeoInput | null
+  /** S026A — count of images uploaded to Supabase Storage for this item. */
+  imageCount: number
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -265,6 +268,17 @@ export function evaluateProductPreflight(input: PreflightInput): ProductPrefligh
     })
     groups.push(makeGroup('estado_fisico', 'Estado físico y medidas', fisChecks))
   }
+
+  // ── Imágenes (S026A) ──────────────────────────────────────────────────────
+  // Advisory only: images live in Supabase Storage but are not yet attached to
+  // the Woo draft (S026B). Missing images never block draft creation today.
+  const imgChecks: PreflightCheck[] = []
+  imgChecks.push(
+    input.imageCount > 0
+      ? { id: 'imagenes', label: 'Fotos', status: 'pass', message: `${input.imageCount} foto(s) subida(s).` }
+      : { id: 'imagenes', label: 'Fotos', status: 'warning', message: 'Sin fotos subidas.', fixHint: 'Sube al menos una foto en el panel "Fotos" de la ficha.' }
+  )
+  groups.push(makeGroup('imagenes', 'Imágenes', imgChecks))
 
   // ── Publicabilidad Woo ────────────────────────────────────────────────────
   const pubChecks: PreflightCheck[] = []

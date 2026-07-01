@@ -2036,3 +2036,27 @@ Revision de backlog y definicion de MVP util tras backoffice v0. Hallazgo centra
 
 **Cambios en tracking:** creado `docs/studio/STUDIO_MVP_BACKLOG_REVIEW.md` (97 lineas); BACKLOG actualizado (S025 comprimida, S026 imagenes = siguiente bloque, DEPLOY promovido a MVP critico, S025C/D/E/F -> fast-follow). No se toco codigo, Woo, WP Admin, Supabase, .env.local ni deploy. Pendiente nod de Pablo al cambio de prioridad.
 **agent_events ref:** 2026-07-01T11:00:00Z (STUDIO_MVP_BACKLOG_REVIEW)
+
+---
+
+## Sesion S026A - IMAGE_PIPELINE_LOCAL_TO_STORAGE
+
+**Fecha:** 2026-07-01
+**Agente:** Claude Code (Sonnet 5)
+**Modo:** ASK→CODE / LOCAL_CODE / SUPABASE_STORAGE / NO_WP_WRITE / NO_WOO_WRITE / NO_PRODUCT_WRITE / NO_PUBLISH / NO_DEPLOY / QUALITY_PASS_REQUIRED
+**Resultado:** READY_FOR_PABLO_IMAGE_SCHEMA_APPLY_THEN_TEST
+
+**Hallazgo del ASK:** la tabla de imagenes ya existia — `media_assets` (disenada en `STUDIO_DATA_MODEL.md` / S019, aplicada en Supabase en S020D junto con las otras 5 tablas MVP, con RLS owner-based `pol_media_assets_owner` ya activa), pero nunca se uso desde codigo (0 referencias en `studio/`). Se reutiliza en vez de crear `inventory_item_images` desde cero — confirmado con Pablo via pregunta explicita antes de escribir SQL. El cliente Supabase de browser (`studio/lib/supabase/browser.ts`) tambien ya existia pero no se uso: las subidas van por Server Action, igual que el resto del codigo.
+
+**SQL aditivo:** `docs/studio/STUDIO_IMAGE_PIPELINE_SCHEMA.sql` — `ADD COLUMN IF NOT EXISTS mime_type/size_bytes`, `ALTER COLUMN storage_bucket SET DEFAULT 'studio-product-images'`, indice unico sobre `storage_path`. Sin DROP, sin DELETE, sin policies nuevas.
+
+**Cambios:** `studio/lib/types.ts` (`MediaAsset`, `MediaUploadStatus`); nuevo `studio/app/inventory/image-actions.ts` (Server Actions `uploadItemImages`/`setPrimaryImage`/`moveImage`/`deleteItemImage` + `listItemImages`; path `<auth_user_id>/<item_id>/<uuid>.<ext>`, valida MIME jpeg/png/webp y tamano <=12 MB, limpia el objeto de Storage si el insert en DB falla, promueve la siguiente imagen a principal si se borra la actual); nuevo `studio/components/ItemImagesPanel.tsx` (upload multiple, grid de miniaturas, badge Principal, mover arriba/abajo, marcar principal, eliminar, contador, estado vacio); `page.tsx` carga las imagenes y renderiza el panel; `product-preflight.ts` anade grupo "Imagenes" (WARNING si 0 fotos, pass si >=1 — decision confirmada por Pablo, no bloquea el borrador porque S026B aun no adjunta a Woo); `globals.css` con estilos `.images-*`/`.image-card*` reutilizando `.row-action-btn`/`.btn-secondary` existentes.
+
+**Quality pass:** `bridge.ts`/`actions.ts` (creacion/edicion de item)/`ItemForm.tsx`/`createWcDraftForItem` SIN cambios -> DRAFT_ONLY, idempotencia y S023B/C/D/E/S024/S025 intactos. Sin service_role en cliente (todas las acciones usan `createClient()` server-side con anon key + cookies de sesion, igual que el resto del codigo). Cada accion reverifica `owner_id = user.id` sobre `inventory_items` antes de tocar `media_assets` o Storage.
+
+**Validaciones:** typecheck PASS, build PASS (8/8 rutas), lint PASS (0 issues), `git diff --check` PASS, secret scan CLEAN (diff + archivos nuevos).
+
+**Confirmaciones:** wp_media_created_by_agent=false, wc_api_called_by_agent=false, wc_post_called_by_agent=false, wc_put_called_by_agent=false, wc_delete_called_by_agent=false, products_modified_by_agent=false, published=false, supabase_remote_modified_by_agent=false, sql_applied_by_agent=false, env_local_modified=false, service_role_exposed=false.
+
+**Siguiente paso:** Pablo aplica `docs/studio/STUDIO_IMAGE_PIPELINE_SCHEMA.sql` en el SQL Editor de Supabase, corre `cd studio && npm run dev`, sube 2-3 fotos JPG/WEBP en una camiseta existente, confirma miniaturas/orden/principal/borrado, verifica los objetos en Supabase Storage bajo `<user_id>/<inventory_item_id>/` y confirma que el preflight muestra el bloque "Imagenes". Si PASS: cierre documental de S026A y abrir S026B (WP Media + attach en create, DRAFT_ONLY intacto, SHADOW_FIRST).
+**agent_events ref:** 2026-07-01T12:00:00Z (S026A)

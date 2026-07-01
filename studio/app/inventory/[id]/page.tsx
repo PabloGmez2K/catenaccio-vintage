@@ -7,9 +7,11 @@ import { AiSuggestionsPanel } from '@/components/AiSuggestionsPanel'
 import { ManualSeoPanel } from '@/components/ManualSeoPanel'
 import { ProductPreflightPanel } from '@/components/ProductPreflightPanel'
 import { WcDraftPanel } from '@/components/WcDraftPanel'
+import { ItemImagesPanel } from '@/components/ItemImagesPanel'
 import { buildSuggestionContext } from '@/lib/ai/suggestion-context'
 import { buildManualSeoPrompt } from '@/lib/seo/manual-seo-prompt'
 import { evaluateProductPreflight, type PreflightInput } from '@/lib/preflight/product-preflight'
+import { listItemImages } from '@/app/inventory/image-actions'
 import { notFound } from 'next/navigation'
 import type { ItemStatus, PhotoStatus, WcSyncStatus, AiSuggestion, InventoryItemWithDetails } from '@/lib/types'
 
@@ -73,6 +75,9 @@ export default async function InventoryItemPage({
 
   const shirt = data.football_shirt_details
 
+  // S026A — images uploaded to Supabase Storage for this item (media_assets).
+  const images = await listItemImages(supabase, id)
+
   // S024 — completeness preflight. Pure evaluation over already-loaded data (no Woo, no writes).
   const preflightInput: PreflightInput = {
     referencia: data.referencia ?? null,
@@ -105,6 +110,7 @@ export default async function InventoryItemPage({
           descripcion_larga: approvedSuggestion.descripcion_larga,
         }
       : null,
+    imageCount: images.length,
   }
   const preflight = evaluateProductPreflight(preflightInput)
   const preflightBlockers = preflight.groups
@@ -328,6 +334,8 @@ export default async function InventoryItemPage({
             <p className="detail-notes">{data.notas_internas}</p>
           </section>
         )}
+
+        <ItemImagesPanel itemId={data.id} images={images} />
 
         <ManualSeoPanel
           itemId={data.id}
