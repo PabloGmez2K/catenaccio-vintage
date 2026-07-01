@@ -1243,6 +1243,38 @@ body {
   line-height: 1.5;
 }
 
+/* S026B_UX — visible progress while creating the draft (can take a few seconds
+   when images are being attached), so the UI doesn't read as stuck. */
+.wc-draft-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: var(--radius);
+  color: #1e40af;
+  font-size: 13px;
+  line-height: 1.4;
+  margin-bottom: 10px;
+}
+
+.wc-draft-spinner {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  border: 2px solid #bfdbfe;
+  border-top-color: #1e40af;
+  border-radius: 50%;
+  animation: wc-draft-spin 0.7s linear infinite;
+}
+
+@keyframes wc-draft-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* ── S024 — completeness preflight panel ─────────────────────────────── */
 
 .preflight-banner {

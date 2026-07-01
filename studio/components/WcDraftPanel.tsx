@@ -111,22 +111,35 @@ export function WcDraftPanel({
             </p>
           )}
 
-          {wcStatus === 'error_sync' && wcError && !result && (
+          {wcStatus === 'error_sync' && wcError && !result && !isPending && (
             <div className="wc-draft-error">Último intento falló: {wcError}</div>
           )}
 
-          {result && !result.ok && (
+          {/* S026B_UX — visible progress while the create+attach round trip is in flight,
+              so a request that takes a few seconds doesn't read as Studio being stuck. */}
+          {isPending && (
+            <div className="wc-draft-progress">
+              <span className="wc-draft-spinner" aria-hidden="true" />
+              <span>
+                Creando borrador en Woo…
+                <br />
+                Adjuntando imágenes, puede tardar unos segundos.
+              </span>
+            </div>
+          )}
+
+          {!isPending && result && !result.ok && (
             <div className="wc-draft-error">{result.error}</div>
           )}
 
-          {result && result.ok && (
+          {!isPending && result && result.ok && (
             <div className="wc-draft-ok">
-              Borrador creado en WooCommerce: ID {result.wcProductId}
+              Borrador creado ✓ (ID {result.wcProductId})
               {result.imagesAttached && (
                 <div>
                   {result.imagesAttached.attached === result.imagesAttached.total
-                    ? ` — Imágenes adjuntadas: ${result.imagesAttached.attached}/${result.imagesAttached.total}`
-                    : ` — Aviso: solo se pudieron mapear ${result.imagesAttached.attached}/${result.imagesAttached.total} imágenes (el borrador se creó igualmente).`}
+                    ? `Imágenes adjuntadas: ${result.imagesAttached.attached}/${result.imagesAttached.total}`
+                    : `Aviso: solo se pudieron mapear ${result.imagesAttached.attached}/${result.imagesAttached.total} imágenes (el borrador se creó igualmente).`}
                 </div>
               )}
             </div>

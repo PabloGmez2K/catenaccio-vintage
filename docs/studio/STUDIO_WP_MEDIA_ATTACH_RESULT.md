@@ -1,6 +1,6 @@
 # STUDIO_WP_MEDIA_ATTACH_RESULT — S026B
 
-**Resultado:** `READY_FOR_PABLO_WP_MEDIA_ATTACH_SHADOW_TEST`
+**Resultado:** `READY_FOR_S026B_CLOSE_AFTER_PABLO_OK`
 **Fecha:** 2026-07-01
 **Modo:** ASK→CODE / SHADOW_FIRST / LOCAL_CODE / WP_MEDIA_ATTACH / WOO_DRAFT_ONLY / NO_PUBLISH / NO_DEPLOY
 **Agente:** Claude Code (Sonnet 5)
@@ -61,6 +61,16 @@ Ningún `POST/PUT/DELETE` real a WooCommerce ejecutado por el agente. Sin SQL. S
 7. Verificar en Studio: `media_assets.wc_media_id` relleno, `upload_status='wc_assigned'` donde el mapeo funcionó.
 8. Confirmar `PABLO_WP_MEDIA_ATTACH_OK`.
 
-## 9. Veredicto
+## 9. PABLO_WP_MEDIA_ATTACH_OK
 
-`READY_FOR_PABLO_WP_MEDIA_ATTACH_SHADOW_TEST`. S026B no se cierra en esta sesión — queda pendiente de la prueba real de Pablo con el flag habilitado localmente.
+Pablo confirmó `PABLO_WP_MEDIA_ATTACH_OK`: borrador Woo creado con imágenes adjuntas, queda en Borrador, no se publica.
+
+## 10. Fix de UX — feedback de carga (misma sesión)
+
+El create+attach tarda unos segundos (sideload de imágenes en Woo) y la UI no comunicaba que seguía trabajando. `WcDraftPanel` ahora muestra un spinner + "Creando borrador en Woo… Adjuntando imágenes, puede tardar unos segundos." mientras `isPending`, y "Borrador creado ✓ (ID …)" al terminar. Sin tocar `bridge.ts`, el payload, el flag ni DRAFT_ONLY.
+
+**Nota de performance (no implementada, ver `S026B_PERFORMANCE_REVIEW` en `BACKLOG.md`):** revisar más adelante bajar el tamaño objetivo del WebP, limitar el número inicial de imágenes, mover el attach a cola/background job, o progreso por fases.
+
+## 11. Veredicto
+
+`READY_FOR_S026B_CLOSE_AFTER_PABLO_OK`. S026B queda validado funcionalmente por Pablo; el fix de UX de esta sesión no cambia la lógica de attach ni el flag.
