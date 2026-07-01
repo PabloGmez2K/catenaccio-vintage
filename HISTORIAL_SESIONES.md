@@ -2002,3 +2002,15 @@ Replantea S025: en vez de una consola read-only aislada (S025A), reconvierte `/i
 
 **Siguiente:** Pablo prueba en local (`cd studio && npm run dev`): work queue legible en 5s, filtros y contadores, marcador requiere-accion, archivar/restaurar (verifica que el item vuelve a su estado previo), links WP Admin/frontend. Confirma `PABLO_BACKOFFICE_V0_OK` -> cierre LITE.
 **agent_events ref:** 2026-07-01T09:00:00Z (S025)
+
+---
+
+## Sesion S025.CLOSE - S025_BACKOFFICE_V0_CLOSE_LITE
+
+**Fecha:** 2026-07-01
+**Agente:** Codex
+**Modo:** DOCS_ONLY / LITE_CLOSE / NO_CODE / NO_WC_CALL / NO_SUPABASE_CHANGE / NO_DEPLOY
+**Resultado:** APPROVE_READY_FOR_MVP_ROADMAP_REVIEW
+
+Pablo valido `PABLO_BACKOFFICE_V0_OK`: `/inventory` ya se percibe util como backoffice y permite operar inventario mejor que la consola read-only previa. Quedan validados filtros, estado de canal web, acciones por fila y archive/restore local. Sigue faltando mucho desarrollo, por lo que el siguiente paso es revision de backlog/MVP. No se abre S026 imagenes todavia.
+**agent_events ref:** 2026-07-01T10:00:00Z (S025.CLOSE)
