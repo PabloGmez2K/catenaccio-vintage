@@ -215,3 +215,28 @@ precios, pedidos, proveedores sensibles). Solo señales saneadas. Ver `DATA_AND_
 - privacy_level: INTERNAL_ONLY
 - Estado: CANDIDATE
 - Siguiente accion: Reabrir tras S023D/S023E o en S028 LANDING_ARCHITECTURE; no implementar en el flujo critico actual.
+
+---
+
+### SLT-009 — Media pipeline + "visual UX no esta hecho hasta que el operador lo siente"
+
+- Fecha: 2026-07-01
+- Proyecto: catenaccio-vintage
+- Sesion/bloque: S025/S026 Studio MVP (backoffice v0 -> S026A imagenes local->Storage -> S026B attach a borrador Woo -> day-close review)
+- project_value: Cadena de imagenes de Studio completa y validada: subida Browser->Supabase Storage (esquiva el limite de 1 MB de Server Actions sin ampliar `bodySizeLimit`), optimizacion WebP client-side, drag&drop, autosave/status, principal=primera, y attach al borrador Woo en el create via `images:[{src,position}]` bajo flag SHADOW_FIRST (default OFF). Ademas, criterio de cierre mas estricto para capacidades visuales.
+- lafabrica:
+  - `MEDIA_UPLOAD_BROWSER_TO_STORAGE`: para flujos de subida de archivos en Next.js, subir directo del navegador al object storage y dejar la Server Action solo para registrar metadata; no ampliar el body-size limit de Server Actions para meter binarios grandes.
+  - `VISUAL_UX_DONE_GATE`: build/lint/typecheck PASS no cierra una capacidad con interfaz visible; exigir prueba manual del operador (`*_VISUAL_OK`), loading state para toda accion >1-2 s, y revision de microcopy cada vez que cambia el comportamiento funcional. Tratar la friccion de flujo que reporta el operador como senal de producto, no como polish opcional; no aceptar como deuda una pieza que es parte del flujo minimo util.
+  - `SHADOW_FIRST_EXTERNAL_ATTACH`: integrar escritura hacia un canal externo vivo tras flag por defecto OFF, con mapeo best-effort que nunca revierte el recurso ya creado; mismo patron que un feature flag de IA en shadow.
+  - `AGENT_ROLE_SPLIT_WITH_VISUAL_SURFACE`: Sonnet=patch quirurgico, Opus=decisiones de backlog/arquitectura, Codex=cierres/validaciones deterministas, Antigravity=inspeccion visual/UX (formularios/backoffice, mobile/desktop, copy viejo, loading states, modales nativos, selects, revision pre-deploy como usuario). Antigravity no para patches quirurgicos ni docs-only.
+- brain:
+  - evidence: Diseno de un pipeline de media (browser->storage->canal e-commerce) con guardrails de propiedad/RLS y flag de shadow; y endurecimiento del criterio de "hecho" para features visuales tras friccion real del operador.
+  - skills: Arquitectura de subida de archivos evitando cuellos de framework; feature flags SHADOW_FIRST hacia canales externos; traduccion de friccion de UX del owner en gates de cierre reutilizables; asignacion de agentes por tipo de tarea incluyendo una surface de validacion visual.
+  - service_angle: Backoffices/PIM con pipeline de imagenes y publicacion asistida a e-commerce; QA de UX asistida por agente antes de deploy.
+  - content_angle: "Por que tu Server Action se rompe en 1 MB (y por que la solucion no es subir el limite)"; "Build en verde no es UX en verde: cerrar features visuales con el usuario, no con el linter".
+  - portfolio_asset: Caso Catenaccio Studio: pipeline de fotos de producto de local a borrador WooCommerce con optimizacion client-side y shadow-first attach.
+- future_product: Modulo reusable de media pipeline (upload directo + optimizacion + attach a canal) y checklist `VISUAL_UX_DONE_GATE` para cualquier vertical con backoffice visual.
+- no_copy: Imagenes/fotos reales de inventario, credenciales Supabase/Woo, URLs privadas de Storage/admin, precios, clientes, datos de camisetas concretas.
+- privacy_level: INTERNAL_ONLY
+- Estado: CANDIDATE
+- Siguiente accion: Validar `MEDIA_UPLOAD_BROWSER_TO_STORAGE` y `VISUAL_UX_DONE_GATE` en un segundo flujo visual (deploy de Studio o segunda pantalla). Si se repiten, promover a PATTERN en lafabrica y anotar skills en el Brain con `DIRECT_BRAIN_WRITE_ALLOWED`.

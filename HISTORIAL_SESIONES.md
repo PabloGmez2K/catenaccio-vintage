@@ -2086,3 +2086,43 @@ ASK: Woo REST acepta sideload de imagenes por URL publica (`images:[{src,positio
 
 **Siguiente paso:** Pablo habilita `STUDIO_WC_ATTACH_IMAGES_ENABLED=true` localmente en `.env.local`, corre `cd studio && npm run dev`, crea un borrador real con 2-4 imagenes y confirma en WP Admin que el producto queda en Borrador con imagenes adjuntas y sin publicar, y en Studio que `media_assets.wc_media_id`/`upload_status` se actualizan. S026B no se cierra en esta sesion.
 **agent_events ref:** 2026-07-01T14:00:00Z (S026B)
+
+---
+
+## Sesion 2026-07-01_DAY_CLOSE_LEARNING_REVIEW
+
+**Fecha:** 2026-07-01
+**Agente:** Claude Code (Opus 4.8)
+**Modo:** DOCS_ONLY / FULL_DAY_CLOSE / LEARNING_REVIEW / NO_CODE / NO_WC_CALL / NO_SUPABASE_CHANGE / NO_DEPLOY
+**Resultado:** DAY_CLOSE_LEARNINGS_CAPTURED
+
+Cierre del dia de Studio MVP. No se implemento codigo, no se toco Woo/WP, Supabase remoto, `.env.local` ni deploy. Solo documentos meta/backlog/historial.
+
+**Cadena del dia revisada:** backoffice v0 validado -> revision de backlog/MVP (`APPROVE_COMPRESS_S025_GO_IMAGES_NEXT`) -> S026A imagenes local->Supabase Storage -> S026B attach al borrador Woo + dos micro-fixes de UX.
+
+**Que salio bien:** comprimir backlog antes de seguir microtareas; replan S025 -> S026 imagenes; corregir S026A a Browser->Storage cuando Pablo detecto el fallo real de 1 MB; NO ampliar `serverActions.bodySizeLimit`; incorporar WebP/UX cuando Pablo explico que era validacion real y no deuda; S026B SHADOW_FIRST (flag OFF por defecto); fixes pequenos (loading + copy) antes de cerrar; cierre por validacion real de Pablo.
+
+**Que salio mal o casi mal:** se tendio a cerrar S026A/S026B demasiado pronto antes de que Pablo detectara UX/copy; se acepto inicialmente WebP como deuda siendo parte del flujo minimo util; falta Antigravity en bloques con UX visual; textos de UI desalineados tras cambios funcionales; algo de sobre-documentacion; riesgo de que "validacion tecnica PASS" tape friccion real de producto.
+
+### MVP VELOCITY / CONTINUOUS IMPROVEMENT
+
+**1. Correcciones de Pablo que llegaron tarde y debian estar en el prompt inicial:** loading feedback antes de cerrar; copy coherente con el nuevo comportamiento; autosave explicito; optimizacion WebP como parte del flujo minimo (no deuda); principal por orden (index 0); validacion visual antes de cierre; evitar UI nativa del navegador en acciones importantes. Todas eran previsibles y debieron formar parte del "Definicion de DONE" del prompt de S026A/S026B.
+
+**2. Validaciones tecnicas que NO bastan para cerrar una feature visible:** build/lint/typecheck PASS != producto usable; para UI visible hace falta `PABLO_VISUAL_OK` o Antigravity visual pass; para flujos lentos hace falta loading state; para cambios funcionales hace falta microcopy review.
+
+**3. Protocolo para reducir sesiones futuras:** el primer prompt de toda feature visible debe incluir (a) UX states empty/loading/success/error; (b) microcopy afectado; (c) mobile/desktop si aplica; (d) autosave o save explicito; (e) comportamiento en flujos lentos; (f) rollback/error state; (g) definicion visual de DONE. No abrir cierre si queda copy falso o UX ambigua. Agrupar microfixes relacionados dentro del mismo bloque antes de cerrar. No cerrar justo tras el primer PASS tecnico si Pablo aun no probo el flujo completo.
+
+**4. Antigravity como gate visual:** entra despues de la implementacion de Sonnet/Codex y antes del cierre cuando hay formularios, backoffice, imagenes, botones, loading, responsive o copy; no para implementar; si para detectar friccion visual, textos antiguos, estados confusos, `select`/`confirm` nativos, y desajustes mobile/desktop.
+
+**5. Regla nueva `STUDIO_MVP_FEATURE_DONE_GATE`** (registrada en `docs/meta/AGENT_EXPERIENCE_LEDGER.md`): una feature Studio visible solo esta DONE si validaciones tecnicas PASS + flujo real probado por Pablo o Antigravity + loading/success/error visibles + microcopy coherente + sin texto antiguo contradictorio + siguiente paso operativo claro + sin deuda critica disfrazada de polish.
+
+**6. Objetivo de velocidad por bloque MVP:** 1 sesion ASK/readiness (si hay incertidumbre) + 1 sesion CODE + 1 sesion visual QA/patch (si hay UI) + 1 cierre LITE. Si se supera, activar `STOP_AND_REPLAN`: revisar si el prompt inicial fue pobre, si falto Antigravity o si el bloque estaba mal cortado. **Lectura de hoy:** S026A consumio impl + 2 rondas de fix (body-limit, luego UX/WebP) + cierre, y S026B impl + 2 micro-fixes (loading, copy) — por encima del objetivo; la causa raiz fue prompt inicial sin Definicion de DONE visual y sin Antigravity, no bloque mal cortado.
+
+**Cambios de backlog:** anadido `STUDIO_UI_COMPONENTS_STANDARDIZATION` (fast-follow / candidato pre-deploy, sin desplazar deploy); confirmados `S026B_PERFORMANCE_REVIEW` (nota, fast-follow, no blocker) y `STUDIO_VERCEL_DEPLOY_MINIMAL` como siguiente bloque MVP critico. No se abrieron bloques nuevos ni se desplazo el deploy.
+
+**Aprendizajes registrados:** `SESSION_LEARNING_TRANSFER_QUEUE.md` SLT-009 (media pipeline + visual-UX-done gate) y `AGENT_EXPERIENCE_LEDGER.md` +5 entradas (MEDIA_UPLOAD_BROWSER_TO_STORAGE_PATTERN, VISUAL_UX_NOT_DONE_UNTIL_USER_FEELS_IT, SHADOW_FIRST_WOO_ATTACH_PATTERN, ANTIGRAVITY_VISUAL_VALIDATION_GATE, STUDIO_MVP_FEATURE_DONE_GATE).
+
+**Pendiente explicito:** S026B validado por Pablo (`PABLO_WP_MEDIA_ATTACH_OK`) pero aun `[~]` (sin cierre documental en sesion propia) y sus 3 commits sin pushear (local ahead 3). Sin push por politica de la sesion.
+
+**Siguiente bloque recomendado:** `STUDIO_VERCEL_DEPLOY_MINIMAL` (bloque 3 del spine MVP), sin cambios.
+**agent_events ref:** 2026-07-01T15:00:00Z (DAY_CLOSE_LEARNING_REVIEW)
