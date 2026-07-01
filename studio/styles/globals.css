@@ -1395,12 +1395,34 @@ body {
   letter-spacing: normal;
 }
 
-.images-upload-row {
+.images-dropzone {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 12px;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.images-dropzone--active {
+  border-color: var(--color-primary);
+  background: var(--color-bg);
+}
+
+.images-dropzone--disabled {
+  opacity: 0.7;
+}
+
+.images-dropzone-label {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 12px;
   flex-wrap: wrap;
+  justify-content: center;
+  cursor: pointer;
+  text-align: center;
 }
 
 .images-upload-input {

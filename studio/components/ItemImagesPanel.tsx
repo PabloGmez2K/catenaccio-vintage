@@ -30,13 +30,12 @@ export function ItemImagesPanel({
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
+  const [isDraggingOver, setIsDraggingOver] = useState(false)
 
-  function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const fileList = e.target.files
-    if (!fileList || fileList.length === 0) return
+  function uploadFiles(files: File[]) {
+    if (files.length === 0) return
     setError(null)
 
-    const files = Array.from(fileList)
     for (const file of files) {
       if (!IMAGE_ALLOWED_MIME[file.type]) {
         setError(`Tipo no permitido: ${file.type || file.name}. Solo JPG/PNG/WEBP.`)
@@ -97,6 +96,30 @@ export function ItemImagesPanel({
     })
   }
 
+  function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const fileList = e.target.files
+    if (!fileList || fileList.length === 0) return
+    uploadFiles(Array.from(fileList))
+  }
+
+  function handleDrop(e: React.DragEvent<HTMLDivElement>) {
+    e.preventDefault()
+    setIsDraggingOver(false)
+    if (isPending) return
+    const files = Array.from(e.dataTransfer.files).filter((f) => f.type.startsWith('image/'))
+    uploadFiles(files)
+  }
+
+  function handleDragOver(e: React.DragEvent<HTMLDivElement>) {
+    e.preventDefault()
+    if (!isPending) setIsDraggingOver(true)
+  }
+
+  function handleDragLeave(e: React.DragEvent<HTMLDivElement>) {
+    e.preventDefault()
+    setIsDraggingOver(false)
+  }
+
   function handleSetPrimary(imageId: string) {
     setError(null)
     startTransition(async () => {
@@ -131,7 +154,12 @@ export function ItemImagesPanel({
     <section className="detail-section images-section">
       <h3>Fotos {images.length > 0 && <span className="images-count">({images.length})</span>}</h3>
 
-      <div className="images-upload-row">
+      <div
+        className={`images-dropzone${isDraggingOver ? ' images-dropzone--active' : ''}${isPending ? ' images-dropzone--disabled' : ''}`}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
         <input
           ref={fileInputRef}
           type="file"
@@ -142,10 +170,12 @@ export function ItemImagesPanel({
           id={`images-upload-${itemId}`}
           className="images-upload-input"
         />
-        <label htmlFor={`images-upload-${itemId}`} className="btn-secondary btn-sm">
-          {isPending ? 'Subiendo…' : 'Subir fotos'}
+        <label htmlFor={`images-upload-${itemId}`} className="images-dropzone-label">
+          <span className="btn-secondary btn-sm">{isPending ? 'Subiendo…' : 'Subir fotos'}</span>
+          <span className="images-upload-hint">
+            Arrastra fotos aquí o haz clic para seleccionar · JPG, PNG o WEBP · máx. 12 MB por foto
+          </span>
         </label>
-        <span className="images-upload-hint">JPG, PNG o WEBP · máx. 12 MB por foto</span>
       </div>
 
       {error && <p className="images-error">{error}</p>}
