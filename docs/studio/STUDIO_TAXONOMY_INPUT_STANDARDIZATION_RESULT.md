@@ -2,7 +2,7 @@
 
 **Sesión:** S024A · 2026-07-01 · Claude Code Opus 4.8
 **Modo:** ASK_TO_CODE / TAXONOMY_UX_STANDARDIZATION / NO_WC_WRITE_BY_AGENT / NO_PUBLISH / NO_DEPLOY
-**Veredicto:** `READY_FOR_PABLO_TAXONOMY_UX_TEST`
+**Veredicto:** `APPROVE_READY_FOR_S024`
 
 ## Problema (raíz)
 
@@ -69,3 +69,5 @@ secret scan CLEAN · JSONL parseable.
 sugerencias desde caché (Jugador muestra Rivaldo/Ronaldinho); texto existente → sin botón
 crear; texto nuevo → estado "Nuevo término" + botón crear; crear → usable tras guardar; sin
 regresión. No crear borrador Woo si no hace falta; no publicar. Confirmar `PABLO_TAXONOMY_UX_OK`.
+
+Pablo confirmó `PABLO_TAXONOMY_UX_OK`: sugerencias coherentes desde `wc_terms`, Jugador sin dependencia del historial del navegador, Rivaldo/Ronaldinho visibles si están en caché, botón Crear término solo para términos inexistentes y sin regresión S023B/C/D/E. S024 no se abrió.

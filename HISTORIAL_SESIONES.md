@@ -1906,3 +1906,15 @@ Estandarizados los 4 campos de taxonomia creable (Liga/Equipo/Ano/Jugador) en el
 
 **Siguiente paso:** Pablo prueba en local (`cd studio && npm run dev`): sugerencias desde cache, estado existe/nuevo, crear termino solo cuando falta, sin regresion. Confirma `PABLO_TAXONOMY_UX_OK` antes de abrir S024.
 **agent_events ref:** 2026-07-01T04:00:00Z (S024A)
+
+---
+
+## Sesion S024A.CLOSE - TAXONOMY_UX_CLOSE_LITE
+
+**Fecha:** 2026-07-01
+**Agente:** Codex
+**Modo:** DOCS_ONLY / LITE_CLOSE / NO_CODE / NO_WC_CALL / NO_SUPABASE_CHANGE / NO_DEPLOY
+**Resultado:** APPROVE_READY_FOR_S024
+
+Pablo valido `PABLO_TAXONOMY_UX_OK`: Liga/Equipo/Ano/Jugador muestran sugerencias coherentes desde `wc_terms`; Jugador ya no depende del historial del navegador; Rivaldo/Ronaldinho aparecen correctamente si estan en cache; el boton Crear termino solo aparece cuando el termino no existe. No se reporto regresion en S023B/C/D/E y no se abrio S024. No se toco codigo, WooCommerce, Supabase remoto, WP Admin, productos, terminos, categorias, deploy ni SQL por agente.
+**agent_events ref:** 2026-07-01T05:00:00Z (S024A.CLOSE)
