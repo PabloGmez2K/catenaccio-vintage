@@ -2060,3 +2060,15 @@ Revision de backlog y definicion de MVP util tras backoffice v0. Hallazgo centra
 
 **Siguiente paso:** Pablo aplica `docs/studio/STUDIO_IMAGE_PIPELINE_SCHEMA.sql` en el SQL Editor de Supabase, corre `cd studio && npm run dev`, sube 2-3 fotos JPG/WEBP en una camiseta existente, confirma miniaturas/orden/principal/borrado, verifica los objetos en Supabase Storage bajo `<user_id>/<inventory_item_id>/` y confirma que el preflight muestra el bloque "Imagenes". Si PASS: cierre documental de S026A y abrir S026B (WP Media + attach en create, DRAFT_ONLY intacto, SHADOW_FIRST).
 **agent_events ref:** 2026-07-01T12:00:00Z (S026A)
+
+---
+
+## Sesion S026A.CLOSE - IMAGE_STORAGE_CLOSE_LITE
+
+**Fecha:** 2026-07-01
+**Agente:** Codex
+**Modo:** DOCS_ONLY / LITE_CLOSE / NO_CODE / NO_WC_CALL / NO_SUPABASE_CHANGE / NO_DEPLOY
+**Resultado:** APPROVE_READY_FOR_S026B
+
+Pablo confirmo `PABLO_IMAGE_STORAGE_FINAL_OK` sobre HEAD `8d00860` (fix body-limit de Server Actions + vuelta de UX/optimizacion): upload de imagenes funcionando sin el error de 1 MB, subida directa Browser -> Supabase Storage validada, metadata ligera en `media_assets` validada, drag & drop de subida y de reordenacion validados, autosave/feedback de estado visual validado, principal = primera imagen validado, reordenacion y eliminacion validadas, optimizacion WebP validada, preflight "Imagenes" validado (sin fotos = warning, con fotos = pass). No se toco Woo/WordPress, no se publico nada. S026A queda `DONE / APPROVE_READY_FOR_S026B`. S026B no se abre en esta sesion.
+**agent_events ref:** 2026-07-01T13:00:00Z (S026A.CLOSE)

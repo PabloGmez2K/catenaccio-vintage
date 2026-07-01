@@ -4,7 +4,7 @@
 **Fecha:** 2026-07-01
 **Sesión:** S026A — IMAGE_PIPELINE_LOCAL_TO_STORAGE (Claude Code Sonnet 5)
 **Modo:** ASK→CODE / LOCAL_CODE / SUPABASE_STORAGE / NO_WP_WRITE / NO_WOO_WRITE / NO_PRODUCT_WRITE / NO_PUBLISH / NO_DEPLOY
-**Veredicto:** `READY_FOR_PABLO_IMAGE_STORAGE_FINAL_RETEST` (tras fix §3b + UX/optimización §3c)
+**Veredicto:** `APPROVE_READY_FOR_S026B` (validación manual de Pablo — `PABLO_IMAGE_STORAGE_FINAL_OK`)
 **Hermanos:** `STUDIO_MVP_BACKLOG_REVIEW.md`, `STUDIO_DATA_MODEL.md`, `STUDIO_COMPLETENESS_PREFLIGHT_RESULT.md`
 
 ---
@@ -191,6 +191,18 @@ Drop API nativos del navegador, para no añadir dependencias sin justificar.
 Si PASS: cierre documental de S026A y abrir **S026B — Upload WP Media + attach en create**
 (DRAFT_ONLY intacto, SHADOW_FIRST) en una sesión nueva.
 
+## 9. Validación manual de Pablo — `PABLO_IMAGE_STORAGE_FINAL_OK`
+
+Pablo confirmó en local, sobre el HEAD `8d00860`: upload de imágenes funcionando sin el error de
+1 MB (subida directa browser → Supabase Storage + metadata ligera en `media_assets` validada);
+drag & drop de subida y de reordenación validados; autosave con feedback visual (optimizando/
+subiendo/guardando/guardado) validado; principal = primera imagen validado tras reordenar; eliminar
+imagen validado; optimización WebP validada; preflight "Imágenes" validado (sin fotos = warning,
+con fotos = pass). Sin tocar Woo/WordPress, sin publicar nada. S026B no se abre en esta sesión.
+
+**S026A queda `APPROVE_READY_FOR_S026B` — CERRADA.**
+
 ---
 
 *Sesión S026A — 2026-07-01 — Claude Code (Sonnet 5). ASK→CODE / LOCAL_CODE / QUALITY_PASS_REQUIRED.*
+*Cierre S026A_IMAGE_STORAGE_CLOSE_LITE — 2026-07-01 — Codex. DOCS_ONLY / LITE_CLOSE.*
