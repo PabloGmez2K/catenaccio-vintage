@@ -2,16 +2,23 @@
 
 import { useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/browser'
 import {
-  uploadItemImages,
+  registerUploadedItemImage,
   setPrimaryImage,
   moveImage,
   deleteItemImage,
 } from '@/app/inventory/image-actions'
+import { IMAGE_STORAGE_BUCKET, IMAGE_MAX_SIZE_BYTES, IMAGE_ALLOWED_MIME } from '@/lib/media/image-upload'
 import type { MediaAsset } from '@/lib/types'
 
 // S026A — image pipeline panel for the item detail page. Supabase Storage +
 // media_assets metadata only. NO WordPress, NO WooCommerce, NO publish.
+//
+// S026A_FIX: files upload directly from the browser to Supabase Storage (not
+// through a Server Action — those have a 1 MB request body limit and are the
+// wrong transport for images). Only small JSON metadata is sent server-side,
+// via registerUploadedItemImage, to persist the media_assets row.
 export function ItemImagesPanel({
   itemId,
   images,
@@ -25,20 +32,67 @@ export function ItemImagesPanel({
   const [isPending, startTransition] = useTransition()
 
   function handleUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const files = e.target.files
-    if (!files || files.length === 0) return
+    const fileList = e.target.files
+    if (!fileList || fileList.length === 0) return
     setError(null)
 
-    const formData = new FormData()
-    for (const file of Array.from(files)) formData.append('files', file)
+    const files = Array.from(fileList)
+    for (const file of files) {
+      if (!IMAGE_ALLOWED_MIME[file.type]) {
+        setError(`Tipo no permitido: ${file.type || file.name}. Solo JPG/PNG/WEBP.`)
+        if (fileInputRef.current) fileInputRef.current.value = ''
+        return
+      }
+      if (file.size > IMAGE_MAX_SIZE_BYTES) {
+        setError(`"${file.name}" supera el tamaño máximo (12 MB).`)
+        if (fileInputRef.current) fileInputRef.current.value = ''
+        return
+      }
+    }
 
     startTransition(async () => {
-      const result = await uploadItemImages(itemId, formData)
-      if (result.ok) {
-        router.refresh()
-      } else {
-        setError(result.error)
+      const supabase = createClient()
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+      if (!user) {
+        setError('No autenticado.')
+        if (fileInputRef.current) fileInputRef.current.value = ''
+        return
       }
+
+      // Sequential on purpose: each registerUploadedItemImage call computes
+      // sort_order/is_primary from current DB state, so concurrent calls could race.
+      for (const file of files) {
+        const ext = IMAGE_ALLOWED_MIME[file.type]
+        const path = `${user.id}/${itemId}/${crypto.randomUUID()}.${ext}`
+
+        const { error: uploadError } = await supabase.storage
+          .from(IMAGE_STORAGE_BUCKET)
+          .upload(path, file, { contentType: file.type, upsert: false })
+        if (uploadError) {
+          setError(`Error al subir "${file.name}": ${uploadError.message}`)
+          break
+        }
+
+        const { data: publicUrlData } = supabase.storage.from(IMAGE_STORAGE_BUCKET).getPublicUrl(path)
+
+        const result = await registerUploadedItemImage(itemId, {
+          storagePath: path,
+          publicUrl: publicUrlData.publicUrl,
+          filename: file.name,
+          mimeType: file.type,
+          sizeBytes: file.size,
+        })
+        if (!result.ok) {
+          // Best-effort cleanup so a failed metadata write doesn't leave an orphaned Storage object.
+          await supabase.storage.from(IMAGE_STORAGE_BUCKET).remove([path])
+          setError(result.error)
+          break
+        }
+      }
+
+      router.refresh()
       if (fileInputRef.current) fileInputRef.current.value = ''
     })
   }

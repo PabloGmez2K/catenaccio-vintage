@@ -4,7 +4,7 @@
 **Fecha:** 2026-07-01
 **Sesión:** S026A — IMAGE_PIPELINE_LOCAL_TO_STORAGE (Claude Code Sonnet 5)
 **Modo:** ASK→CODE / LOCAL_CODE / SUPABASE_STORAGE / NO_WP_WRITE / NO_WOO_WRITE / NO_PRODUCT_WRITE / NO_PUBLISH / NO_DEPLOY
-**Veredicto:** `READY_FOR_PABLO_IMAGE_SCHEMA_APPLY_THEN_TEST`
+**Veredicto:** `READY_FOR_PABLO_IMAGE_STORAGE_RETEST` (tras fix de §3b — "Body exceeded 1 MB limit")
 **Hermanos:** `STUDIO_MVP_BACKLOG_REVIEW.md`, `STUDIO_DATA_MODEL.md`, `STUDIO_COMPLETENESS_PREFLIGHT_RESULT.md`
 
 ---
@@ -16,9 +16,9 @@ aplicada en Supabase en S020D junto con las otras 5 tablas MVP), con RLS owner-b
 (`pol_media_assets_owner`) ya activa. Nunca se usó desde código (0 referencias en `studio/`). Se
 reutiliza en vez de crear `inventory_item_images` desde cero — evita una tabla duplicada.
 
-Ya existía también el cliente Supabase de browser (`studio/lib/supabase/browser.ts`), aunque
-finalmente no se usó: las subidas van por Server Action (mismo patrón que el resto del código),
-no por el cliente de browser.
+Ya existía también el cliente Supabase de browser (`studio/lib/supabase/browser.ts`). En la entrega
+inicial no se usó (las subidas iban por Server Action); tras el fix de §3b **sí se usa** — es el
+transporte real de los archivos.
 
 ## 2. SQL requerido
 
@@ -34,12 +34,11 @@ Sin `DROP`, sin `DELETE`, sin tocar otras tablas, sin policies nuevas (la RLS ex
 ## 3. Cambios de código
 
 - `studio/lib/types.ts`: nuevo `MediaAsset` + `MediaUploadStatus`.
-- `studio/app/inventory/image-actions.ts` (nuevo): Server Actions `uploadItemImages`,
-  `setPrimaryImage`, `moveImage`, `deleteItemImage` + helper de lectura `listItemImages`. Valida
-  MIME (`image/jpeg|png|webp`) y tamaño (≤12 MB) antes de subir; path
-  `<auth_user_id>/<inventory_item_id>/<uuid>.<ext>`; `original_filename` se guarda en `filename`.
-  Si el insert en DB falla tras subir a Storage, se borra el objeto (evita huérfanos). Al eliminar
-  la foto principal, promueve automáticamente la siguiente por `sort_order`.
+- `studio/app/inventory/image-actions.ts` (nuevo): Server Actions `registerUploadedItemImage`
+  (metadata-only, ver §3b), `setPrimaryImage`, `moveImage`, `deleteItemImage` + helper de lectura
+  `listItemImages`. Path `<auth_user_id>/<inventory_item_id>/<uuid>.<ext>`; `original_filename` se
+  guarda en `filename`. Al eliminar la foto principal, promueve automáticamente la siguiente por
+  `sort_order`.
 - `studio/components/ItemImagesPanel.tsx` (nuevo): panel client — subida múltiple, grid de
   miniaturas, badge "Principal", mover arriba/abajo, marcar principal, eliminar, contador, estado
   vacío, mensajes de error.
@@ -54,10 +53,47 @@ Sin `DROP`, sin `DELETE`, sin tocar otras tablas, sin policies nuevas (la RLS ex
 `bridge.ts`, `actions.ts` (creación/edición de item), `ItemForm.tsx` y `createWcDraftForItem` **no
 se tocaron**.
 
+## 3b. FIX post-entrega — "Body exceeded 1 MB limit" (Server Actions)
+
+**Síntoma:** al subir 2+ imágenes desde `/inventory/[id]`, Next.js devolvía `Body exceeded 1 MB
+limit` (límite por defecto de payload de Server Actions).
+
+**Causa:** la entrega inicial transportaba los `File` completos dentro de un `FormData` hacia la
+Server Action `uploadItemImages`, que subía a Storage server-side. Server Actions no están pensadas
+para transportar archivos binarios grandes — tienen un límite de payload (1 MB por defecto,
+configurable vía `serverActions.bodySizeLimit`, pero subir el límite no ataca la causa raíz y sigue
+sin escalar bien).
+
+**Fix:** el archivo ahora sube **directamente desde el navegador a Supabase Storage**, usando el
+cliente de browser ya existente (`studio/lib/supabase/browser.ts`) — sin pasar por ninguna Server
+Action. Solo se envía al servidor un JSON pequeño con la metadata (path, URL pública, filename,
+mime, tamaño) a la nueva Server Action `registerUploadedItemImage`, que:
+1. autentica al usuario y reverifica `owner_id` del item (igual que antes);
+2. valida en profundidad que el `storage_path` recibido empieza por `<user.id>/<itemId>/` (defensa
+   extra — el cliente ya no es la única capa que decide el path);
+3. revalida MIME/tamaño server-side (el cliente ya valida antes de subir, pero no se confía
+   ciegamente en el input);
+4. calcula `sort_order`/`is_primary` e inserta la fila en `media_assets`.
+
+Las subidas se procesan **secuencialmente** en el cliente (no en paralelo) porque cada llamada a
+`registerUploadedItemImage` calcula `sort_order`/`is_primary` a partir del estado actual de la
+tabla — llamadas concurrentes podrían generar condiciones de carrera.
+
+Nuevo módulo compartido `studio/lib/media/image-upload.ts` (bucket, tamaño máximo, MIME permitidos)
+para que cliente y Server Action no diverjan.
+
+`setPrimaryImage`/`moveImage`/`deleteItemImage` no se tocaron — nunca transportaron archivos, solo
+operan sobre filas ya existentes en `media_assets`.
+
+No se subió `serverActions.bodySizeLimit` en `next.config.ts` — la solución correcta es no enviar
+el archivo por la Server Action, no ensanchar el límite.
+
 ## 4. Seguridad
 
-- Sin service_role en cliente — todas las Server Actions usan `createClient()` (server, anon key +
-  cookies de sesión), igual que el resto del código.
+- Sin service_role en cliente ni en servidor — la subida usa el cliente de browser con **anon key**
+  (mismo nivel de privilegio que cualquier usuario autenticado, sujeto a RLS/Storage policies); el
+  resto de acciones (`registerUploadedItemImage`, `setPrimaryImage`, `moveImage`, `deleteItemImage`)
+  usan `createClient()` server-side (anon key + cookies de sesión), igual que el resto del código.
 - Path de Storage siempre incluye `auth.uid()` como primer segmento (coincide con la policy
   "own folder" que Pablo configuró manualmente en el bucket).
 - Solo se aceptan `image/jpeg`, `image/png`, `image/webp`; tamaño máximo 12 MB, verificado

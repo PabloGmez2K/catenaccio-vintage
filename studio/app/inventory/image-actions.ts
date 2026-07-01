@@ -4,20 +4,18 @@
 // Supabase only (Storage + DB). NO WordPress, NO WooCommerce, NO Woo media, NO publish.
 // Reuses the media_assets table (S019 design, applied S020D) — see
 // docs/studio/STUDIO_IMAGE_PIPELINE_SCHEMA.sql for the additive columns this needs.
+//
+// S026A_FIX: the actual file upload happens client-side, directly against Supabase
+// Storage (see ItemImagesPanel.tsx) — Server Actions have a 1 MB request body limit
+// by default and are the wrong transport for image files. This module only ever
+// receives small JSON metadata after the browser has already uploaded the object.
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import type { MediaAsset } from '@/lib/types'
+import { IMAGE_STORAGE_BUCKET, IMAGE_MAX_SIZE_BYTES, IMAGE_ALLOWED_MIME } from '@/lib/media/image-upload'
 
 export type ImageActionResult = { ok: true } | { ok: false; error: string }
-
-const BUCKET = 'studio-product-images'
-const MAX_SIZE_BYTES = 12 * 1024 * 1024
-const ALLOWED_MIME: Record<string, string> = {
-  'image/jpeg': 'jpg',
-  'image/png': 'png',
-  'image/webp': 'webp',
-}
 
 async function requireOwnedItem(
   supabase: Awaited<ReturnType<typeof createClient>>,
@@ -34,11 +32,21 @@ async function requireOwnedItem(
   return { ok: true, workspaceId: data.workspace_id as string }
 }
 
-// ── uploadItemImages ──────────────────────────────────────────────────────────
+// ── registerUploadedItemImage ─────────────────────────────────────────────────
+// Called once per file AFTER the browser has already uploaded the object directly
+// to Supabase Storage (client owns the transport; this only persists metadata).
 
-export async function uploadItemImages(
+export type UploadedImageMetadata = {
+  storagePath: string
+  publicUrl: string
+  filename: string
+  mimeType: string
+  sizeBytes: number
+}
+
+export async function registerUploadedItemImage(
   itemId: string,
-  formData: FormData
+  metadata: UploadedImageMetadata
 ): Promise<ImageActionResult> {
   const supabase = await createClient()
 
@@ -51,16 +59,17 @@ export async function uploadItemImages(
   const owned = await requireOwnedItem(supabase, itemId, user.id)
   if (!owned.ok) return owned
 
-  const files = formData.getAll('files').filter((f): f is File => f instanceof File && f.size > 0)
-  if (files.length === 0) return { ok: false, error: 'Selecciona al menos una imagen.' }
-
-  for (const file of files) {
-    if (!ALLOWED_MIME[file.type]) {
-      return { ok: false, error: `Tipo no permitido: ${file.type || file.name}. Solo JPG/PNG/WEBP.` }
-    }
-    if (file.size > MAX_SIZE_BYTES) {
-      return { ok: false, error: `"${file.name}" supera el tamaño máximo (12 MB).` }
-    }
+  // Defense in depth: the path must live under this user's own item folder,
+  // matching the Storage "own folder" RLS policy Pablo configured on the bucket.
+  const expectedPrefix = `${user.id}/${itemId}/`
+  if (!metadata.storagePath.startsWith(expectedPrefix)) {
+    return { ok: false, error: 'Ruta de almacenamiento no válida para este item.' }
+  }
+  if (!IMAGE_ALLOWED_MIME[metadata.mimeType]) {
+    return { ok: false, error: `Tipo no permitido: ${metadata.mimeType}. Solo JPG/PNG/WEBP.` }
+  }
+  if (metadata.sizeBytes > IMAGE_MAX_SIZE_BYTES) {
+    return { ok: false, error: 'El archivo supera el tamaño máximo (12 MB).' }
   }
 
   const { data: existing } = await supabase
@@ -69,49 +78,30 @@ export async function uploadItemImages(
     .eq('item_id', itemId)
     .order('sort_order', { ascending: false })
     .limit(1)
-  let nextSortOrder = (existing?.[0]?.sort_order ?? -1) + 1
+  const nextSortOrder = (existing?.[0]?.sort_order ?? -1) + 1
 
   const { count: primaryCount } = await supabase
     .from('media_assets')
     .select('id', { count: 'exact', head: true })
     .eq('item_id', itemId)
     .eq('is_primary', true)
-  let hasPrimary = (primaryCount ?? 0) > 0
+  const hasPrimary = (primaryCount ?? 0) > 0
 
-  for (const file of files) {
-    const ext = ALLOWED_MIME[file.type]
-    const path = `${user.id}/${itemId}/${crypto.randomUUID()}.${ext}`
-
-    const { error: uploadError } = await supabase.storage
-      .from(BUCKET)
-      .upload(path, file, { contentType: file.type, upsert: false })
-    if (uploadError) return { ok: false, error: `Error al subir "${file.name}": ${uploadError.message}` }
-
-    const { data: publicUrlData } = supabase.storage.from(BUCKET).getPublicUrl(path)
-
-    const { error: insertError } = await supabase.from('media_assets').insert({
-      item_id: itemId,
-      workspace_id: owned.workspaceId,
-      owner_id: user.id,
-      filename: file.name,
-      storage_bucket: BUCKET,
-      storage_path: path,
-      public_url: publicUrlData.publicUrl,
-      mime_type: file.type,
-      size_bytes: file.size,
-      sort_order: nextSortOrder,
-      is_primary: !hasPrimary,
-      upload_status: 'uploaded_storage',
-    })
-    if (insertError) {
-      // Best-effort cleanup so a failed DB write doesn't leave an orphaned Storage object.
-      await supabase.storage.from(BUCKET).remove([path])
-      return { ok: false, error: `Error al guardar metadata de "${file.name}": ${insertError.message}` }
-    }
-
-    nextSortOrder += 1
-    hasPrimary = true
-  }
+  const { error: insertError } = await supabase.from('media_assets').insert({
+    item_id: itemId,
+    workspace_id: owned.workspaceId,
+    owner_id: user.id,
+    filename: metadata.filename,
+    storage_bucket: IMAGE_STORAGE_BUCKET,
+    storage_path: metadata.storagePath,
+    public_url: metadata.publicUrl,
+    mime_type: metadata.mimeType,
+    size_bytes: metadata.sizeBytes,
+    sort_order: nextSortOrder,
+    is_primary: !hasPrimary,
+    upload_status: 'uploaded_storage',
+  })
+  if (insertError) return { ok: false, error: insertError.message }
 
   revalidatePath(`/inventory/${itemId}`)
   return { ok: true }
