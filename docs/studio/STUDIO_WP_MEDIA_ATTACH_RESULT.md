@@ -1,6 +1,6 @@
 # STUDIO_WP_MEDIA_ATTACH_RESULT — S026B
 
-**Resultado:** `READY_FOR_S026B_CLOSE_AFTER_PABLO_OK`
+**Resultado:** `DONE / APPROVE_READY_FOR_STUDIO_VERCEL_DEPLOY_MINIMAL`
 **Fecha:** 2026-07-01
 **Modo:** ASK→CODE / SHADOW_FIRST / LOCAL_CODE / WP_MEDIA_ATTACH / WOO_DRAFT_ONLY / NO_PUBLISH / NO_DEPLOY
 **Agente:** Claude Code (Sonnet 5)
@@ -78,3 +78,15 @@ Pablo confirmó `PABLO_S026B_LOADING_UX_OK` y detectó un texto obsoleto en `WcD
 ## 12. Veredicto
 
 `READY_FOR_S026B_CLOSE`. S026B queda validado funcionalmente por Pablo; los fixes de UX/copy de esta sesión no cambian la lógica de attach ni el flag.
+
+## 13. Cierre LITE — validación manual completa de Pablo (2026-07-01, Codex)
+
+**Veredicto de cierre:** `DONE / APPROVE_READY_FOR_STUDIO_VERCEL_DEPLOY_MINIMAL`.
+
+Pablo confirmó `PABLO_WP_MEDIA_ATTACH_OK` + `PABLO_S026B_LOADING_UX_OK` con la prueba manual completa:
+- crear borrador Woo con imágenes adjuntas funciona; el producto queda en **Borrador** y **no se publica**;
+- con el flag `STUDIO_WC_ATTACH_IMAGES_ENABLED` ON, las imágenes de Studio se adjuntan automáticamente y la **primera imagen de Studio se respeta como primera/principal**;
+- **loading UX visible** durante el create+attach; **copy del panel corregido** según flag ON/OFF (sin texto obsoleto);
+- **DRAFT_ONLY** e **idempotencia** intactos; sin PUT/DELETE, sin cleanup, sin deploy, sin SQL, sin `.env.local` tocado por el agente.
+
+`S026B_PERFORMANCE_REVIEW` queda registrado como **fast-follow, no blocker** (tamaño WebP objetivo, nº de imágenes iniciales, attach en background, progreso por fases). Siguiente bloque crítico: `STUDIO_VERCEL_DEPLOY_MINIMAL`.

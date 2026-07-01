@@ -2126,3 +2126,21 @@ Cierre del dia de Studio MVP. No se implemento codigo, no se toco Woo/WP, Supaba
 
 **Siguiente bloque recomendado:** `STUDIO_VERCEL_DEPLOY_MINIMAL` (bloque 3 del spine MVP), sin cambios.
 **agent_events ref:** 2026-07-01T15:00:00Z (DAY_CLOSE_LEARNING_REVIEW)
+
+---
+
+## Sesion S026B.CLOSE - WP_MEDIA_ATTACH_ON_DRAFT_CREATE
+
+**Fecha:** 2026-07-01
+**Agente:** Codex
+**Modo:** DOCS_ONLY / LITE_CLOSE / NO_CODE / NO_WC_CALL / NO_SUPABASE_CHANGE / NO_DEPLOY
+**Resultado:** DONE / APPROVE_READY_FOR_STUDIO_VERCEL_DEPLOY_MINIMAL
+
+Cierre documental de S026B tras validacion manual completa de Pablo (`PABLO_WP_MEDIA_ATTACH_OK` + `PABLO_S026B_LOADING_UX_OK`) y tras el cierre de aprendizajes del dia. Pablo validó: crear borrador Woo con imagenes adjuntas funciona; el producto queda en Borrador y no se publica; con el flag `STUDIO_WC_ATTACH_IMAGES_ENABLED` ON las imagenes de Studio se adjuntan automaticamente y la primera imagen se respeta como primera/principal; loading UX visible durante create+attach; copy del panel corregido segun flag ON/OFF; DRAFT_ONLY e idempotencia intactos; sin PUT/DELETE, sin cleanup, sin deploy, sin SQL, sin `.env.local` tocado por agente.
+
+`S026B_PERFORMANCE_REVIEW` queda como fast-follow (no blocker): tamano WebP objetivo, nº de imagenes iniciales, attach en background, progreso por fases. `STUDIO_UI_COMPONENTS_STANDARDIZATION` sigue registrado sin abrir. No se abrieron bloques nuevos.
+
+**Estado repo:** HEAD antes del cierre `29d3b7f`; los 3 commits de S026B (877b9d7 / 691dc0f / c4ded65) siguen sin pushear (local ahead de origin/main). Sin push por politica de la sesion.
+
+**Siguiente bloque recomendado:** `STUDIO_VERCEL_DEPLOY_MINIMAL` (bloque 3 del spine MVP), sin cambios.
+**agent_events ref:** 2026-07-01T16:00:00Z (S026B.CLOSE)
