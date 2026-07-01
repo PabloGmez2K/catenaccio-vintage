@@ -1918,3 +1918,25 @@ Estandarizados los 4 campos de taxonomia creable (Liga/Equipo/Ano/Jugador) en el
 
 Pablo valido `PABLO_TAXONOMY_UX_OK`: Liga/Equipo/Ano/Jugador muestran sugerencias coherentes desde `wc_terms`; Jugador ya no depende del historial del navegador; Rivaldo/Ronaldinho aparecen correctamente si estan en cache; el boton Crear termino solo aparece cuando el termino no existe. No se reporto regresion en S023B/C/D/E y no se abrio S024. No se toco codigo, WooCommerce, Supabase remoto, WP Admin, productos, terminos, categorias, deploy ni SQL por agente.
 **agent_events ref:** 2026-07-01T05:00:00Z (S024A.CLOSE)
+
+---
+
+## Sesion S024 - COMPLETENESS / PREFLIGHT
+
+**Fecha:** 2026-07-01
+**Agente:** Claude Code (Opus 4.8)
+**Modo:** ASK→CODE / LOCAL_CODE / NO_WC_WRITE_BY_AGENT / NO_PRODUCT_WRITE / NO_PUBLISH / NO_DEPLOY
+**Resultado:** READY_FOR_PABLO_PREFLIGHT_TEST
+
+Preflight de completitud en `/inventory/[id]` antes de crear borrador Woo. Helper puro `studio/lib/preflight/product-preflight.ts` (`evaluateProductPreflight`) que **espeja las reglas de bloqueo del bridge** (`createWcDraftForItem`) + avisos de completitud del listing (gaps del audit); funcion pura sobre datos ya cargados, sin Woo/red/escrituras. Devuelve estado global (`READY_TO_CREATE_DRAFT` / `WARNING_REVIEW_RECOMMENDED` / `BLOCKED_MISSING_REQUIRED_FIELDS`), `groups[]` (6 bloques) y contadores.
+
+**Cambios:** nuevo helper + nuevo `ProductPreflightPanel.tsx` (cliente, bloques colapsables, banner de estado, link Editar item); `page.tsx` calcula preflight y lo renderiza siempre + pasa `preflightStatus`/`blockerMessages` a `WcDraftPanel`; `WcDraftPanel` protege el boton (BLOCKED deshabilita + lista bloqueos; WARNING avisa; READY normal); CSS `.preflight-*` en `globals.css`.
+
+**Quality pass:** `bridge.ts`/`actions.ts`/term-cache/category-cache SIN cambios -> S023B/C/D/E, S024A y categoria intactos; DRAFT_ONLY intacto. Sin SQL, sin schema, sin client Woo write. No inventa terminos, no llama Woo, no depende de remoto vivo.
+
+**Validaciones:** typecheck PASS, build PASS (8/8 rutas, `/inventory/[id]` 5.18 kB), lint PASS (0 issues), `git diff --check` PASS, secret scan CLEAN.
+
+**Confirmaciones:** wc_api_called_by_agent=false, wc_post_products_called_by_agent=false, products_modified_by_agent=false, published=false, supabase_remote_modified_by_agent=false, env_local_modified=false, sql_modified=false.
+
+**Siguiente paso:** Pablo prueba en local (`cd studio && npm run dev`): camiseta incompleta -> blockers + boton deshabilitado; completar campos -> pasa a pass/warning; camiseta lista -> READY y crea un unico borrador; verifica en WP Admin (Borrador, taxonomias/categoria/SEO/precio OK, no publicar). Confirma `PABLO_PREFLIGHT_OK`.
+**agent_events ref:** 2026-07-01T06:00:00Z (S024)

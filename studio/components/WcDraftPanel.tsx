@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { createWcDraft } from '@/app/inventory/[id]/wc-actions'
+import type { PreflightStatus } from '@/lib/preflight/product-preflight'
 
 export function WcDraftPanel({
   itemId,
@@ -10,18 +11,25 @@ export function WcDraftPanel({
   wcStatus,
   wcError,
   precioPubWeb,
+  preflightStatus,
+  blockerMessages,
 }: {
   itemId: string
   wcProductId: number | null
   wcStatus: string
   wcError: string | null
   precioPubWeb: number | null
+  preflightStatus: PreflightStatus
+  blockerMessages: string[]
 }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [result, setResult] = useState<
     { ok: true; wcProductId: number } | { ok: false; error: string } | null
   >(null)
+
+  const isBlocked = preflightStatus === 'BLOCKED_MISSING_REQUIRED_FIELDS'
+  const isWarning = preflightStatus === 'WARNING_REVIEW_RECOMMENDED'
 
   function handleCreate() {
     setResult(null)
@@ -61,7 +69,26 @@ export function WcDraftPanel({
       {/* ── Not yet drafted ───────────────────────────────────── */}
       {wcProductId == null && (
         <div className="wc-draft-pending">
-          {!precioPubWeb && (
+          {/* S024 — preflight-gated: blockers disable the button, warnings only caution. */}
+          {isBlocked && (
+            <div className="wc-draft-warning">
+              <strong>No se puede crear el borrador todavía.</strong> Completa estos bloqueos:
+              <ul className="wc-draft-blocker-list">
+                {blockerMessages.map((m, i) => (
+                  <li key={i}>{m}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {isWarning && (
+            <div className="wc-draft-warning">
+              La preflight tiene avisos. Puedes crear el borrador, pero revisa la sección
+              «Preflight de completitud» de arriba antes de continuar.
+            </div>
+          )}
+
+          {!isBlocked && !precioPubWeb && (
             <div className="wc-draft-warning">
               Falta el precio web (<code>precio_publicado_web</code>). Edita el item para añadirlo antes de crear el borrador.
             </div>
@@ -85,7 +112,7 @@ export function WcDraftPanel({
             <button
               className="btn-primary btn-sm"
               onClick={handleCreate}
-              disabled={isPending}
+              disabled={isPending || isBlocked}
               type="button"
             >
               {isPending ? 'Creando borrador…' : 'Crear borrador en WooCommerce'}

@@ -5,9 +5,11 @@ import { ErrorState } from '@/components/ErrorState'
 import { StatusBadge } from '@/components/StatusBadge'
 import { AiSuggestionsPanel } from '@/components/AiSuggestionsPanel'
 import { ManualSeoPanel } from '@/components/ManualSeoPanel'
+import { ProductPreflightPanel } from '@/components/ProductPreflightPanel'
 import { WcDraftPanel } from '@/components/WcDraftPanel'
 import { buildSuggestionContext } from '@/lib/ai/suggestion-context'
 import { buildManualSeoPrompt } from '@/lib/seo/manual-seo-prompt'
+import { evaluateProductPreflight, type PreflightInput } from '@/lib/preflight/product-preflight'
 import { notFound } from 'next/navigation'
 import type { ItemStatus, PhotoStatus, WcSyncStatus, AiSuggestion, InventoryItemWithDetails } from '@/lib/types'
 
@@ -70,6 +72,45 @@ export default async function InventoryItemPage({
   const manualSeoPromptText = buildManualSeoPrompt(ctx)
 
   const shirt = data.football_shirt_details
+
+  // S024 — completeness preflight. Pure evaluation over already-loaded data (no Woo, no writes).
+  const preflightInput: PreflightInput = {
+    referencia: data.referencia ?? null,
+    wcProductId: data.wc_product_id ?? null,
+    precioPublicadoWeb: data.precio_publicado_web != null ? Number(data.precio_publicado_web) : null,
+    shirt: shirt
+      ? {
+          product_type: shirt.product_type ?? null,
+          talla: shirt.talla ?? null,
+          condicion: shirt.condicion ?? null,
+          condicion_notas: shirt.condicion_notas ?? null,
+          liga: shirt.liga ?? null,
+          liga_display: shirt.liga_display ?? null,
+          equipo: shirt.equipo ?? null,
+          equipo_display: shirt.equipo_display ?? null,
+          temporada: shirt.temporada ?? null,
+          temporada_display: shirt.temporada_display ?? null,
+          jugador: shirt.jugador ?? null,
+          jugador_display: shirt.jugador_display ?? null,
+          marca_display: shirt.marca_display ?? null,
+          categoria: shirt.categoria ?? null,
+          categoria_display: shirt.categoria_display ?? null,
+          ancho_cm: shirt.ancho_cm != null ? Number(shirt.ancho_cm) : null,
+          largo_cm: shirt.largo_cm != null ? Number(shirt.largo_cm) : null,
+        }
+      : null,
+    approvedSeo: approvedSuggestion
+      ? {
+          titulo_seo: approvedSuggestion.titulo_seo,
+          descripcion_larga: approvedSuggestion.descripcion_larga,
+        }
+      : null,
+  }
+  const preflight = evaluateProductPreflight(preflightInput)
+  const preflightBlockers = preflight.groups
+    .flatMap((g) => g.checks)
+    .filter((c) => c.status === 'blocker')
+    .map((c) => c.message)
 
   return (
     <AppShell>
@@ -295,6 +336,8 @@ export default async function InventoryItemPage({
           precioPubWeb={data.precio_publicado_web != null ? Number(data.precio_publicado_web) : null}
         />
 
+        <ProductPreflightPanel result={preflight} editHref={`/inventory/${data.id}/edit`} />
+
         {approvedSuggestion && (
           <WcDraftPanel
             itemId={data.id}
@@ -302,6 +345,8 @@ export default async function InventoryItemPage({
             wcStatus={data.wc_status as string}
             wcError={data.wc_error ?? null}
             precioPubWeb={data.precio_publicado_web ? Number(data.precio_publicado_web) : null}
+            preflightStatus={preflight.status}
+            blockerMessages={preflightBlockers}
           />
         )}
 
