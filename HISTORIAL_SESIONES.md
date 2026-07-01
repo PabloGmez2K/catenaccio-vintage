@@ -2014,3 +2014,25 @@ Replantea S025: en vez de una consola read-only aislada (S025A), reconvierte `/i
 
 Pablo valido `PABLO_BACKOFFICE_V0_OK`: `/inventory` ya se percibe util como backoffice y permite operar inventario mejor que la consola read-only previa. Quedan validados filtros, estado de canal web, acciones por fila y archive/restore local. Sigue faltando mucho desarrollo, por lo que el siguiente paso es revision de backlog/MVP. No se abre S026 imagenes todavia.
 **agent_events ref:** 2026-07-01T10:00:00Z (S025.CLOSE)
+
+---
+
+## Sesion STUDIO_MVP_BACKLOG_REVIEW
+
+**Fecha:** 2026-07-01
+**Agente:** Claude Code (Opus 4.8)
+**Modo:** STRATEGIC_REQUIRED / BACKLOG_REVIEW / NO_CODE / NO_WC_WRITE / NO_SUPABASE_WRITE / NO_DEPLOY
+**Resultado:** APPROVE_COMPRESS_S025_GO_IMAGES_NEXT
+
+Revision de backlog y definicion de MVP util tras backoffice v0. Hallazgo central: el happy path de Studio esta ~90% construido y validado (el borrador Woo ya lleva datos + taxonomias reales + categoria + SEO + precio + stock, DRAFT_ONLY idempotente); **la unica capacidad que falta en cada camiseta son las imagenes**; publicar sigue manual en WP Admin (OK para MVP, DEC-A9).
+
+**Refinamiento del reorder S025:** el reorder del mismo dia puso 6 bloques de operaciones (S025A-F) por delante de imagenes. Backoffice v0 ya absorbio S025A+B, y como Studio prepara todo antes de crear el borrador las imagenes se adjuntan en el create -> no requieren S025D (PUT) ni drift vivo para el happy path. Correr S025C-F antes de imagenes es el desvio de microtareas que RULE-01/GATE_STUDIO_MVP advierte evitar. Decision: comprimir.
+
+**MVP util:** borrador completo con fotos desde Studio + publish manual de un clic, medido vs ~45 min sobre 5-10 camisetas (GATE_STUDIO_MVP). Solo faltan imagenes + deploy.
+
+**Roadmap recomendado (4 al gate + 3 fast-follow):** (1) S026A local->Supabase Storage; (2) S026B WP Media + attach en create (SHADOW_FIRST); (3) STUDIO_VERCEL_DEPLOY_MINIMAL; (4) GATE_STUDIO_MVP E2E real. Fast-follow post-gate: (5) S025D edit/resync, (6) S025C cleanup drafts, (7) S025E field audit / S025F Vinted export.
+
+**Primer prompt implementable:** S026A IMAGE_PIPELINE_LOCAL_TO_STORAGE (Sonnet, local, sin WP write). Pre-req Pablo: crear bucket Supabase Storage + RLS (manual, patron S020D).
+
+**Cambios en tracking:** creado `docs/studio/STUDIO_MVP_BACKLOG_REVIEW.md` (97 lineas); BACKLOG actualizado (S025 comprimida, S026 imagenes = siguiente bloque, DEPLOY promovido a MVP critico, S025C/D/E/F -> fast-follow). No se toco codigo, Woo, WP Admin, Supabase, .env.local ni deploy. Pendiente nod de Pablo al cambio de prioridad.
+**agent_events ref:** 2026-07-01T11:00:00Z (STUDIO_MVP_BACKLOG_REVIEW)
