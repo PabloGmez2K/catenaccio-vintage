@@ -7,13 +7,17 @@ type ControlledTaxonomySlug = 'pa_liga' | 'pa_equipo' | 'pa_ano' | 'pa_jugador'
 
 // Explicit, single-purpose action: creates (or detects) one WC term for the
 // label currently typed in the field above it. Never fires on its own —
-// only on click. Independent of saving the item.
+// only on click. Independent of saving the item. On success it reports the
+// resolved term back via onCreated so the field can flip to "exists" without a
+// refresh (S024A) — the cache is also persisted server-side by the action.
 export function TermCreateButton({
   taxonomySlug,
   label,
+  onCreated,
 }: {
   taxonomySlug: ControlledTaxonomySlug
   label: string
+  onCreated?: (term: { id: number; name: string; slug: string; created: boolean }) => void
 }) {
   const [isPending, startTransition] = useTransition()
   const [result, setResult] = useState<
@@ -26,11 +30,12 @@ export function TermCreateButton({
     setResult(null)
     startTransition(async () => {
       const res = await createTermAction(taxonomySlug, label)
-      setResult(
-        res.ok
-          ? { ok: true, created: res.created, termId: res.termId }
-          : { ok: false, error: res.error }
-      )
+      if (res.ok) {
+        setResult({ ok: true, created: res.created, termId: res.termId })
+        onCreated?.({ id: Number(res.termId), name: res.name, slug: res.slug, created: res.created })
+      } else {
+        setResult({ ok: false, error: res.error })
+      }
     })
   }
 

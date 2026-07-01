@@ -1260,6 +1260,24 @@ body {
   color: #991b1b;
 }
 
+/* S024A — per-field taxonomy status (exists in Woo / new term / no cache) */
+.term-status {
+  font-size: 12px;
+  margin: 4px 0 0;
+}
+
+.term-status-exists {
+  color: #065f46;
+}
+
+.term-status-missing {
+  color: #92400e;
+}
+
+.term-status-unknown {
+  color: var(--color-text-muted);
+}
+
 .manual-seo-submit-row .btn-primary.btn-sm,
 .manual-seo-submit-row .btn-secondary.btn-sm {
   margin-left: 0;

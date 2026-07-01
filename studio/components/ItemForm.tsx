@@ -3,7 +3,8 @@
 import { useState, useMemo, useEffect, useActionState } from 'react'
 import Link from 'next/link'
 import { buildTitle } from '@/lib/title-builder'
-import { TermCreateButton } from '@/components/TermCreateButton'
+import { TaxonomyTermField } from '@/components/TaxonomyTermField'
+import type { TermFormOption, TermOptionsBySlug } from '@/lib/wc/term-options'
 import {
   ligaOptions,
   equipoOptions,
@@ -63,6 +64,9 @@ interface CategoryOption {
   name: string
 }
 
+// The four creatable taxonomies whose inputs are standardized in S024A.
+type FieldTaxonomySlug = 'pa_liga' | 'pa_equipo' | 'pa_ano' | 'pa_jugador'
+
 interface ItemFormProps {
   mode?: 'create' | 'edit'
   itemId?: string
@@ -71,6 +75,8 @@ interface ItemFormProps {
   categoryOptions?: CategoryOption[]
   // Heuristic recommendation names resolved server-side from the cache (Otros Clubs / Selecciones).
   recommendedCategoryNames?: { withLiga: string | null; withoutLiga: string | null }
+  // Cache-backed term suggestions per taxonomy (S024A). Empty per slug if unsynced.
+  termOptions?: TermOptionsBySlug
 }
 
 function FieldError({ msg }: { msg?: string }) {
@@ -84,6 +90,7 @@ export function ItemForm({
   defaultValues = {},
   categoryOptions = [],
   recommendedCategoryNames,
+  termOptions = {},
 }: ItemFormProps) {
   const serverAction = mode === 'edit' ? updateInventoryItem : createInventoryItem
   const [state, formAction, isPending] = useActionState<ActionState, FormData>(
@@ -92,6 +99,30 @@ export function ItemForm({
   )
 
   const fe = state.fieldErrors ?? {}
+
+  // ── Cache-backed term suggestions (S024A) ────────────────────────────────
+  // Held in state so a term created via "Crear término en Woo" appears as an
+  // existing suggestion immediately, without a page refresh. The server action
+  // also persists it to wc_terms, so it survives the next load.
+  const [terms, setTerms] = useState<Record<FieldTaxonomySlug, TermFormOption[]>>(() => ({
+    pa_liga: termOptions.pa_liga ?? [],
+    pa_equipo: termOptions.pa_equipo ?? [],
+    pa_ano: termOptions.pa_ano ?? [],
+    pa_jugador: termOptions.pa_jugador ?? [],
+  }))
+
+  function handleTermCreated(term: TermFormOption) {
+    setTerms((prev) => {
+      const list = prev[term.taxonomySlug as FieldTaxonomySlug]
+      if (list.some((o) => o.id === term.id)) return prev
+      return {
+        ...prev,
+        [term.taxonomySlug]: [...list, term].sort((a, b) =>
+          a.name.localeCompare(b.name, 'es', { sensitivity: 'base' })
+        ),
+      }
+    })
+  }
 
   // ── Controlled form state ────────────────────────────────────────────────
 
@@ -251,80 +282,55 @@ export function ItemForm({
         <section className="form-section">
           <h3>Identificación y catálogo</h3>
 
-          <div className="form-field">
-            <label htmlFor="liga_display">Liga</label>
-            <input
-              id="liga_display"
-              name="liga_display"
-              type="text"
-              list="liga-list"
-              value={ligaDisplay}
-              onChange={(e) => setLigaDisplay(e.target.value)}
-              placeholder="LaLiga, Premier League, Sin liga / Selección nacional…"
-              autoComplete="off"
-            />
-            <datalist id="liga-list">
-              {ligaOptions.map((o) => (
-                <option key={o.label} value={o.label} />
-              ))}
-            </datalist>
-            <p className="field-help">
-              Para selecciones nacionales, usa Liga = Sin liga / Selección nacional y Equipo = España, Francia, Brasil, Argentina…
-            </p>
-            <p className="field-help">
-              Si no aparece en la lista, puedes escribirlo. Studio lo guardará como pendiente de mapeo para Woo.
-            </p>
-            <TermCreateButton taxonomySlug="pa_liga" label={ligaDisplay} />
-          </div>
+          <TaxonomyTermField
+            id="liga_display"
+            name="liga_display"
+            label="Liga"
+            placeholder="LaLiga, Premier League, Sin liga / Selección nacional…"
+            value={ligaDisplay}
+            onChange={setLigaDisplay}
+            taxonomySlug="pa_liga"
+            options={terms.pa_liga}
+            fallbackLabels={ligaOptions.map((o) => o.label)}
+            helpTexts={[
+              'Para selecciones nacionales, usa Liga = Sin liga / Selección nacional y Equipo = España, Francia, Brasil, Argentina…',
+              'Si no aparece en la lista, puedes escribirlo. Studio lo guardará como pendiente de mapeo para Woo.',
+            ]}
+            onTermCreated={handleTermCreated}
+          />
 
-          <div className={`form-field ${fe.equipo_display ? 'has-error' : ''}`}>
-            <label htmlFor="equipo_display">
-              Equipo <span className="required">*</span>
-            </label>
-            <input
-              id="equipo_display"
-              name="equipo_display"
-              type="text"
-              list="equipo-list"
-              value={equipoDisplay}
-              onChange={(e) => setEquipoDisplay(e.target.value)}
-              placeholder="FC Barcelona, Real Madrid, Ajax…"
-              autoComplete="off"
-            />
-            <datalist id="equipo-list">
-              {equipoOptions.map((o) => (
-                <option key={o.label} value={o.label} />
-              ))}
-            </datalist>
-            <FieldError msg={fe.equipo_display} />
-            <p className="field-help">
-              Si no aparece en la lista, puedes escribirlo. Studio lo guardará como pendiente de mapeo para Woo.
-            </p>
-            <TermCreateButton taxonomySlug="pa_equipo" label={equipoDisplay} />
-          </div>
+          <TaxonomyTermField
+            id="equipo_display"
+            name="equipo_display"
+            label="Equipo"
+            required
+            placeholder="FC Barcelona, Real Madrid, Ajax…"
+            value={equipoDisplay}
+            onChange={setEquipoDisplay}
+            taxonomySlug="pa_equipo"
+            options={terms.pa_equipo}
+            fallbackLabels={equipoOptions.map((o) => o.label)}
+            error={fe.equipo_display}
+            helpTexts={[
+              'Si no aparece en la lista, puedes escribirlo. Studio lo guardará como pendiente de mapeo para Woo.',
+            ]}
+            onTermCreated={handleTermCreated}
+          />
 
-          <div className={`form-field ${fe.temporada_display ? 'has-error' : ''}`}>
-            <label htmlFor="temporada_display">
-              Temporada <span className="required">*</span>
-            </label>
-            <input
-              id="temporada_display"
-              name="temporada_display"
-              type="text"
-              list="temporada-list"
-              value={temporadaDisplay}
-              onChange={(e) => setTemporadaDisplay(e.target.value)}
-              placeholder="2001-02, 2014-15…"
-              autoComplete="off"
-            />
-            <datalist id="temporada-list">
-              {temporadaOptions.map((o) => (
-                <option key={o.label} value={o.label} />
-              ))}
-            </datalist>
-            <FieldError msg={fe.temporada_display} />
-            <TermCreateButton taxonomySlug="pa_ano" label={temporadaDisplay} />
-          </div>
+          <TaxonomyTermField
+            id="temporada_display"
+            name="temporada_display"
+            label="Temporada"
+            required
+            placeholder="2001-02, 2014-15…"
+            value={temporadaDisplay}
+            onChange={setTemporadaDisplay}
+            taxonomySlug="pa_ano"
+            options={terms.pa_ano}
+            fallbackLabels={temporadaOptions.map((o) => o.label)}
+            error={fe.temporada_display}
+            onTermCreated={handleTermCreated}
+          />
 
           <div className="form-row">
             <div className="form-field">
@@ -548,18 +554,17 @@ export function ItemForm({
           <h3>Personalización y detalles vintage</h3>
 
           <div className="form-row">
-            <div className="form-field">
-              <label htmlFor="jugador_display">Jugador</label>
-              <input
-                id="jugador_display"
-                name="jugador_display"
-                type="text"
-                value={jugadorDisplay}
-                onChange={(e) => setJugadorDisplay(e.target.value)}
-                placeholder="Raúl, Zidane, Henry…"
-              />
-              <TermCreateButton taxonomySlug="pa_jugador" label={jugadorDisplay} />
-            </div>
+            <TaxonomyTermField
+              id="jugador_display"
+              name="jugador_display"
+              label="Jugador"
+              placeholder="Raúl, Zidane, Henry…"
+              value={jugadorDisplay}
+              onChange={setJugadorDisplay}
+              taxonomySlug="pa_jugador"
+              options={terms.pa_jugador}
+              onTermCreated={handleTermCreated}
+            />
             <div className="form-field">
               <label htmlFor="numero_dorsal">Número dorsal</label>
               <input

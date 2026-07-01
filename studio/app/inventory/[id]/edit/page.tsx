@@ -4,6 +4,7 @@ import { AppShell } from '@/components/AppShell'
 import { ErrorState } from '@/components/ErrorState'
 import { ItemForm, type ItemFormDefaults } from '@/components/ItemForm'
 import { getCategorySelectorData } from '@/lib/wc/category-cache'
+import { loadTermOptions } from '@/lib/wc/term-options'
 
 export default async function EditItemPage({
   params,
@@ -43,7 +44,10 @@ export default async function EditItemPage({
 
   const shirt = data.football_shirt_details
 
-  const { options: categoryOptions, recommendedNames } = await getCategorySelectorData(supabase)
+  const [{ options: categoryOptions, recommendedNames }, termOptions] = await Promise.all([
+    getCategorySelectorData(supabase),
+    loadTermOptions(supabase, ['pa_liga', 'pa_equipo', 'pa_ano', 'pa_jugador']),
+  ])
 
   const defaultValues: ItemFormDefaults = {
     referencia: data.referencia ?? '',
@@ -87,6 +91,7 @@ export default async function EditItemPage({
         defaultValues={defaultValues}
         categoryOptions={categoryOptions}
         recommendedCategoryNames={recommendedNames}
+        termOptions={termOptions}
       />
     </AppShell>
   )

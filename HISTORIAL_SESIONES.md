@@ -1877,3 +1877,32 @@ y verifica en WP Admin categoria + primary cat + sin regresion. Si PASS: cierre 
 **Resultado:** APPROVE_S023_COMPLETE
 
 Pablo valido manualmente S023E: SQL aditivo aplicado, selector de categoria WooCommerce OK, categoria + Rank Math primary category OK, sin regresion en Liga/Equipo/Ano/Jugador, producto no publicado y `Ronaldinho` creado correctamente como jugador en Woo desde Studio. Se cerro S023E y la fase S023; S024 queda como siguiente bloque recomendado, no abierto. No se toco codigo, WooCommerce, Supabase remoto, WP Admin, productos, terminos, categorias, deploy ni SQL por agente.
+
+---
+
+## Sesion S024A — TAXONOMY_INPUT_STANDARDIZATION
+
+**Fecha:** 2026-07-01
+**Agente:** Claude Code (Opus 4.8)
+**Modo:** ASK_TO_CODE / TAXONOMY_UX_STANDARDIZATION / NO_WC_WRITE_BY_AGENT / NO_PUBLISH / NO_DEPLOY
+**Resultado:** READY_FOR_PABLO_TAXONOMY_UX_TEST
+
+Estandarizados los 4 campos de taxonomia creable (Liga/Equipo/Ano/Jugador) en el formulario de subida. **Raiz del problema:** el campo Jugador no tenia `<datalist>` (solo el autocompletado de historial del navegador -> de ahi "solo Rivaldo"), y Liga/Equipo/Ano usaban listas estaticas de `wc-terms-mvp.ts`, no la cache real. La cache `wc_terms` (S023A) ya contenia los terminos (pa_jugador=18, incl. Rivaldo y Ronaldinho); el desajuste era de UI, no de datos.
+
+**Cambios:**
+- Nuevo `studio/lib/wc/term-options.ts`: `loadTermOptions` (server) convierte `wc_terms` cacheados en opciones por taxonomia; `matchTermOption` resuelve un valor escrito a una opcion cacheada (exact name/slug, case-insensitive). No inventa IDs, no llama Woo.
+- Nuevo componente reutilizable `studio/components/TaxonomyTermField.tsx`: datalist desde cache; estado visible (Existe en Woo · ID / Nuevo termino / Sin cache); boton "Crear termino en Woo" solo cuando el termino no existe y hay texto suficiente; entrada manual siempre libre; fallback a lista estatica solo si la cache esta vacia.
+- `TermCreateButton`: añadido callback opcional `onCreated` -> el campo pasa a "existe" sin refresh (la action ya hace write-through a `wc_terms`).
+- `ItemForm`: prop `termOptions`, estado local de terminos, render de los 4 campos via `TaxonomyTermField`. Pages `new`/`edit` cargan opciones server-side (`Promise.all`).
+- CSS: clases `.term-status*`.
+
+**Quality pass:** `actions.ts` (resolucion/guardado), `bridge.ts`, `term-cache.ts`, `term-create.ts` y `wc-terms-mvp.ts` SIN cambios -> S023B/C/D/E y categoria intactos, DRAFT_ONLY intacto. Boton crear oculto si el valor ya existe; visible si falta. Opciones desde `wc_terms`, sin IDs inventados.
+
+**Validaciones:** typecheck PASS, build PASS (8/8 rutas), lint PASS (0 issues), `git diff --check` PASS, secret scan CLEAN, JSONL parseable.
+
+**Confirmaciones:** wc_api_called_by_agent=false, wc_post_terms_called_by_agent=false, wc_post_products_called_by_agent=false, terms_created_by_agent=false, products_modified_by_agent=false, published=false, supabase_remote_modified_by_agent=false, env_local_modified=false, sql_applied_by_agent=false.
+
+**Diferido (FUTURE):** `FUTURE_TAXONOMY_SMART_SUGGESTIONS` (grafo Liga->Equipo->Temporada->Jugador, filtros contextuales), universe manager — no implementados.
+
+**Siguiente paso:** Pablo prueba en local (`cd studio && npm run dev`): sugerencias desde cache, estado existe/nuevo, crear termino solo cuando falta, sin regresion. Confirma `PABLO_TAXONOMY_UX_OK` antes de abrir S024.
+**agent_events ref:** 2026-07-01T04:00:00Z (S024A)
