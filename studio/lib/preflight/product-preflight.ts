@@ -83,6 +83,8 @@ export interface PreflightInput {
   approvedSeo: PreflightSeoInput | null
   /** S026A — count of images uploaded to Supabase Storage for this item. */
   imageCount: number
+  /** S026B — whether Woo draft create currently attaches Studio images (shadow-first flag). */
+  attachImagesEnabled: boolean
 }
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -269,14 +271,23 @@ export function evaluateProductPreflight(input: PreflightInput): ProductPrefligh
     groups.push(makeGroup('estado_fisico', 'Estado físico y medidas', fisChecks))
   }
 
-  // ── Imágenes (S026A) ──────────────────────────────────────────────────────
-  // Advisory only: images live in Supabase Storage but are not yet attached to
-  // the Woo draft (S026B). Missing images never block draft creation today.
+  // ── Imágenes (S026A/B) ─────────────────────────────────────────────────────
+  // Advisory only: missing images never block draft creation. When the S026B
+  // attach flag is on, the warning is more specific since the draft really will
+  // publish with no gallery instead of just needing manual WP Admin upload.
   const imgChecks: PreflightCheck[] = []
   imgChecks.push(
     input.imageCount > 0
       ? { id: 'imagenes', label: 'Fotos', status: 'pass', message: `${input.imageCount} foto(s) subida(s).` }
-      : { id: 'imagenes', label: 'Fotos', status: 'warning', message: 'Sin fotos subidas.', fixHint: 'Sube al menos una foto en el panel "Fotos" de la ficha.' }
+      : {
+          id: 'imagenes',
+          label: 'Fotos',
+          status: 'warning',
+          message: input.attachImagesEnabled
+            ? 'Sin fotos subidas. El borrador se puede crear, pero saldrá sin imágenes.'
+            : 'Sin fotos subidas.',
+          fixHint: 'Sube al menos una foto en el panel "Fotos" de la ficha.',
+        }
   )
   groups.push(makeGroup('imagenes', 'Imágenes', imgChecks))
 

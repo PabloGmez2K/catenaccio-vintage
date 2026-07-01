@@ -13,6 +13,8 @@ export function WcDraftPanel({
   precioPubWeb,
   preflightStatus,
   blockerMessages,
+  imageCount,
+  attachImagesEnabled,
 }: {
   itemId: string
   wcProductId: number | null
@@ -21,11 +23,15 @@ export function WcDraftPanel({
   precioPubWeb: number | null
   preflightStatus: PreflightStatus
   blockerMessages: string[]
+  imageCount: number
+  attachImagesEnabled: boolean
 }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [result, setResult] = useState<
-    { ok: true; wcProductId: number } | { ok: false; error: string } | null
+    | { ok: true; wcProductId: number; imagesAttached?: { attached: number; total: number } }
+    | { ok: false; error: string }
+    | null
   >(null)
 
   const isBlocked = preflightStatus === 'BLOCKED_MISSING_REQUIRED_FIELDS'
@@ -36,7 +42,7 @@ export function WcDraftPanel({
     startTransition(async () => {
       const res = await createWcDraft(itemId)
       if (res.ok) {
-        setResult({ ok: true, wcProductId: res.wcProductId })
+        setResult({ ok: true, wcProductId: res.wcProductId, imagesAttached: res.imagesAttached })
         router.refresh()
       } else {
         setResult({ ok: false, error: res.error })
@@ -94,6 +100,17 @@ export function WcDraftPanel({
             </div>
           )}
 
+          {/* S026B — Studio images / attach status, shadow-first */}
+          {!result && (
+            <p className="wc-draft-hint">
+              {imageCount === 0
+                ? 'Sin imágenes en Studio todavía.'
+                : attachImagesEnabled
+                  ? `${imageCount} imagen(es) lista(s) en Studio — se adjuntarán al crear el borrador.`
+                  : `${imageCount} imagen(es) lista(s) en Studio — adjuntar imágenes está desactivado (shadow, STUDIO_WC_ATTACH_IMAGES_ENABLED).`}
+            </p>
+          )}
+
           {wcStatus === 'error_sync' && wcError && !result && (
             <div className="wc-draft-error">Último intento falló: {wcError}</div>
           )}
@@ -105,6 +122,13 @@ export function WcDraftPanel({
           {result && result.ok && (
             <div className="wc-draft-ok">
               Borrador creado en WooCommerce: ID {result.wcProductId}
+              {result.imagesAttached && (
+                <div>
+                  {result.imagesAttached.attached === result.imagesAttached.total
+                    ? ` — Imágenes adjuntadas: ${result.imagesAttached.attached}/${result.imagesAttached.total}`
+                    : ` — Aviso: solo se pudieron mapear ${result.imagesAttached.attached}/${result.imagesAttached.total} imágenes (el borrador se creó igualmente).`}
+                </div>
+              )}
             </div>
           )}
 

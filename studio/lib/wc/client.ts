@@ -13,6 +13,8 @@ export type WcProductPayload = {
   stock_quantity?: number | null
   categories?: Array<{ id: number }>
   attributes?: Array<{ id: number; name?: string; options: string[]; visible: boolean; variation: boolean }>
+  // S026B — sideload from public URLs (Supabase Storage). Gated by STUDIO_WC_ATTACH_IMAGES_ENABLED.
+  images?: Array<{ src: string; position?: number; name?: string }>
   // value is string for most fields; string[] for ACF multi-value fields (e.g. ano_temporada)
   meta_data: Array<{ key: string; value: string | string[] }>
 }
@@ -22,6 +24,7 @@ export type WcProductResponse = {
   name: string
   status: string
   permalink: string
+  images?: Array<{ id: number; src?: string; position?: number }>
 }
 
 export type WcApiResult =

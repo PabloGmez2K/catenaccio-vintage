@@ -7,9 +7,10 @@ import { createClient } from '@/lib/supabase/server'
 import { createWcDraftProduct } from './client'
 import { loadCachedTerms, matchCachedTermLabel } from './term-cache'
 import { resolveCategoryId } from './category-cache'
+import { isWcImageAttachEnabled, loadItemImagesForBridge } from '@/lib/media/item-images'
 import type { WcProductPayload } from './client'
 
-const BRIDGE_VERSION = 'v2.1'
+const BRIDGE_VERSION = 'v2.2'
 
 // ACF field reference keys — static values from the ACF field group config.
 // Each custom field value must be accompanied by its _fieldname key so that
@@ -42,7 +43,7 @@ const WC_ATTRIBUTE_IDS = {
 } as const
 
 export type BridgeResult =
-  | { ok: true; wcProductId: number }
+  | { ok: true; wcProductId: number; imagesAttached?: { attached: number; total: number } }
   | { ok: false; error: string; code: string }
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -297,6 +298,10 @@ export async function createWcDraftForItem(itemId: string): Promise<BridgeResult
     return { ok: false, code: 'workspace_not_found', error: 'Workspace no encontrado.' }
   }
 
+  // ── 7b. Studio images (S026B — gated by STUDIO_WC_ATTACH_IMAGES_ENABLED) ──
+  const imagesAttachEnabled = isWcImageAttachEnabled()
+  const studioImages = await loadItemImagesForBridge(supabase, itemId)
+
   // ── 8. Build WC payload ───────────────────────────────────────────────────
   const descriptionText = suggestion.descripcion_larga.trim()
 
@@ -333,6 +338,15 @@ export async function createWcDraftForItem(itemId: string): Promise<BridgeResult
     stock_quantity: 1,
     categories: [{ id: categoryId }],
     attributes,
+    ...(imagesAttachEnabled && studioImages.length > 0
+      ? {
+          images: studioImages.map((img, index) => ({
+            src: img.publicUrl,
+            position: index,
+            name: img.filename,
+          })),
+        }
+      : {}),
     meta_data: [
       { key: 'liga', value: ligaValue },
       { key: '_liga', value: ACF_KEYS.liga },
@@ -376,6 +390,8 @@ export async function createWcDraftForItem(itemId: string): Promise<BridgeResult
       attributes: payload.attributes,
       meta_data: payload.meta_data,
     },
+    images_attach_enabled: imagesAttachEnabled,
+    images_included: payload.images?.length ?? 0,
     bridge_version: BRIDGE_VERSION,
   }
 
@@ -424,6 +440,35 @@ export async function createWcDraftForItem(itemId: string): Promise<BridgeResult
       }
     }
 
+    // ── 10b. Persist wc_media_id (best-effort — never reverts the draft) ─────
+    // Only meaningful when the flag was on and we actually sent images. WC returns
+    // images in the same order we sent them (position 0..n-1), so index-mapping is
+    // safe as long as the counts match; if they don't, skip mapping rather than guess.
+    let imagesAttached: { attached: number; total: number } | undefined
+    if (imagesAttachEnabled && studioImages.length > 0) {
+      const total = studioImages.length
+      const responseImages = wcProduct.images ?? []
+      if (responseImages.length === total) {
+        let attached = 0
+        for (let i = 0; i < studioImages.length; i++) {
+          const wcImageId = responseImages[i]?.id
+          if (!wcImageId) continue
+          const { error: mediaUpdateError } = await supabase
+            .from('media_assets')
+            .update({ wc_media_id: wcImageId, upload_status: 'wc_assigned' })
+            .eq('id', studioImages[i].id)
+          if (!mediaUpdateError) attached++
+          else console.warn(`[bridge] wc_media_id persist failed for media ${studioImages[i].id}: ${mediaUpdateError.message}`)
+        }
+        imagesAttached = { attached, total }
+      } else {
+        imagesAttached = { attached: 0, total }
+        console.warn(
+          `[bridge] image count mismatch for item ${itemId}: sent ${total}, WC returned ${responseImages.length} — wc_media_id not mapped`
+        )
+      }
+    }
+
     // Lifecycle event: best-effort. If it fails, log but don't block — inventory is already saved.
     const { error: lifecycleError } = await supabase.from('item_lifecycle_events').insert({
       item_id: itemId,
@@ -449,7 +494,7 @@ export async function createWcDraftForItem(itemId: string): Promise<BridgeResult
       )
     }
 
-    return { ok: true, wcProductId: wcProduct.id }
+    return { ok: true, wcProductId: wcProduct.id, imagesAttached }
   }
 
   // ── 11. Error path ────────────────────────────────────────────────────────

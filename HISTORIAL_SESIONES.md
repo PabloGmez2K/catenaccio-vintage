@@ -2072,3 +2072,17 @@ Revision de backlog y definicion de MVP util tras backoffice v0. Hallazgo centra
 
 Pablo confirmo `PABLO_IMAGE_STORAGE_FINAL_OK` sobre HEAD `8d00860` (fix body-limit de Server Actions + vuelta de UX/optimizacion): upload de imagenes funcionando sin el error de 1 MB, subida directa Browser -> Supabase Storage validada, metadata ligera en `media_assets` validada, drag & drop de subida y de reordenacion validados, autosave/feedback de estado visual validado, principal = primera imagen validado, reordenacion y eliminacion validadas, optimizacion WebP validada, preflight "Imagenes" validado (sin fotos = warning, con fotos = pass). No se toco Woo/WordPress, no se publico nada. S026A queda `DONE / APPROVE_READY_FOR_S026B`. S026B no se abre en esta sesion.
 **agent_events ref:** 2026-07-01T13:00:00Z (S026A.CLOSE)
+
+---
+
+## Sesion S026B - WP_MEDIA_ATTACH_ON_DRAFT_CREATE
+
+**Fecha:** 2026-07-01
+**Agente:** Claude Code (Sonnet 5)
+**Modo:** ASK_TO_CODE / SHADOW_FIRST / LOCAL_CODE / WP_MEDIA_ATTACH / WOO_DRAFT_ONLY / NO_PUBLISH / NO_DEPLOY
+**Resultado:** READY_FOR_PABLO_WP_MEDIA_ATTACH_SHADOW_TEST
+
+ASK: Woo REST acepta sideload de imagenes por URL publica (`images:[{src,position}]`) en el mismo `POST /wc/v3/products` ya existente -> elegida Opcion A (sin endpoint WP Media propio). Implementado: nuevo `studio/lib/media/item-images.ts` (lee `media_assets` ordenadas por `sort_order`, filtra por `public_url`, expone el gate `isWcImageAttachEnabled()`); `bridge.ts` (`v2.2`) incluye `images[]` en el payload solo si `STUDIO_WC_ATTACH_IMAGES_ENABLED==='true'` (SHADOW_FIRST, default OFF, mismo patron que `STUDIO_AI_ENABLED`, sin tocar `.env.local`); tras 201, mapea `response.images[]` por indice hacia `media_assets.wc_media_id`/`upload_status='wc_assigned'` (best-effort, nunca revierte el draft si el conteo no cuadra). `WcDraftPanel` muestra cuantas fotos hay listas, si el attach esta ON/OFF, y tras crear el borrador el resultado "Imagenes adjuntadas: N/N". Preflight (`product-preflight.ts`) sin cambio de severidad — solo mensaje mas claro con 0 fotos y flag ON. Idempotencia intacta (STOP antes de tocar imagenes si `wc_product_id` ya existe). typecheck/build (8/8)/lint PASS, git diff --check PASS, secret scan CLEAN. Sin SQL, sin `.env.local`, sin llamada real a Woo por el agente, sin PUT/DELETE, sin publish. Ver `docs/studio/STUDIO_WP_MEDIA_ATTACH_RESULT.md`.
+
+**Siguiente paso:** Pablo habilita `STUDIO_WC_ATTACH_IMAGES_ENABLED=true` localmente en `.env.local`, corre `cd studio && npm run dev`, crea un borrador real con 2-4 imagenes y confirma en WP Admin que el producto queda en Borrador con imagenes adjuntas y sin publicar, y en Studio que `media_assets.wc_media_id`/`upload_status` se actualizan. S026B no se cierra en esta sesion.
+**agent_events ref:** 2026-07-01T14:00:00Z (S026B)

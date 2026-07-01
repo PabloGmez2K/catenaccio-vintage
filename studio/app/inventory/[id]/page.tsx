@@ -55,6 +55,9 @@ export default async function InventoryItemPage({
   // Default off: cost-deferred until AI integration is explicitly activated.
   const aiEnabled = process.env.STUDIO_AI_ENABLED === 'true'
 
+  // S026B — Woo image attach flag (shadow-first, default off). Never set in .env.local by the agent.
+  const attachImagesEnabled = process.env.STUDIO_WC_ATTACH_IMAGES_ENABLED === 'true'
+
   // Always load suggestions (needed for ManualSeoPanel regardless of aiEnabled).
   const { data: suggestionsData } = await supabase
     .from('ai_suggestions')
@@ -111,6 +114,7 @@ export default async function InventoryItemPage({
         }
       : null,
     imageCount: images.length,
+    attachImagesEnabled,
   }
   const preflight = evaluateProductPreflight(preflightInput)
   const preflightBlockers = preflight.groups
@@ -355,6 +359,8 @@ export default async function InventoryItemPage({
             precioPubWeb={data.precio_publicado_web ? Number(data.precio_publicado_web) : null}
             preflightStatus={preflight.status}
             blockerMessages={preflightBlockers}
+            imageCount={images.length}
+            attachImagesEnabled={attachImagesEnabled}
           />
         )}
 
