@@ -1940,3 +1940,15 @@ Preflight de completitud en `/inventory/[id]` antes de crear borrador Woo. Helpe
 
 **Siguiente paso:** Pablo prueba en local (`cd studio && npm run dev`): camiseta incompleta -> blockers + boton deshabilitado; completar campos -> pasa a pass/warning; camiseta lista -> READY y crea un unico borrador; verifica en WP Admin (Borrador, taxonomias/categoria/SEO/precio OK, no publicar). Confirma `PABLO_PREFLIGHT_OK`.
 **agent_events ref:** 2026-07-01T06:00:00Z (S024)
+
+---
+
+## Sesion S024.CLOSE - S024_PREFLIGHT_CLOSE_LITE
+
+**Fecha:** 2026-07-01
+**Agente:** Codex
+**Modo:** DOCS_ONLY / LITE_CLOSE / NO_CODE / NO_WC_CALL / NO_SUPABASE_CHANGE / NO_DEPLOY
+**Resultado:** APPROVE_READY_FOR_S025
+
+Pablo valido `PABLO_PREFLIGHT_OK`: caso incompleto con blockers correctos; SEO/precio bloquea crear borrador; medidas quedan como warning; caso listo/ya con borrador muestra READY, 0 bloqueos y 0 avisos. Nota de idempotencia visible y borrador existente ID 1861 visible. No se publico producto, no se reporto regresion S023B/C/D/E/S024A y S025 queda como siguiente bloque recomendado, no abierto.
+**agent_events ref:** 2026-07-01T07:00:00Z (S024.CLOSE)

@@ -5,7 +5,7 @@
 **Sesión:** S024 — COMPLETENESS / PREFLIGHT
 **Modo:** ASK→CODE / LOCAL_CODE / NO_WC_WRITE_BY_AGENT / NO_PRODUCT_WRITE / NO_PUBLISH / NO_DEPLOY
 **Agente:** Claude Code (Opus 4.8)
-**Veredicto:** `READY_FOR_PABLO_PREFLIGHT_TEST`
+**Veredicto:** `APPROVE_READY_FOR_S025`
 
 ---
 
@@ -66,6 +66,12 @@ aprobada + precio) → cero llamadas nuevas, cero remoto vivo, cero Woo.
 typecheck PASS · build PASS (8/8 rutas, `/inventory/[id]` 5.18 kB) · lint PASS (0 issues) ·
 `git diff --check` PASS · secret scan CLEAN.
 
+## Validacion manual de Pablo
+
+Pablo confirma `PABLO_PREFLIGHT_OK`: caso incompleto validado con blockers correctos; SEO/precio bloquea la creacion de borrador y medidas queda como warning, no blocker.
+Caso listo/ya con borrador validado: READY, 0 bloqueos, 0 avisos; la nota de idempotencia aparece visible cuando ya existe borrador Woo.
+Borrador existente ID 1861 visible. No se publico producto y no se reporta regresion S023B/C/D/E/S024A.
+
 ## Confirmaciones
 
 `wc_api_called_by_agent=false` · `wc_post_products_called_by_agent=false` ·
@@ -83,4 +89,4 @@ typecheck PASS · build PASS (8/8 rutas, `/inventory/[id]` 5.18 kB) · lint PASS
 
 ## Siguiente paso
 
-Pablo valida `PABLO_PREFLIGHT_OK`. Si PASS: cerrar S024 (LITE) y evaluar S025 (imágenes).
+S025 (imagenes) queda como siguiente bloque recomendado, no abierto.
