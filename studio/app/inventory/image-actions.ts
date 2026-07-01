@@ -107,45 +107,14 @@ export async function registerUploadedItemImage(
   return { ok: true }
 }
 
-// ── setPrimaryImage ───────────────────────────────────────────────────────────
+// ── reorderItemImages ─────────────────────────────────────────────────────────
+// Single source of truth for ordering: the image at index 0 is ALWAYS the
+// primary photo (position-derived, no separate "mark as primary" action).
+// Used both by drag-and-drop reordering and the ↑/↓ fallback buttons.
 
-export async function setPrimaryImage(itemId: string, imageId: string): Promise<ImageActionResult> {
-  const supabase = await createClient()
-
-  const {
-    data: { user },
-    error: authError,
-  } = await supabase.auth.getUser()
-  if (authError || !user) return { ok: false, error: 'No autenticado.' }
-
-  const owned = await requireOwnedItem(supabase, itemId, user.id)
-  if (!owned.ok) return owned
-
-  const { error: clearError } = await supabase
-    .from('media_assets')
-    .update({ is_primary: false })
-    .eq('item_id', itemId)
-    .eq('owner_id', user.id)
-  if (clearError) return { ok: false, error: clearError.message }
-
-  const { error: setError } = await supabase
-    .from('media_assets')
-    .update({ is_primary: true })
-    .eq('id', imageId)
-    .eq('item_id', itemId)
-    .eq('owner_id', user.id)
-  if (setError) return { ok: false, error: setError.message }
-
-  revalidatePath(`/inventory/${itemId}`)
-  return { ok: true }
-}
-
-// ── moveImage (swap sort_order with the previous/next image) ────────────────
-
-export async function moveImage(
+export async function reorderItemImages(
   itemId: string,
-  imageId: string,
-  direction: 'up' | 'down'
+  orderedImageIds: string[]
 ): Promise<ImageActionResult> {
   const supabase = await createClient()
 
@@ -158,35 +127,34 @@ export async function moveImage(
   const owned = await requireOwnedItem(supabase, itemId, user.id)
   if (!owned.ok) return owned
 
+  if (orderedImageIds.length === 0) return { ok: true }
+
   const { data: images, error: loadError } = await supabase
     .from('media_assets')
-    .select('id, sort_order')
+    .select('id')
     .eq('item_id', itemId)
     .eq('owner_id', user.id)
-    .order('sort_order', { ascending: true })
   if (loadError || !images) return { ok: false, error: loadError?.message ?? 'No se pudieron cargar las imágenes.' }
 
-  const index = images.findIndex((img) => img.id === imageId)
-  if (index === -1) return { ok: false, error: 'Imagen no encontrada.' }
-  const swapIndex = direction === 'up' ? index - 1 : index + 1
-  if (swapIndex < 0 || swapIndex >= images.length) return { ok: true } // already at the edge
+  // Defense in depth: the submitted order must be exactly the set of images
+  // that actually belong to this item/owner — never trust the client's list blindly.
+  const existingIds = images.map((img) => img.id as string)
+  const sameSet =
+    existingIds.length === orderedImageIds.length &&
+    existingIds.every((id) => orderedImageIds.includes(id))
+  if (!sameSet) {
+    return { ok: false, error: 'El orden recibido no coincide con las imágenes del item.' }
+  }
 
-  const current = images[index]
-  const swapWith = images[swapIndex]
-
-  const { error: err1 } = await supabase
-    .from('media_assets')
-    .update({ sort_order: swapWith.sort_order })
-    .eq('id', current.id)
-    .eq('owner_id', user.id)
-  if (err1) return { ok: false, error: err1.message }
-
-  const { error: err2 } = await supabase
-    .from('media_assets')
-    .update({ sort_order: current.sort_order })
-    .eq('id', swapWith.id)
-    .eq('owner_id', user.id)
-  if (err2) return { ok: false, error: err2.message }
+  for (let index = 0; index < orderedImageIds.length; index++) {
+    const { error: updateError } = await supabase
+      .from('media_assets')
+      .update({ sort_order: index, is_primary: index === 0 })
+      .eq('id', orderedImageIds[index])
+      .eq('item_id', itemId)
+      .eq('owner_id', user.id)
+    if (updateError) return { ok: false, error: updateError.message }
+  }
 
   revalidatePath(`/inventory/${itemId}`)
   return { ok: true }

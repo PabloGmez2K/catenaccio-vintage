@@ -4,7 +4,7 @@
 **Fecha:** 2026-07-01
 **Sesión:** S026A — IMAGE_PIPELINE_LOCAL_TO_STORAGE (Claude Code Sonnet 5)
 **Modo:** ASK→CODE / LOCAL_CODE / SUPABASE_STORAGE / NO_WP_WRITE / NO_WOO_WRITE / NO_PRODUCT_WRITE / NO_PUBLISH / NO_DEPLOY
-**Veredicto:** `READY_FOR_PABLO_IMAGE_STORAGE_RETEST` (tras fix de §3b — "Body exceeded 1 MB limit")
+**Veredicto:** `READY_FOR_PABLO_IMAGE_STORAGE_FINAL_RETEST` (tras fix §3b + UX/optimización §3c)
 **Hermanos:** `STUDIO_MVP_BACKLOG_REVIEW.md`, `STUDIO_DATA_MODEL.md`, `STUDIO_COMPLETENESS_PREFLIGHT_RESULT.md`
 
 ---
@@ -38,10 +38,11 @@ Sin `DROP`, sin `DELETE`, sin tocar otras tablas, sin policies nuevas (la RLS ex
   (metadata-only, ver §3b), `setPrimaryImage`, `moveImage`, `deleteItemImage` + helper de lectura
   `listItemImages`. Path `<auth_user_id>/<inventory_item_id>/<uuid>.<ext>`; `original_filename` se
   guarda en `filename`. Al eliminar la foto principal, promueve automáticamente la siguiente por
-  `sort_order`.
+  `sort_order`. **`setPrimaryImage`/`moveImage` fueron sustituidas por `reorderItemImages` en §3c.**
 - `studio/components/ItemImagesPanel.tsx` (nuevo): panel client — subida múltiple, grid de
   miniaturas, badge "Principal", mover arriba/abajo, marcar principal, eliminar, contador, estado
-  vacío, mensajes de error.
+  vacío, mensajes de error. **Rediseñado en §3c** (autosave, drag-reorder, sin botón "Marcar
+  principal").
 - `studio/app/inventory/[id]/page.tsx`: carga `listItemImages`, renderiza `ItemImagesPanel`, pasa
   `imageCount` al preflight.
 - `studio/lib/preflight/product-preflight.ts`: nuevo grupo `imagenes` — **WARNING** (no blocker) si
@@ -88,12 +89,55 @@ operan sobre filas ya existentes en `media_assets`.
 No se subió `serverActions.bodySizeLimit` en `next.config.ts` — la solución correcta es no enviar
 el archivo por la Server Action, no ensanchar el límite.
 
+## 3c. UX + optimización post-retest (autosave, principal=primera, drag-reorder, WebP)
+
+Tras el fix de §3b, Pablo probó S026A y detectó 4 problemas de UX/producto antes de poder validarla:
+
+1. **Autosave no comunicado.** No hay botón "Guardar" porque cada acción (subir/ordenar/eliminar)
+   ya escribe en Supabase al instante, pero la UI no lo decía ni mostraba progreso.
+   **Fix:** texto fijo "Las fotos se guardan automáticamente al subir, ordenar o eliminar" +
+   línea de estado dinámica (`Optimizando…` → `Subiendo…` → `Guardando…` → `Guardado ✓` / error),
+   compartida entre subida, reordenar y eliminar vía un runner común (`runMutation`).
+2. **"Marcar principal" no gustaba — principal debe ser la primera imagen del orden.**
+   **Fix:** eliminado el botón y el badge ahora se muestra solo en `index === 0` (posicional, no
+   depende de un campo independiente que pudiera desincronizarse). Servidor: `setPrimaryImage` y
+   `moveImage` (basado en swap de `sort_order`) se sustituyeron por una única acción
+   `reorderItemImages(itemId, orderedImageIds)` que es la única responsable de la invariante
+   "principal = primera": recorre el array recibido y escribe `sort_order=index`,
+   `is_primary=(index===0)` para cada imagen, tras verificar que el conjunto de IDs recibido
+   coincide exactamente con las imágenes reales del item/owner (nunca confía en el orden del
+   cliente sin comprobar pertenencia). Los botones ↑/↓ se mantienen como *fallback* (accesibilidad
+   / sin drag), pero ahora construyen el nuevo orden y llaman a la misma `reorderItemImages` — ya
+   no hay una ruta de código distinta para "mover" vs. "arrastrar".
+3. **Orden por arrastre de tarjetas.** Añadido drag-and-drop nativo (HTML5 DnD, sin librería) sobre
+   las tarjetas de `images-grid`: `draggable` + `onDragStart/onDragOver/onDrop/onDragEnd`, estado
+   local `dragCardIndex`/`dragOverIndex` solo para feedback visual (opacidad de la tarjeta arrastrada,
+   borde de la tarjeta destino). Al soltar, se recalcula el array de IDs y se llama a
+   `reorderItemImages` — ninguna reordenación se aplica de forma optimista sin persistir.
+4. **Optimización WebP antes de subir (ya no como deuda).** `studio/lib/media/image-upload.ts`
+   gana `optimizeImageFile(file)`: decodifica con `createImageBitmap`, redimensiona a un lado
+   máximo de 2200 px (**nunca amplía** imágenes pequeñas — `scale = min(1, max/lado)`), dibuja en
+   `<canvas>` y codifica a WebP calidad 0.86 vía `canvas.toBlob`. Si el navegador no soporta
+   codificar WebP (el blob resultante no es `image/webp`), si el canvas falla, o si el archivo
+   "optimizado" saliera más pesado que el original, se usa el original tal cual — **nunca rompe el
+   flujo de subida**. `filename` (metadata visible) conserva el nombre original; `storage_path`
+   sigue usando `uuid + extensión` derivada del MIME final; `mime_type`/`size_bytes` guardan el
+   MIME/tamaño **finales** realmente subidos. Cuando hay optimización real, la UI muestra
+   `Optimizada: 4.2 MB → 720 KB`. Añadidos `validateImageFile`, `getImageExtensionFromMime` y
+   `formatBytes` como helpers compartidos entre panel y (indirectamente) la Server Action.
+
+No se usó ninguna librería externa de compresión/drag-and-drop — solo Canvas API y HTML5 Drag and
+Drop API nativos del navegador, para no añadir dependencias sin justificar.
+
 ## 4. Seguridad
 
 - Sin service_role en cliente ni en servidor — la subida usa el cliente de browser con **anon key**
   (mismo nivel de privilegio que cualquier usuario autenticado, sujeto a RLS/Storage policies); el
-  resto de acciones (`registerUploadedItemImage`, `setPrimaryImage`, `moveImage`, `deleteItemImage`)
+  resto de acciones (`registerUploadedItemImage`, `reorderItemImages`, `deleteItemImage`)
   usan `createClient()` server-side (anon key + cookies de sesión), igual que el resto del código.
+- `reorderItemImages` verifica que el conjunto de IDs recibido coincide exactamente con las
+  imágenes reales del item/owner antes de escribir — un orden manipulado con IDs ajenos se rechaza
+  con error, nunca se aplica parcialmente.
 - Path de Storage siempre incluye `auth.uid()` como primer segmento (coincide con la policy
   "own folder" que Pablo configuró manualmente en el bucket).
 - Solo se aceptan `image/jpeg`, `image/png`, `image/webp`; tamaño máximo 12 MB, verificado
@@ -125,17 +169,22 @@ el archivo por la Server Action, no ensanchar el límite.
 
 ## 7. Instrucciones para Pablo
 
-1. Aplica `docs/studio/STUDIO_IMAGE_PIPELINE_SCHEMA.sql` en el SQL Editor de Supabase.
+1. Aplica `docs/studio/STUDIO_IMAGE_PIPELINE_SCHEMA.sql` en el SQL Editor de Supabase (si no lo
+   habías hecho ya — no hay SQL nuevo en esta vuelta).
 2. `cd studio && npm run dev`.
 3. Abre una camiseta existente (`/inventory/[id]`).
-4. Sube 2-3 imágenes JPG/WEBP en el panel "Fotos".
-5. Confirma que las miniaturas se ven.
-6. Marca una como principal.
-7. Cambia el orden (↑/↓).
-8. Elimina una imagen.
-9. Confirma en Supabase Storage que los objetos aparecen bajo `<user_id>/<inventory_item_id>/`.
-10. Confirma que el preflight muestra el bloque "Imágenes" (pass o warning según haya fotos).
-11. Confirma que no se ha tocado Woo/WP ni publicado nada.
+4. Sube 2-4 fotos grandes (JPG/WEBP) — clic o arrastrando a la zona.
+5. Observa el estado: `Optimizando…` → `Subiendo…` → `Guardando…` → `Fotos guardadas ✓` (sin error
+   de 1 MB).
+6. Confirma que las miniaturas se ven y que la primera tiene el badge "Principal".
+7. Arrastra una tarjeta para reordenar; confirma que la nueva primera pasa a tener el badge
+   "Principal" tras el refresco.
+8. (Opcional) Usa ↑/↓ como alternativa sin arrastrar.
+9. Elimina una imagen y confirma el mensaje "Foto eliminada ✓".
+10. En Supabase Storage, confirma que los objetos aparecen bajo `<user_id>/<inventory_item_id>/` y
+    que son `.webp` (o el original si tu navegador no soporta codificar WebP).
+11. Confirma que el preflight muestra el bloque "Imágenes" (pass o warning según haya fotos).
+12. Confirma que no se ha tocado Woo/WP ni publicado nada.
 
 ## 8. Siguiente paso
 
