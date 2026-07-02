@@ -2144,3 +2144,25 @@ Cierre documental de S026B tras validacion manual completa de Pablo (`PABLO_WP_M
 
 **Siguiente bloque recomendado:** `STUDIO_VERCEL_DEPLOY_MINIMAL` (bloque 3 del spine MVP), sin cambios.
 **agent_events ref:** 2026-07-01T16:00:00Z (S026B.CLOSE)
+
+---
+
+## Sesion STUDIO_VERCEL_DEPLOY_AND_MOBILE_PATCH_CLOSE
+
+**Fecha:** 2026-07-02
+**Agente:** Codex
+**Modo:** DOCS_ONLY / CLOSE / NO_CODE / NO_DEPLOY / NO_WP_TOUCH / NO_SUPABASE_CHANGE
+**Resultado:** DONE
+
+Cierre documental del bloque de deploy minimo de Catenaccio Studio en Vercel y del patch responsive movil posterior. Pablo hizo el deploy manual en Vercel; la URL funcional queda en https://catenaccio-studio.vercel.app. El primer intento fallo porque Vercel estaba con `Framework Preset=Other` y buscaba Output Directory `public`; se corrigio cambiando el preset a `Next.js`. Deploy final sobre base `27b246e`; HEAD de cierre `a2a1661`.
+
+Validacion registrada: Supabase magic link login OK; redirect a `/inventory` OK; `/inventory` carga OK; inventario real carga con el usuario correcto. El falso blocker "0 activos" fue causado por login con otro email/usuario, no por bug de inventory. Hubo rate limit temporal de magic link por multiples intentos, sin blocker tecnico.
+
+Patch movil: commit `a2a1661` (`fix(studio): mobile-first responsive patch for header, inventory list and item form`), archivos tocados previamente `studio/components/InventoryTable.tsx` y `studio/styles/globals.css`. Pablo valido ya en Vercel: `/inventory` movil muestra 8 activos en cards legibles; `/inventory/new` movil funciona; el boton "Regenerar" ya no desborda; header movil queda mas ligero. `PABLO_MOBILE_VISUAL_OK` confirmado. La UI queda aceptada para fase MVP, no como version final perfecta.
+
+Guardrails: no se creo borrador Woo durante este bloque salvo acciones previas ya validadas en S026B; no se publico producto; no se toco WordPress/WooCommerce/WP Admin; no se toco Vercel, Supabase, `.env.local`, codigo, logica de borrador Woo ni auth en esta sesion. `STUDIO_WC_ATTACH_IMAGES_ENABLED` debe permanecer OFF en Vercel para esta fase salvo autorizacion explicita futura; `STUDIO_AI_ENABLED` debe permanecer OFF.
+
+Riesgos registrados como no bloqueantes: npm audit/hardening publico, Supabase Edge warning, Vercel first deploy config issue, auth rate limit temporal de magic links y UI future polish.
+
+**Backlog:** `STUDIO_VERCEL_DEPLOY_MINIMAL` movido a DONE; `STUDIO_MOBILE_RESPONSIVE_MVP_PATCH` registrado como DONE; siguiente paso `GATE_STUDIO_MVP` con Pablo publicando 1 camiseta real E2E y midiendo tiempo/friccion.
+**agent_events ref:** 2026-07-02T10:00:00Z (STUDIO_VERCEL_DEPLOY_AND_MOBILE_PATCH_CLOSE)
