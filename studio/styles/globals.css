@@ -1790,3 +1790,180 @@ body {
   font-size: 11px;
   flex-basis: 100%;
 }
+
+/* ── Mobile responsive patch (STUDIO_MOBILE_RESPONSIVE_MVP_PATCH) ──── */
+
+@media (max-width: 640px) {
+  /* Header: lighter and shorter, wraps if it must instead of overflowing */
+  .app-header {
+    height: auto;
+    min-height: 48px;
+    padding: 8px 12px;
+    flex-wrap: wrap;
+    row-gap: 6px;
+  }
+
+  .app-title {
+    font-size: 14px;
+  }
+
+  .mvp-badge {
+    font-size: 9px;
+    padding: 1px 5px;
+  }
+
+  .app-nav {
+    gap: 10px;
+  }
+
+  .nav-link {
+    font-size: 12px;
+  }
+
+  .sign-out-btn {
+    font-size: 12px;
+    padding: 3px 10px;
+  }
+
+  .app-main {
+    padding: 12px;
+  }
+
+  /* Inventory header: let the "+ Nueva camiseta" button drop to its own row */
+  .inventory-header {
+    flex-wrap: wrap;
+    row-gap: 8px;
+  }
+
+  .inventory-header h2 {
+    font-size: 18px;
+  }
+
+  .inventory-header .btn-primary.btn-sm {
+    margin-left: 0;
+    width: 100%;
+    text-align: center;
+  }
+
+  /* Filters: tighter chips, still wrapping, no extra whitespace */
+  .inv-filters {
+    gap: 5px;
+    margin-bottom: 12px;
+  }
+
+  .inv-filter {
+    padding: 4px 9px;
+    font-size: 11px;
+  }
+
+  /* Table → cards: no horizontal scroll, one field per line */
+  .table-wrapper {
+    overflow-x: visible;
+    border: none;
+    box-shadow: none;
+    background: transparent;
+  }
+
+  .inventory-table,
+  .inventory-table tbody,
+  .inventory-table tr,
+  .inventory-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .inventory-table thead {
+    display: none;
+  }
+
+  .inventory-table tbody tr {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    margin-bottom: 12px;
+    padding: 4px 14px;
+  }
+
+  .inventory-table tbody tr.row-attention {
+    background: #fff9f9;
+  }
+
+  .inventory-table td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--color-border);
+    text-align: right;
+  }
+
+  .inventory-table td:last-child {
+    border-bottom: none;
+  }
+
+  .inventory-table td::before {
+    content: attr(data-label);
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-text-muted);
+    text-align: left;
+    flex-shrink: 0;
+  }
+
+  /* Referencia (title) and Acciones read better as full-width blocks, not
+     label/value rows — one is the card heading, the other a button group. */
+  .inventory-table td.cell-referencia,
+  .inventory-table td.cell-actions {
+    display: block;
+    text-align: left;
+  }
+
+  .inventory-table td.cell-referencia::before,
+  .inventory-table td.cell-actions::before {
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .inventory-table td.cell-referencia {
+    font-size: 15px;
+  }
+
+  .inv-empty-filter {
+    padding: 24px 16px;
+  }
+
+  /* Forms: stack paired fields, keep the title input + regenerate button
+     from overflowing the viewport (S022A "Regenerar" overflow report) */
+  .form-section {
+    padding: 14px 16px;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .title-input-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btn-regenerate {
+    width: 100%;
+    text-align: center;
+    padding: 8px 12px;
+  }
+
+  .form-actions {
+    flex-direction: column;
+  }
+
+  .form-actions .btn-primary,
+  .form-actions .btn-secondary {
+    width: 100%;
+    text-align: center;
+  }
+}

@@ -50,7 +50,7 @@ export function InventoryTable({ items, wpSiteBase }: Props) {
 
             return (
               <tr key={item.id} className={action.flag ? 'row-attention' : undefined}>
-                <td>
+                <td data-label="Referencia" className="cell-referencia">
                   {action.flag && (
                     <span className="attention-dot" title={action.reason ?? 'Requiere acción'}>
                       ●
@@ -60,22 +60,24 @@ export function InventoryTable({ items, wpSiteBase }: Props) {
                     {item.referencia}
                   </Link>
                 </td>
-                <td>
+                <td data-label="Estado">
                   <StatusBadge type="item" value={item.status} />
                 </td>
-                <td>
+                <td data-label="Canal web">
                   <span className={`status-badge badge-${web.tone}`}>{web.label}</span>
                 </td>
-                <td className="num">€{Number(item.coste).toFixed(2)}</td>
-                <td className="num">{precioWeb != null ? `€${precioWeb.toFixed(2)}` : '—'}</td>
-                <td className="num">{margen != null ? `€${margen}` : '—'}</td>
-                <td>
+                <td data-label="Coste" className="num">€{Number(item.coste).toFixed(2)}</td>
+                <td data-label="Precio web" className="num">
+                  {precioWeb != null ? `€${precioWeb.toFixed(2)}` : '—'}
+                </td>
+                <td data-label="Margen" className="num">{margen != null ? `€${margen}` : '—'}</td>
+                <td data-label="Fotos">
                   <StatusBadge type="photo" value={item.photo_status} />
                 </td>
-                <td className="date">
+                <td data-label="Alta" className="date">
                   {new Date(item.created_at).toLocaleDateString('es-ES')}
                 </td>
-                <td>
+                <td data-label="Acciones" className="cell-actions">
                   <InventoryRowActions
                     itemId={item.id}
                     referencia={item.referencia}
