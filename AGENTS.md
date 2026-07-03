@@ -70,6 +70,14 @@ Si la tarea llega como read-only / ASK, no modificar archivos. Devolver diagnós
 
 ## Guardrails del dominio
 
+**UI DESIGN GATE — leer `DESIGN.md` antes de tocar UI:**
+- Antes de cualquier tarea que toque UI, layout, estilos, componentes visuales, navegación, copy de interfaz, fichas de producto, filtros, búsqueda, cards, tablas, estados visuales o feedback: leer `DESIGN.md` primero. Es el contrato visual local de Catenaccio.
+- No inferir identidad de marca desde el CSS actual del repo. Los placeholders navy/rojo (`studio/styles/globals.css`, `catenaccio-a0-child/assets/css/cv-a0.css`) son deuda visual, no identidad — la marca es el verde `#1E5929` (`#155c2c` = legacy en migración).
+- Si la petición contradice `DESIGN.md` → parar y pedir decisión al orquestador. No proceder por iniciativa propia.
+- Cambios UI por delta sobre lo aprobado, nunca rediseño desde cero.
+- Studio (`studio/`, backoffice PIM, activo) y storefront (`catenaccio-a0-child/`, público, **congelado/diferido salvo instrucción explícita**) son superficies distintas con densidad y estética propias (DESIGN.md §4-6). No aplicar estética de tienda a Studio ni densidad de dashboard al storefront.
+- No cambiar tokens globales (paleta, tipografía, espaciado base) como efecto lateral de una tarea acotada.
+
 **Catenaccio Vintage — WordPress/WooCommerce activo:**
 - No tocar código WordPress, plugins, temas, DB ni wp-config.php sin autorización explícita en el prompt.
 - Sin SSH (Raiola Inicio SSD 2.0). WP Admin / WC Status / Site Health es la vía de acceso aceptada y permanente. No bloquear sesiones por falta de SSH.

@@ -446,6 +446,20 @@ coherente.
 
 ---
 
+## §21 — UI_DESIGN_GATE
+
+Activar antes de cualquier tarea que toque UI: layout, estilos, componentes visuales, navegación,
+copy de interfaz, fichas de producto, filtros, búsqueda, cards, tablas, estados visuales o feedback.
+
+Regla: leer `DESIGN.md` (contrato visual local de Catenaccio) antes de proponer o modificar nada.
+Si la tarea contradice el contrato, parar y pedir decisión del orquestador — no proceder por
+iniciativa propia. Cambios UI por delta sobre lo aprobado, nunca rediseño desde cero. Studio y
+storefront (`catenaccio-a0-child/`) son superficies distintas; el storefront está
+congelado/diferido salvo instrucción explícita. Detalle operativo completo en `AGENTS.md` →
+Guardrails del dominio.
+
+---
+
 ## Historial de cambios de este documento
 
 | Fecha | Cambio | Quién |
@@ -454,3 +468,4 @@ coherente.
 | 2026-06-13 | Stack real, lectura proporcional +git step 0, guardrails de dominio, tabla de agentes específica, §16 SESSION_WORKSTREAM_ANCHOR, §17 TARGET_OPTIONS binario | Claude Code (Sonnet) |
 | 2026-06-24 | §19 — reglas RULE-01 a RULE-05, DEC-PABLO-01 a DEC-PABLO-03 absorbidas del Operating Brain; patrones PATTERN-05 a 09 de lafabrica; equivalencias PrestaShop→WooCommerce; referencia al AGENT_EXPERIENCE_LEDGER | Claude Code (Sonnet) |
 | 2026-06-28 | §20 — DOMAIN_PRODUCT_MODELING_GATE para formularios/product UI tras aprendizaje S022A | Codex |
+| 2026-07-03 | §21 — UI_DESIGN_GATE: leer DESIGN.md antes de cualquier tarea de UI; detalle en AGENTS.md | Claude Code (Sonnet) |
