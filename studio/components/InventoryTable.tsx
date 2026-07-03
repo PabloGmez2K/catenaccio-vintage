@@ -2,7 +2,7 @@ import Link from 'next/link'
 import type { InventoryItem } from '@/lib/types'
 import { StatusBadge } from './StatusBadge'
 import { InventoryRowActions } from './InventoryRowActions'
-import { deriveWebChannel, requiresAction } from '@/lib/inventory/operational-view'
+import { deriveVintedChannel, deriveWebChannel, requiresAction } from '@/lib/inventory/operational-view'
 
 interface Props {
   items: InventoryItem[]
@@ -21,6 +21,7 @@ export function InventoryTable({ items, wpSiteBase }: Props) {
             <th>Referencia</th>
             <th>Estado</th>
             <th>Canal web</th>
+            <th>Vinted</th>
             <th>Coste</th>
             <th>Precio web</th>
             <th>Margen</th>
@@ -45,7 +46,13 @@ export function InventoryTable({ items, wpSiteBase }: Props) {
               wcStatus: item.wc_status,
               precioPublicadoWeb: precioWeb,
             })
-            const margen = precioWeb != null ? (precioWeb - Number(item.coste)).toFixed(2) : null
+            const sold = item.status === 'vendida'
+            const precioVendido = item.precio_vendido != null ? Number(item.precio_vendido) : null
+            // Vendida → margen real sobre el precio de venta; si no, margen esperado
+            // sobre el precio web publicado.
+            const margenBase = sold && precioVendido != null ? precioVendido : precioWeb
+            const margen = margenBase != null ? (margenBase - Number(item.coste)).toFixed(2) : null
+            const vinted = deriveVintedChannel(item.vinted_status)
             const archived = item.status === 'archivada'
 
             return (
@@ -66,11 +73,24 @@ export function InventoryTable({ items, wpSiteBase }: Props) {
                 <td data-label="Canal web">
                   <span className={`status-badge badge-${web.tone}`}>{web.label}</span>
                 </td>
+                <td data-label="Vinted">
+                  {vinted ? (
+                    <span className={`status-badge badge-${vinted.tone}`}>{vinted.label}</span>
+                  ) : (
+                    '—'
+                  )}
+                </td>
                 <td data-label="Coste" className="num">€{Number(item.coste).toFixed(2)}</td>
                 <td data-label="Precio web" className="num">
                   {precioWeb != null ? `€${precioWeb.toFixed(2)}` : '—'}
                 </td>
-                <td data-label="Margen" className="num">{margen != null ? `€${margen}` : '—'}</td>
+                <td
+                  data-label="Margen"
+                  className="num"
+                  title={sold && precioVendido != null ? 'Margen real (venta)' : 'Margen esperado (precio web)'}
+                >
+                  {margen != null ? `€${margen}` : '—'}
+                </td>
                 <td data-label="Fotos">
                   <StatusBadge type="photo" value={item.photo_status} />
                 </td>
@@ -84,6 +104,7 @@ export function InventoryTable({ items, wpSiteBase }: Props) {
                     wcProductId={item.wc_product_id}
                     wpSiteBase={wpSiteBase}
                     archived={archived}
+                    sold={sold}
                   />
                 </td>
               </tr>

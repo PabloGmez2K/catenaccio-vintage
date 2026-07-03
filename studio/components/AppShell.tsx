@@ -25,6 +25,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <Link href="/inventory" className="nav-link">
             Inventario
           </Link>
+          <Link href="/inventory/woo" className="nav-link">
+            Catálogo web
+          </Link>
           <button onClick={handleSignOut} className="sign-out-btn">
             Salir
           </button>

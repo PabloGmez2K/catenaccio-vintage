@@ -1967,3 +1967,325 @@ body {
     text-align: center;
   }
 }
+
+/* ── STOCK_MANAGER foundation — catálogo web + venta local + Vinted ──── */
+
+/* Resumen operativo (tiles de conteo — texto, sin decoración) */
+.stock-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.stock-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.stock-tile--link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.stock-tile--link:hover {
+  background: var(--color-bg);
+}
+
+.stock-tile-value {
+  font-size: 20px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-text);
+  line-height: 1.1;
+}
+
+.stock-tile-label {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  line-height: 1.3;
+}
+
+/* Cola "revisar primero" */
+.review-first {
+  padding: 10px 14px;
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: var(--radius);
+  margin-bottom: 16px;
+}
+
+.review-first-title {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #92400e;
+  margin-bottom: 6px;
+}
+
+.review-first-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.review-first-item {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.review-first-count {
+  min-width: 20px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #92400e;
+  text-align: right;
+}
+
+.review-first-link {
+  color: inherit;
+}
+
+.review-first-link:hover {
+  color: var(--color-text);
+}
+
+/* Catálogo web: celda de producto con miniatura */
+.woo-product-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.woo-thumb {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg);
+}
+
+.woo-thumb--empty {
+  display: inline-block;
+}
+
+.woo-product-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Estados de error parcial / total del catálogo web */
+.woo-unavailable {
+  padding: 24px 20px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.woo-unavailable-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 6px;
+}
+
+.woo-unavailable-hint {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+  margin-bottom: 10px;
+}
+
+.woo-unavailable-detail {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin-bottom: 14px;
+}
+
+.woo-partial-warning {
+  padding: 8px 12px;
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: var(--radius);
+  color: #92400e;
+  font-size: 12px;
+  margin-bottom: 12px;
+}
+
+.woo-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 24px 20px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text-muted);
+  font-size: 13px;
+}
+
+/* Huérfanos Studio → producto web inexistente */
+.orphans-section {
+  margin-top: 20px;
+  padding: 14px 16px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.orphans-section h3 {
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.orphans-list {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.orphans-item {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.orphans-meta {
+  color: var(--color-text-muted);
+  font-size: 12px;
+}
+
+/* Paneles Venta / Vinted en la ficha */
+.sale-hint {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  margin-bottom: 10px;
+  line-height: 1.5;
+}
+
+.sale-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sale-form-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.sale-form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.sale-form-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+}
+
+.sale-form-field input,
+.sale-form-field select,
+.sale-form-field textarea {
+  padding: 7px 9px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  font-size: 13px;
+  font-family: inherit;
+  background: var(--color-surface);
+  color: var(--color-text);
+  width: 100%;
+}
+
+.sale-form-field input:focus,
+.sale-form-field select:focus,
+.sale-form-field textarea:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.sale-form-field textarea {
+  resize: vertical;
+}
+
+.sale-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.sale-error {
+  color: #991b1b;
+  font-size: 12px;
+  margin-top: 8px;
+}
+
+.sale-saved {
+  color: #065f46;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.sale-reminder {
+  padding: 8px 12px;
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: var(--radius);
+  color: #92400e;
+  font-size: 12px;
+  margin: 10px 0;
+  line-height: 1.5;
+}
+
+.sale-margin-ok {
+  color: #065f46;
+  font-weight: 600;
+}
+
+.sale-margin-neg {
+  color: #991b1b;
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  .stock-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .sale-form-row {
+    grid-template-columns: 1fr;
+  }
+
+  /* La celda de producto del catálogo web hereda el colapso a card de
+     .inventory-table; solo aseguramos que la miniatura no rompa la línea. */
+  .woo-product-cell {
+    display: flex;
+  }
+}

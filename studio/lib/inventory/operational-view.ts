@@ -6,7 +6,7 @@
 // It does NOT know the live Woo state — "Drift" detection needs a live GET (S030) and
 // is intentionally out of scope here, so it is never faked.
 
-import type { ItemStatus, WcSyncStatus } from '@/lib/types'
+import type { ItemStatus, VintedStatus, WcSyncStatus } from '@/lib/types'
 
 export interface OperationalInput {
   status: ItemStatus
@@ -49,6 +49,24 @@ export function requiresAction(i: OperationalInput): { flag: boolean; reason: st
     return { flag: true, reason: 'Sin precio web y sin borrador Woo' }
   }
   return { flag: false, reason: null }
+}
+
+// Vinted channel badge for the work queue (manual tracking, no live read).
+// null → the item has no Vinted life yet, the cell renders an em dash.
+export function deriveVintedChannel(status: VintedStatus): WebChannel | null {
+  switch (status) {
+    case 'pendiente':
+      return { label: 'Pendiente', tone: 'yellow' }
+    case 'publicada':
+      return { label: 'Publicada', tone: 'purple' }
+    case 'vendida_vinted':
+      return { label: 'Vendida', tone: 'green' }
+    case 'retirada':
+      return { label: 'Retirada', tone: 'gray' }
+    case 'no_aplica':
+    default:
+      return null
+  }
 }
 
 // Mutually-exclusive bucket for the filter tabs. Priority order matters:

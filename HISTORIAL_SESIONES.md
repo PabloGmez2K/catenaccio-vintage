@@ -2166,3 +2166,33 @@ Riesgos registrados como no bloqueantes: npm audit/hardening publico, Supabase E
 
 **Backlog:** `STUDIO_VERCEL_DEPLOY_MINIMAL` movido a DONE; `STUDIO_MOBILE_RESPONSIVE_MVP_PATCH` registrado como DONE; siguiente paso `GATE_STUDIO_MVP` con Pablo publicando 1 camiseta real E2E y midiendo tiempo/friccion.
 **agent_events ref:** 2026-07-02T10:00:00Z (STUDIO_VERCEL_DEPLOY_AND_MOBILE_PATCH_CLOSE)
+
+---
+
+## Sesion STOCK_MANAGER_FOUNDATION_SLICE_WITH_FABLE
+
+**Fecha:** 2026-07-03
+**Agente:** Claude Code (Fable 5)
+**Modo:** HIGH_AUTONOMY_PRODUCT_BUILD / CODE_ALLOWED / LOCAL_ONLY / READONLY_WOO / NO_DEPLOY / NO_PUSH
+**Resultado:** DONE (implementacion local) — pendiente `PABLO_STOCK_MANAGER_FOUNDATION_OK`
+
+Primera sesion de mision amplia con Fable: pasar Studio de "creador de borradores Woo" a la foundation de un **gestor operativo de stock**, segun la redefinicion de MVP de Pablo (web + Vinted + ventas + control, todo junto).
+
+**Que se construyo:**
+
+1. **`/inventory/woo` — Catalogo web read-only vivo.** Nuevo helper `lib/wc/product-catalog.ts` (patron de `taxonomy-sync.ts`: GET paginado con Basic auth, `_fields` minimo, errores saneados de credenciales): `status=any` + papelera best-effort. La pantalla responde a las preguntas operativas: cuantas camisetas hay en Studio, cuantos productos en la web, cuantos publicados/borradores/agotados, cuantos sin vincular y que revisar primero (cola ordenada: errores de sync, huerfanos Studio->Woo, publicados agotados, productos sin ficha Studio, borradores pendientes). Filtros server-side, tiles clicables, tabla con miniatura/estado/stock/precio/Studio link/alta/enlaces Web+WP Admin. Reusa las clases de `inventory-table` -> densidad desktop y colapso a cards movil gratis. `loading.tsx` propio y error operativo con reintento (si Woo no responde, Studio sigue).
+2. **Linking Studio<->Woo** en `lib/inventory/stock-overview.ts` (derivaciones puras sin I/O): vinculados, sin vincular (badge naranja), y huerfanos (fichas Studio cuyo `wc_product_id` no aparece en el catalogo) con seccion propia.
+3. **Venta local.** `app/inventory/sales-actions.ts`: `markItemSold` (canal/precio/fecha/notas -> `status='vendida'` + evento `sold` con notas en el audit trail — sin columna nueva), `undoItemSale` (recupera estado previo del audit trail, patron restore), edicion de venta (`sale_updated`). Panel "Venta" en la ficha con margen real verde/rojo y recordatorio de que la web no se toca desde ahi; accion "Vender" en la tabla que ancla a `#venta`. Canal vinted -> `vinted_status='vendida_vinted'` (deshacer no lo revierte; documentado).
+4. **Vinted manual.** Panel "Vinted" (estado/precio/fecha publicacion/URL/notas) sobre las columnas `vinted_*` de S019/S020D que nunca se habian usado desde codigo. Sin API, sin scraping.
+5. **`/inventory` delta minimo:** columna Vinted (badge), margen real en vendidas (tooltip aclara real vs esperado), select ampliado.
+
+**Hallazgo clave (ahorro de riesgo):** el schema aplicado en S020D ya contenia TODAS las columnas de venta/Vinted disenadas en S019 — **cero SQL necesario**, Pablo no tiene que aplicar nada antes de probar. El bloque solo expone en types/UI lo que ya existia en la base.
+
+**Validacion:** typecheck PASS, lint PASS (0), build PASS (9 rutas, `/inventory/woo` 667 B), `git diff --check` PASS, secret scan CLEAN. Smoke runtime: `/inventory/woo` protegida por middleware (redirect a `/login` sin sesion; no se ejecuto ningun GET a Woo por el agente).
+
+**Guardrails respetados:** 0 writes a Woo (sin POST/PUT/PATCH/DELETE, sin borradores, sin papelera, sin publicar, sin stock); `bridge.ts`/`client.ts`(create)/`actions.ts` e idempotencia DRAFT_ONLY intactos; sin SQL aplicado; sin `.env.local`; sin deploy; sin push; sin dependencias nuevas; sin tokens globales nuevos (DESIGN.md v0 delta-only; tiles/paneles con vars existentes).
+
+**Limitaciones declaradas:** GET vivo por render (cache Supabase = decision futura si el catalogo crece); papelera sujeta a permisos del rol; drift campo a campo sigue siendo S030; marcar vendida no toca stock web (manual a proposito — sincronizarlo seria el primer write nuevo a Woo y exige bloque propio con gate).
+
+**Siguiente bloque recomendado:** Pablo prueba con datos reales y confirma `PABLO_STOCK_MANAGER_FOUNDATION_OK` (+ Antigravity visual pass opcional segun STUDIO_MVP_FEATURE_DONE_GATE); despues, segun friccion: metricas agregadas de ventas, S030 drift o S025D edit/resync.
+**agent_events ref:** 2026-07-03T12:00:00Z (STOCK_MANAGER_FOUNDATION_SLICE)

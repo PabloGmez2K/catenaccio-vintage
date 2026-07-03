@@ -8,12 +8,22 @@ import { ManualSeoPanel } from '@/components/ManualSeoPanel'
 import { ProductPreflightPanel } from '@/components/ProductPreflightPanel'
 import { WcDraftPanel } from '@/components/WcDraftPanel'
 import { ItemImagesPanel } from '@/components/ItemImagesPanel'
+import { SalePanel } from '@/components/SalePanel'
+import { VintedPanel } from '@/components/VintedPanel'
 import { buildSuggestionContext } from '@/lib/ai/suggestion-context'
 import { buildManualSeoPrompt } from '@/lib/seo/manual-seo-prompt'
 import { evaluateProductPreflight, type PreflightInput } from '@/lib/preflight/product-preflight'
 import { listItemImages } from '@/app/inventory/image-actions'
 import { notFound } from 'next/navigation'
-import type { ItemStatus, PhotoStatus, WcSyncStatus, AiSuggestion, InventoryItemWithDetails } from '@/lib/types'
+import type {
+  ItemStatus,
+  PhotoStatus,
+  WcSyncStatus,
+  AiSuggestion,
+  InventoryItemWithDetails,
+  SaleChannel,
+  VintedStatus,
+} from '@/lib/types'
 
 // Maps raw DB authenticity_type values to the UI label Pablo sees.
 // 'Replica' is the stored value for "Original" (legacy + current internal value).
@@ -80,6 +90,16 @@ export default async function InventoryItemPage({
 
   // S026A — images uploaded to Supabase Storage for this item (media_assets).
   const images = await listItemImages(supabase, id)
+
+  // Sale notes live in the audit trail (event 'sold'/'sale_updated'), not in a column.
+  const { data: saleEvents } = await supabase
+    .from('item_lifecycle_events')
+    .select('notes')
+    .eq('item_id', id)
+    .in('event_type', ['sold', 'sale_updated'])
+    .order('created_at', { ascending: false })
+    .limit(1)
+  const saleNotes = data.status === 'vendida' ? (saleEvents?.[0]?.notes ?? null) : null
 
   // S024 — completeness preflight. Pure evaluation over already-loaded data (no Woo, no writes).
   const preflightInput: PreflightInput = {
@@ -183,6 +203,27 @@ export default async function InventoryItemPage({
             </div>
           )}
         </section>
+
+        <SalePanel
+          itemId={data.id}
+          referencia={data.referencia}
+          status={data.status as ItemStatus}
+          coste={Number(data.coste)}
+          canalVenta={(data.canal_venta ?? null) as SaleChannel | null}
+          precioVendido={data.precio_vendido != null ? Number(data.precio_vendido) : null}
+          fechaVenta={data.fecha_venta ?? null}
+          saleNotes={saleNotes}
+          hasWcProduct={data.wc_product_id != null}
+        />
+
+        <VintedPanel
+          itemId={data.id}
+          vintedStatus={(data.vinted_status ?? 'no_aplica') as VintedStatus}
+          vintedUrl={data.vinted_url ?? null}
+          vintedPrice={data.vinted_price != null ? Number(data.vinted_price) : null}
+          vintedPublishedAt={data.vinted_published_at ?? null}
+          vintedNotes={data.vinted_notes ?? null}
+        />
 
         {(data.proveedor || data.fecha_compra) && (
           <section className="detail-section">

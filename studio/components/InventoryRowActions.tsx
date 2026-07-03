@@ -14,12 +14,14 @@ export function InventoryRowActions({
   wcProductId,
   wpSiteBase,
   archived,
+  sold,
 }: {
   itemId: string
   referencia: string
   wcProductId: number | null
   wpSiteBase: string | null
   archived: boolean
+  sold: boolean
 }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -69,6 +71,15 @@ export function InventoryRowActions({
       >
         Editar
       </Link>
+      {!archived && !sold && (
+        <Link
+          href={`/inventory/${itemId}#venta`}
+          className="row-action-link"
+          title="Registrar venta local (no toca la web)"
+        >
+          Vender
+        </Link>
+      )}
       {frontendUrl && (
         <a
           href={frontendUrl}

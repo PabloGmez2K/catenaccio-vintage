@@ -48,7 +48,7 @@ export default async function InventoryPage({
   const { data, error } = await supabase
     .from('inventory_items')
     .select(
-      'id, referencia, status, coste, precio_objetivo, precio_publicado_web, wc_product_id, wc_status, photo_status, created_at'
+      'id, referencia, status, coste, precio_objetivo, precio_publicado_web, wc_product_id, wc_status, photo_status, created_at, canal_venta, precio_vendido, fecha_venta, vinted_status'
     )
     .order('created_at', { ascending: false })
 

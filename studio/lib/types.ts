@@ -32,6 +32,9 @@ export type VintedStatus =
   | 'vendida_vinted'
   | 'retirada'
 
+// Canal por el que se cierra una venta (enum sale_channel del schema S019/S020D).
+export type SaleChannel = 'web' | 'vinted' | 'otro'
+
 export interface InventoryItem {
   id: string
   referencia: string
@@ -44,6 +47,12 @@ export interface InventoryItem {
   wc_error: string | null
   photo_status: PhotoStatus
   created_at: string
+  // Venta local + Vinted manual (STOCK_MANAGER foundation). Columnas existentes
+  // en el schema aplicado (S019/S020D) que hasta ahora no llegaban a la UI.
+  canal_venta: SaleChannel | null
+  precio_vendido: number | null
+  fecha_venta: string | null
+  vinted_status: VintedStatus
 }
 
 export interface FootballShirtDetails {
@@ -93,6 +102,12 @@ export interface InventoryItemWithDetails extends InventoryItem {
   notas_compra: string | null
   notas_internas: string | null
   fecha_compra: string
+  // Vinted manual tracking completo (solo se lee en la ficha, select '*').
+  vinted_url: string | null
+  vinted_price: number | null
+  vinted_published_at: string | null
+  vinted_notes: string | null
+  precio_publicado_vinted: number | null
   football_shirt_details: FootballShirtDetails | null
 }
 

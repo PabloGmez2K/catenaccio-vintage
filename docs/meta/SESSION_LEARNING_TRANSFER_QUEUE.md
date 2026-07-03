@@ -240,3 +240,27 @@ precios, pedidos, proveedores sensibles). Solo señales saneadas. Ver `DATA_AND_
 - privacy_level: INTERNAL_ONLY
 - Estado: CANDIDATE
 - Siguiente accion: Validar `MEDIA_UPLOAD_BROWSER_TO_STORAGE` y `VISUAL_UX_DONE_GATE` en un segundo flujo visual (deploy de Studio o segunda pantalla). Si se repiten, promover a PATTERN en lafabrica y anotar skills en el Brain con `DIRECT_BRAIN_WRITE_ALLOWED`.
+
+---
+
+### SLT-010 — Mision amplia de producto con Fable (high-autonomy) + schema-first antes de SQL nuevo
+
+- Fecha: 2026-07-03
+- Proyecto: catenaccio-vintage
+- Sesion/bloque: STOCK_MANAGER_FOUNDATION_SLICE_WITH_FABLE
+- project_value: Primer slice del MVP redefinido (stock manager) entregado en una sola sesion de mision amplia: catalogo Woo vivo read-only, linking Studio<->Woo, venta local con audit trail y Vinted manual, sin SQL y sin writes externos.
+- lafabrica:
+  - `SCHEMA_FIRST_BEFORE_NEW_SQL`: antes de proponer SQL aditivo, leer el schema canonico aplicado; en este caso TODAS las columnas de venta/Vinted existian desde el diseno original (S019) sin uso desde codigo. El coste de un slice cae drasticamente cuando el modelo de datos se diseno completo por adelantado aunque la UI llegue meses despues. Patron: disenar el modelo de dominio completo en la fase de schema, exponerlo por slices.
+  - `HIGH_AUTONOMY_MISSION_PROMPT`: un prompt de mision amplia funciona con agente de gama alta si fija (a) prohibiciones duras enumeradas (no writes, no deploy, no SQL remoto), (b) prioridad ordenada con permiso explicito de recortar (1-3 core, 4-5 si cabe), (c) criterio de parada, (d) formato de entrega literal. La autonomia se gasta en decisiones de producto (que ruta, que copy, que se difiere), no en negociar limites.
+  - `READONLY_CHANNEL_VIEW_BEFORE_WRITE`: para integrar un canal externo con riesgo, construir primero la vista read-only viva (catalogo + linking + cola de revision); revela huérfanos y desalineaciones y define el backlog de writes con evidencia, sin riesgo.
+- brain:
+  - evidence: Slice de producto multi-pantalla (ruta nueva + 2 paneles + acciones servidor + derivaciones puras) entregado con validaciones completas en una sesion, respetando contrato visual y guardrails de un repo maduro.
+  - skills: Diseno de slices verticales sobre schema existente; integracion read-only de e-commerce; audit-trail como storage de datos secundarios (notas de venta) para evitar migraciones.
+  - service_angle: Backoffice de stock multicanal (web + marketplace manual) para vendedores de vintage/segunda mano.
+  - content_angle: "Tu proximo feature quiza no necesita migracion: el schema que disenaste hace meses ya lo soporta".
+  - portfolio_asset: Caso Catenaccio Studio como stock manager multicanal con canal externo read-only.
+- future_product: Modulo reusable de "channel mirror" read-only (catalogo externo + linking + review queue) para cualquier vertical con tienda + marketplaces manuales.
+- no_copy: Inventario real, precios de venta reales, margenes, URLs privadas, credenciales.
+- privacy_level: INTERNAL_ONLY
+- Estado: CANDIDATE
+- Siguiente accion: Validar el patron de mision amplia en una segunda sesion Fable; si el slice pasa PABLO_STOCK_MANAGER_FOUNDATION_OK sin bucle de rework, promover `HIGH_AUTONOMY_MISSION_PROMPT` a patron lafabrica.
