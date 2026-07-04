@@ -6,7 +6,7 @@ export default function WooCatalogLoading() {
   return (
     <AppShell>
       <div className="inventory-header">
-        <h2>Catálogo web</h2>
+        <h2>Auditoría web</h2>
       </div>
       <div className="woo-loading">
         <span className="wc-draft-spinner" aria-hidden="true" />

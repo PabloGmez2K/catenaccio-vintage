@@ -3,12 +3,14 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { markItemSold, undoItemSale } from '@/app/inventory/sales-actions'
+import { syncWooStockOut } from '@/app/inventory/[id]/woo-sync-actions'
 import type { ItemStatus, SaleChannel } from '@/lib/types'
 
 // Local sale panel for the item detail page (STOCK_MANAGER foundation).
-// Registers the sale in Studio only: channel, final price, date and optional note.
-// It never touches the web — if the item is live in Woo, the operator updates
-// WP Admin manually (reminder shown after marking as sold).
+// Registering the sale writes to Studio only. WOO_WRITE_SYNC adds step 2:
+// after the sale, if the item is linked and the web still shows stock, the
+// panel OFFERS a confirmed action to leave the web product out of stock
+// (inline confirmation, never automatic, never unpublishes).
 
 const CHANNEL_LABELS: Record<SaleChannel, string> = {
   web: 'Web',
@@ -30,6 +32,7 @@ export function SalePanel({
   fechaVenta,
   saleNotes,
   hasWcProduct,
+  wooStockStatus,
 }: {
   itemId: string
   referencia: string
@@ -40,11 +43,15 @@ export function SalePanel({
   fechaVenta: string | null
   saleNotes: string | null
   hasWcProduct: boolean
+  // Live web stock ('instock' | 'outofstock' | …) or null if it couldn't be read.
+  wooStockStatus: string | null
 }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const [editing, setEditing] = useState(false)
+  const [stockArmed, setStockArmed] = useState(false)
+  const [stockResult, setStockResult] = useState<{ ok: boolean; text: string } | null>(null)
 
   const [canal, setCanal] = useState<SaleChannel>(canalVenta ?? 'web')
   const [precio, setPrecio] = useState(precioVendido != null ? String(precioVendido) : '')
@@ -148,11 +155,72 @@ export function SalePanel({
               <span className="field-value">{saleNotes}</span>
             </div>
           )}
-          {hasWcProduct && (
-            <p className="sale-reminder">
-              La web no se toca desde aquí: si el producto sigue visible, actualízalo en WP
-              Admin (stock o estado).
-            </p>
+          {/* Paso 2 del flujo de venta: dejar la web agotada, con confirmación. */}
+          {hasWcProduct && wooStockStatus !== 'outofstock' && (
+            <div className="sale-woo-followup">
+              <p className="sale-reminder">
+                {wooStockStatus === null
+                  ? 'No se pudo leer el stock actual de la web. Puedes intentar dejarla agotada igualmente: se verifica en el momento.'
+                  : 'La web sigue mostrando esta camiseta con stock. Déjala agotada para evitar una doble venta.'}
+              </p>
+              {!stockArmed ? (
+                <button
+                  type="button"
+                  className="btn-primary btn-sm"
+                  onClick={() => {
+                    setStockResult(null)
+                    setStockArmed(true)
+                  }}
+                  disabled={isPending}
+                >
+                  Dejar agotada en la web
+                </button>
+              ) : (
+                <div className="woo-confirm">
+                  <p className="woo-confirm-text">
+                    El producto quedará <strong>agotado</strong> en la web. Si está publicado,
+                    seguirá visible como «Agotado» — <strong>no se despublica</strong>.
+                  </p>
+                  <div className="woo-confirm-actions">
+                    <button
+                      type="button"
+                      className="btn-primary btn-sm"
+                      disabled={isPending}
+                      onClick={() => {
+                        setStockArmed(false)
+                        startTransition(async () => {
+                          const res = await syncWooStockOut(itemId)
+                          if (res.ok) {
+                            setStockResult({ ok: true, text: res.message })
+                            router.refresh()
+                          } else {
+                            setStockResult({ ok: false, text: res.error })
+                          }
+                        })
+                      }}
+                    >
+                      Confirmar agotado
+                    </button>
+                    <button
+                      type="button"
+                      className="btn-secondary btn-sm"
+                      onClick={() => setStockArmed(false)}
+                      disabled={isPending}
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+          {hasWcProduct && wooStockStatus === 'outofstock' && !stockResult && (
+            <p className="sale-hint">La web ya está agotada para esta camiseta.</p>
+          )}
+          {stockResult && (
+            <div className={stockResult.ok ? 'wc-draft-ok' : 'wc-draft-error'}>
+              {stockResult.text}
+            </div>
           )}
           <div className="sale-actions">
             <button

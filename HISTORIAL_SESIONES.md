@@ -2196,3 +2196,34 @@ Primera sesion de mision amplia con Fable: pasar Studio de "creador de borradore
 
 **Siguiente bloque recomendado:** Pablo prueba con datos reales y confirma `PABLO_STOCK_MANAGER_FOUNDATION_OK` (+ Antigravity visual pass opcional segun STUDIO_MVP_FEATURE_DONE_GATE); despues, segun friccion: metricas agregadas de ventas, S030 drift o S025D edit/resync.
 **agent_events ref:** 2026-07-03T12:00:00Z (STOCK_MANAGER_FOUNDATION_SLICE)
+
+---
+
+## Sesion WOO_WRITE_SYNC_FOUNDATION_WITH_FABLE_ULTRACODE
+
+**Fecha:** 2026-07-04
+**Agente:** Claude Code (Fable 5)
+**Modo:** RECOVERY_FIRST / HIGH_AUTONOMY_PRODUCT_BUILD / CONTROLLED_WOO_WRITES / LOCAL_FIRST / NO_DEPLOY / NO_PUSH
+**Resultado:** DONE (implementacion local) — pendiente `PABLO_WOO_WRITE_SYNC_OK`
+
+Sesion en dos actos: la implementacion original (WOO_WRITE_SYNC_FOUNDATION_WITH_FABLE) se corto por limite de uso a mitad de un refactor; esta sesion hizo recovery y cierre.
+
+**Recovery:** estado `DIRTY_RECOVERABLE` — HEAD en `4f094f4`, 11 modificados + 7 nuevos, todos dentro de scope, sin staged, `git diff --check` limpio. Se rescato el 100% del trabajo parcial revisando diff archivo por archivo. Cabos sueltos de la interrupcion: 7 llamadas a `markSyncError` sin el parametro `flipMirror` recien introducido (typecheck roto — la senal mas clara de donde se corto), `LOG_FAILED_SUFFIX` sin cablear, prop `approvedSuggestionId` sin pasar. Unico descarte deliberado: `trashUnlinkedWooDraft` (papelera para borradores sin ficha), porque `item_lifecycle_events.item_id` es NOT NULL -> sin ficha no hay log posible y violaba la regla «todo Woo write deja log visible»; el flujo queda vincular primero -> papelera desde la ficha.
+
+**Que se construyo (rescatado + completado):**
+
+1. **`lib/wc/write-client.ts`** — capa unica de writes: `updateWooProduct` (PUT con payload reconstruido clave a clave desde whitelist `regular_price`/`stock_quantity`/`stock_status`/`description`; `status` excluido -> imposible publicar/despublicar/archivar por PUT) y `trashWooProduct` (DELETE `?force=false` hardcodeado, relectura fresca inmediatamente antes, solo draft/pending, veto ID 1731). Errores saneados: user, password y base64 -> `[REDACTED]`.
+2. **`app/inventory/[id]/woo-sync-actions.ts`** — 5 server actions con contrato comun: 1 producto, GET fresco pre-write, re-verificacion de lo previsualizado (precio: ambos lados en centimos; descripcion: version aprobada Studio + contenido web vivo normalizado), log en `item_lifecycle_events` de exitos y fallos, aviso si el log fallo, error visible sin retry. Espejo `wc_status` -> `error_sync` solo si fallo un WRITE real (`flipMirror`), no una lectura previa.
+3. **`WooSyncPanel`** en la ficha vinculada: badge estado/stock Woo vivos + hora de lectura + releer, tabla diff Studio vs Web (Igual/Distinto + notas), acciones armadas en dos pasos (precio, dejar agotada, descripcion, papelera, actualizar estado local), resultado persistente y «Registro de sincronizacion» (ultimos 8 eventos `wc_*`). Si la lectura viva falla, las acciones se desactivan.
+4. **Venta -> web agotada como paso 2 del `SalePanel`:** tras registrar venta (item vendida/reservada re-verificado en server), boton confirmado «Dejar agotada en la web» -> `stock_status=outofstock` (+`stock_quantity=0` solo si `manage_stock`). No despublica nunca.
+5. **Inventario unico:** «Catalogo web» sale de la navegacion y pasa a «Auditoria web» (link desde /inventory); su unica accion es «Vincular a Studio» (Supabase-only: crea item + fila `football_shirt_details` con NOT NULL vacios que el formulario obliga a completar, rollback del item si details falla).
+6. **Movil:** `/inventory` colapsa a lista compacta (nueva `InventoryRow`: miniatura via embed `media_assets` + referencia + badges + precio, tap expande); desktop identico.
+
+**Critico fresco:** subagente adversarial independiente («demuestra que NO pasa la barra»). Checklist 9/9 reglas de casa OK con evidencia. 1 blocker: `linkWooProductToStudio` no creaba `football_shirt_details` -> editar la ficha vinculada fallaba SIEMPRE con escritura parcial; corregido (insert details + rollback + mensaje de duplicado amable). 8 notas corregidas (error_sync sin salida desde el panel, badge «Igual» con precio Studio vacio, copy de nota de stock, carrera preview->write en descripcion lado web, entidades HTML en `normalizeDescription`, `manage_stock` retirado de la whitelist, base64 en sanitize, aria del chevron movil). 7 notas aceptadas y documentadas en el RESULT (GET bloqueante por ficha vinculada, TOCTOU de segundos GET->DELETE, margen ficticio con `coste: 0` placeholder hasta editar, sin accion de restock, politica SalePanel vs WooSyncPanel ante lectura fallida, `photo_status` placeholder, espejo conservador ante network_error en DELETE).
+
+**Validacion:** typecheck PASS, lint PASS (0), build PASS (9 rutas), `git diff --check` PASS, secret scan CLEAN. **Cero Woo writes ejecutados por el agente** — ni terminal, ni curl, ni UI; la prueba real es de Pablo, desde UI local, sobre 1 producto elegido por el.
+
+**Guardrails:** sin bulk, sin `/products/batch`, sin `force=true`, sin hard delete, sin publicados a papelera, sin tocar pedidos/clientes/pagos/emails/ajustes/WP-PHP, bridge v2.2 DRAFT_ONLY e idempotencia intactos, sin SQL nuevo (cero — el schema ya lo cubria todo), sin `.env.local`, sin deploy, sin push.
+
+**Siguiente:** Pablo prueba las 3 operaciones (precio, venta->agotado, papelera de borrador) desde `npm run dev` segun la guia del RESULT §7 y confirma `PABLO_WOO_WRITE_SYNC_OK`. Despues, por friccion real: restock/undo hacia la web, metricas agregadas de ventas o S030 drift.
+**agent_events ref:** 2026-07-04T (WOO_WRITE_SYNC_FOUNDATION)

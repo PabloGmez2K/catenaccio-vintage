@@ -10,11 +10,12 @@ import {
   type WooCatalogFilter,
 } from '@/lib/inventory/stock-overview'
 
-// STOCK_MANAGER foundation — read-only live view of the web catalog.
-// Route choice: a sibling of /inventory instead of extending it, because this
-// screen depends on a live external GET (Woo) on every render. Keeping it apart
-// leaves the work queue fast and local, and gives the catalog its own loading,
-// error and filter states. This page never writes to Woo.
+// Web audit — live view of the Woo catalog, demoted to a secondary surface
+// (WOO_WRITE_SYNC): /inventory is the single main inventory; this screen exists
+// to reconcile the web channel — link web products that have no Studio ficha,
+// one confirmed product at a time. The web is never written from here: linked
+// products (including drafts to trash) are operated from their ficha, where
+// every action leaves a log.
 
 const VALID_FILTERS: WooCatalogFilter[] = [
   'todos',
@@ -63,7 +64,7 @@ export default async function WooCatalogPage({
     return (
       <AppShell>
         <div className="inventory-header">
-          <h2>Catálogo web</h2>
+          <h2>Auditoría web</h2>
         </div>
         <div className="woo-unavailable">
           <p className="woo-unavailable-title">
@@ -114,9 +115,9 @@ export default async function WooCatalogPage({
   return (
     <AppShell>
       <div className="inventory-header">
-        <h2>Catálogo web</h2>
+        <h2>Auditoría web</h2>
         <span className="item-count">
-          Estado real de la tienda · solo lectura
+          Estado real de la tienda · vincula productos a fichas de Studio
         </span>
       </div>
 

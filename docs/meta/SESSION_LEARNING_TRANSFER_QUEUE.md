@@ -264,3 +264,27 @@ precios, pedidos, proveedores sensibles). Solo señales saneadas. Ver `DATA_AND_
 - privacy_level: INTERNAL_ONLY
 - Estado: CANDIDATE
 - Siguiente accion: Validar el patron de mision amplia en una segunda sesion Fable; si el slice pasa PABLO_STOCK_MANAGER_FOUNDATION_OK sin bucle de rework, promover `HIGH_AUTONOMY_MISSION_PROMPT` a patron lafabrica.
+
+---
+
+### SLT-011 — Recovery de sesion cortada a mitad de implementacion + writes externos con revisor adversarial
+
+- Fecha: 2026-07-04
+- Proyecto: catenaccio-vintage
+- Sesion/bloque: WOO_WRITE_SYNC_FOUNDATION_WITH_FABLE_ULTRACODE
+- project_value: Sesion de implementacion cortada por limite de uso recuperada al 100% sin perder trabajo ni resetear; primera capa de writes controlados a WooCommerce cerrada con crítico adversarial que encontro 1 blocker real antes de que lo encontrara Pablo.
+- lafabrica:
+  - `RECOVERY_FIRST_PROTOCOL`: ante sesion cortada, clasificar el working tree (CLEAN / DIRTY_RECOVERABLE / DIRTY_BLOCKED) ANTES de tocar nada; el typecheck roto es el mejor mapa de donde se corto (aqui: 7 llamadas con un parametro nuevo sin propagar = refactor a medio hacer). Revisar diff archivo a archivo y rescatar, no resetear. Un descarte solo si viola una regla dura (aqui: write sin log posible).
+  - `EXTERNAL_WRITE_FOUNDATION_PATTERN`: primera capa de writes a un sistema externo = (a) modulo unico de writes con whitelist reconstruida clave a clave (nunca passthrough del payload), (b) relectura fresca pre-write + re-verificacion de lo previsualizado en AMBOS lados, (c) flag explicito que distingue fallo de lectura previa vs fallo de write real para no ensuciar el estado espejo, (d) toda accion deja log en una tabla de eventos y si el log falla se avisa sin revertir el write.
+  - `ADVERSARIAL_REVIEWER_BEFORE_USER`: un subagente con mision literal "demuestra que esto NO pasa la barra" + checklist de reglas con evidencia archivo:linea encuentra lo que el implementador no ve (aqui: flujo link->edit roto por fila 1:1 faltante — el blocker exacto que Pablo habria pisado en su primera prueba). Merece el coste en cualquier bloque que escriba en sistemas externos.
+- brain:
+  - evidence: Recovery completo de working tree ajeno (18 archivos) + cierre de foundation de writes e-commerce con 9/9 reglas de seguridad verificadas de forma independiente.
+  - skills: Clasificacion de estado git para recovery; diseño de capas de escritura con whitelist/guards/espejo; orquestacion de revisor adversarial con checklist verificable.
+  - service_angle: "Rescate de sesiones/branches a medio hacer" + integraciones de escritura seguras contra plataformas e-commerce.
+  - content_angle: "El typecheck roto es el mapa: como retomar el trabajo de otro agente sin resetear nada".
+  - portfolio_asset: Caso write-sync Studio->WooCommerce con barra de seguridad de 24 reglas.
+- future_product: Plantilla reusable de "controlled external write layer" (whitelist + preview/confirm + mirror + event log) para cualquier integracion SaaS.
+- no_copy: Credenciales, IDs de productos reales mas alla del veto documentado, precios reales.
+- privacy_level: INTERNAL_ONLY
+- Estado: CANDIDATE
+- Siguiente accion: Si Pablo confirma PABLO_WOO_WRITE_SYNC_OK sin rework, promover `EXTERNAL_WRITE_FOUNDATION_PATTERN` y `ADVERSARIAL_REVIEWER_BEFORE_USER` a patrones lafabrica.

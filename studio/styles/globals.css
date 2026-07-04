@@ -2289,3 +2289,369 @@ body {
     display: flex;
   }
 }
+
+/* ── WOO_WRITE_SYNC — panel de sincronización web + confirmaciones ──── */
+
+.woo-sync-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.woo-sync-linked {
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+
+.woo-sync-links {
+  display: inline-flex;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.woo-sync-fetched {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin-bottom: 10px;
+}
+
+.woo-sync-refresh {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-size: 11px;
+  color: var(--color-primary);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.woo-sync-refresh:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.woo-diff {
+  margin-bottom: 12px;
+}
+
+.woo-diff-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.woo-diff-table th {
+  text-align: left;
+  padding: 6px 8px;
+  background: var(--color-bg-muted, #fafafa);
+  border-bottom: 1px solid var(--color-border);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+}
+
+.woo-diff-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: top;
+}
+
+.woo-diff-field {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.woo-diff-note {
+  font-size: 11px;
+  color: #92400e;
+  margin-top: 6px;
+  line-height: 1.5;
+}
+
+.woo-sync-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.woo-action {
+  width: 100%;
+}
+
+.woo-confirm {
+  padding: 10px 12px;
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  border-radius: var(--radius);
+}
+
+.woo-confirm--danger {
+  background: #fef2f2;
+  border-color: #fca5a5;
+}
+
+.woo-confirm-text {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
+.woo-confirm-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.woo-sync-clean {
+  font-size: 12px;
+  color: #065f46;
+}
+
+.woo-sync-log {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--color-border);
+}
+
+.woo-sync-log-title {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-muted);
+  margin-bottom: 6px;
+}
+
+.woo-sync-log-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.woo-sync-log-item {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.woo-sync-log-date {
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+.woo-sync-log-label {
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.woo-sync-log-label--error {
+  color: #991b1b;
+}
+
+.woo-sync-log-notes {
+  color: var(--color-text-muted);
+  flex-basis: 100%;
+  padding-left: 78px;
+}
+
+.woo-sync-footer {
+  margin-top: 10px;
+  margin-bottom: 0;
+}
+
+.sale-woo-followup {
+  margin: 10px 0;
+}
+
+/* Auditoría web: acciones por fila + resultado visible */
+.woo-audit-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.woo-audit-pending {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.woo-audit-ok {
+  font-size: 12px;
+  color: #065f46;
+}
+
+.woo-audit-error {
+  font-size: 12px;
+  color: #991b1b;
+}
+
+.inv-audit-link {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.inv-audit-link:hover {
+  text-decoration: underline;
+}
+
+/* ── Móvil: lista compacta expandible (WOO_WRITE_SYNC UX) ───────────── */
+
+/* Desktop: el resumen móvil no existe */
+.row-mobile-summary {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  /* Solo la tabla del inventario principal (modificador --compact) usa la
+     línea compacta expandible; la tabla de auditoría web conserva el colapso
+     a cards anterior (todas las celdas visibles con etiqueta). Los selectores
+     repiten .cell-* para ganar en cascada a las reglas del patch previo. */
+  .row-desktop-ref {
+    display: none;
+  }
+
+  .inventory-table--compact td,
+  .inventory-table--compact td.cell-actions {
+    display: none;
+  }
+
+  .inventory-table--compact td.cell-referencia {
+    display: block;
+    padding: 0;
+    border-bottom: none;
+  }
+
+  .inventory-table--compact td.cell-referencia::before {
+    display: none;
+  }
+
+  .inventory-table--compact tbody tr {
+    padding: 0;
+    margin-bottom: 8px;
+    overflow: hidden;
+  }
+
+  .row-mobile-summary {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: none;
+    border: none;
+    text-align: left;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+  }
+
+  .row-mobile-thumb {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 1px solid var(--color-border);
+    background: var(--color-bg);
+  }
+
+  .row-mobile-thumb--empty {
+    display: inline-block;
+  }
+
+  .row-mobile-main {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .row-mobile-ref {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-text);
+    overflow-wrap: anywhere;
+  }
+
+  .row-mobile-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .row-mobile-badges .status-badge {
+    font-size: 10px;
+  }
+
+  .row-mobile-side {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    flex-shrink: 0;
+  }
+
+  .row-mobile-price {
+    font-size: 14px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .row-mobile-chevron {
+    font-size: 12px;
+    color: var(--color-text-muted);
+    transition: transform 0.15s ease;
+  }
+
+  .row-mobile-chevron--open {
+    transform: rotate(180deg);
+  }
+
+  /* Expandida: se revelan el resto de campos con el layout etiqueta/valor
+     ya existente del patch responsive anterior. */
+  .inventory-table--compact tr.row-expanded td {
+    display: flex;
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .inventory-table--compact tr.row-expanded td.cell-referencia {
+    display: block;
+    padding: 0;
+  }
+
+  .inventory-table--compact tr.row-expanded td.cell-actions {
+    display: block;
+    padding: 8px 14px;
+  }
+
+  /* El panel/confirm de sync respira en móvil */
+  .woo-sync-links {
+    margin-left: 0;
+    flex-basis: 100%;
+  }
+
+  .woo-diff-table {
+    font-size: 11px;
+  }
+
+  .woo-sync-log-notes {
+    padding-left: 0;
+  }
+}

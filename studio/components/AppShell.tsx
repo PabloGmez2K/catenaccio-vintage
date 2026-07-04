@@ -21,12 +21,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <span className="app-title">Catenaccio Studio</span>
           <span className="mvp-badge">MVP</span>
         </div>
+        {/* El inventario es la superficie principal única; la auditoría web es
+            secundaria y se llega desde el propio inventario, no desde la nav. */}
         <nav className="app-nav">
           <Link href="/inventory" className="nav-link">
             Inventario
-          </Link>
-          <Link href="/inventory/woo" className="nav-link">
-            Catálogo web
           </Link>
           <button onClick={handleSignOut} className="sign-out-btn">
             Salir

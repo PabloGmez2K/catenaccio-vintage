@@ -97,6 +97,12 @@ export interface FootballShirtDetails {
   autenticidad: string | null
 }
 
+// List-page shape: the inventory query embeds the item's first image (by
+// sort_order) so the mobile compact row can show a thumbnail.
+export interface InventoryListItem extends InventoryItem {
+  media_assets: Array<{ public_url: string | null }> | null
+}
+
 export interface InventoryItemWithDetails extends InventoryItem {
   proveedor: string | null
   notas_compra: string | null

@@ -10,7 +10,7 @@ import {
   requiresAction,
   type OperationalInput,
 } from '@/lib/inventory/operational-view'
-import type { InventoryItem } from '@/lib/types'
+import type { InventoryItem, InventoryListItem } from '@/lib/types'
 
 const VALID_FILTERS: InventoryFilter[] = [
   'activos',
@@ -45,18 +45,22 @@ export default async function InventoryPage({
 
   const supabase = await createClient()
 
+  // media_assets embed: first image by sort_order → thumbnail for the mobile
+  // compact list. One embedded row per item keeps the payload flat.
   const { data, error } = await supabase
     .from('inventory_items')
     .select(
-      'id, referencia, status, coste, precio_objetivo, precio_publicado_web, wc_product_id, wc_status, photo_status, created_at, canal_venta, precio_vendido, fecha_venta, vinted_status'
+      'id, referencia, status, coste, precio_objetivo, precio_publicado_web, wc_product_id, wc_status, photo_status, created_at, canal_venta, precio_vendido, fecha_venta, vinted_status, media_assets(public_url)'
     )
     .order('created_at', { ascending: false })
+    .order('sort_order', { referencedTable: 'media_assets', ascending: true })
+    .limit(1, { referencedTable: 'media_assets' })
 
   // Server-side base URL for external Woo links (frontend + WP Admin). Not a secret;
   // absent in envs without WooCommerce configured → links are simply hidden.
   const wpSiteBase = process.env.WP_SITE_URL?.replace(/\/$/, '') ?? null
 
-  const all = (data ?? []) as InventoryItem[]
+  const all = (data ?? []) as unknown as InventoryListItem[]
   const tagged = all.map((item) => ({ item, bucket: operationalBucket(toOp(item)) }))
 
   const counts: Record<InventoryFilter, number> = {
@@ -86,6 +90,10 @@ export default async function InventoryPage({
         <span className="item-count">
           {`${counts.activos} activo${counts.activos !== 1 ? 's' : ''}`}
           {counts.archived > 0 ? ` · ${counts.archived} archivado${counts.archived !== 1 ? 's' : ''}` : ''}
+          {' · '}
+          <Link href="/inventory/woo" className="inv-audit-link">
+            Auditoría web
+          </Link>
         </span>
         <Link href="/inventory/new" className="btn-primary btn-sm">
           + Nueva camiseta

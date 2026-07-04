@@ -1,11 +1,13 @@
 import Link from 'next/link'
 import type { WooCatalogRow } from '@/lib/inventory/stock-overview'
 import type { WooCatalogProduct } from '@/lib/wc/product-catalog'
+import { WooAuditRowActions } from './WooAuditRowActions'
 
-// Read-only live view of the WooCommerce catalog with the Studio link per product.
+// Live view of the WooCommerce catalog with the Studio link per product.
 // Reuses the inventory-table classes so it inherits the desktop density and the
-// mobile card collapse for free. No actions here beyond navigation: this screen
-// never writes to Woo.
+// mobile card collapse for free. WOO_WRITE_SYNC adds ONE controlled per-row
+// action: link an unlinked product to a new Studio ficha (local write). The web
+// is never written from this screen — trash lives on the ficha, where it logs.
 
 const STATUS_BADGES: Record<WooCatalogProduct['status'], { label: string; tone: string }> = {
   publish: { label: 'Publicado', tone: 'badge-green' },
@@ -45,7 +47,7 @@ export function WooCatalogTable({
             <th>Precio</th>
             <th>Studio</th>
             <th>Alta</th>
-            <th>Enlaces</th>
+            <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -97,7 +99,7 @@ export function WooCatalogTable({
                     ? new Date(product.dateCreated).toLocaleDateString('es-ES')
                     : '—'}
                 </td>
-                <td data-label="Enlaces" className="cell-actions">
+                <td data-label="Acciones" className="cell-actions">
                   <div className="row-actions">
                     {product.permalink && product.status === 'publish' && (
                       <a
@@ -121,6 +123,12 @@ export function WooCatalogTable({
                         WP ↗
                       </a>
                     )}
+                    <WooAuditRowActions
+                      productId={product.id}
+                      productName={product.name}
+                      productStatus={product.status}
+                      linkedItemId={studio?.id ?? null}
+                    />
                   </div>
                 </td>
               </tr>

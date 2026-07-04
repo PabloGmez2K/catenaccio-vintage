@@ -10,6 +10,9 @@ import { WcDraftPanel } from '@/components/WcDraftPanel'
 import { ItemImagesPanel } from '@/components/ItemImagesPanel'
 import { SalePanel } from '@/components/SalePanel'
 import { VintedPanel } from '@/components/VintedPanel'
+import { WooSyncPanel, type WooLogEntry } from '@/components/WooSyncPanel'
+import { fetchWooProductDetail, type WooProductDetail } from '@/lib/wc/product-catalog'
+import { buildWooDiff, type WooDiffResult } from '@/lib/inventory/woo-diff'
 import { buildSuggestionContext } from '@/lib/ai/suggestion-context'
 import { buildManualSeoPrompt } from '@/lib/seo/manual-seo-prompt'
 import { evaluateProductPreflight, type PreflightInput } from '@/lib/preflight/product-preflight'
@@ -100,6 +103,54 @@ export default async function InventoryItemPage({
     .order('created_at', { ascending: false })
     .limit(1)
   const saleNotes = data.status === 'vendida' ? (saleEvents?.[0]?.notes ?? null) : null
+
+  // ── WOO_WRITE_SYNC — live web state + sync log for linked items ─────────────
+  // One GET per ficha view: the sync panel works against the REAL product, never
+  // against the local mirror alone. If the read fails, actions are disabled.
+  const wpSiteBase = process.env.WP_SITE_URL?.replace(/\/$/, '') ?? null
+  let wooLive: WooProductDetail | null = null
+  let wooLiveError: string | null = null
+  let wooFetchedAt: string | null = null
+  let wooDiff: WooDiffResult | null = null
+  let wooLog: WooLogEntry[] = []
+
+  if (data.wc_product_id != null) {
+    const [liveResult, { data: logRows }] = await Promise.all([
+      fetchWooProductDetail(data.wc_product_id),
+      supabase
+        .from('item_lifecycle_events')
+        .select('id, created_at, event_type, notes')
+        .eq('item_id', id)
+        .in('event_type', [
+          'wc_sync_ok',
+          'wc_price_synced',
+          'wc_stock_synced',
+          'wc_description_synced',
+          'wc_trashed',
+          'wc_sync_error',
+          'wc_state_refreshed',
+          'created_from_woo',
+        ])
+        .order('created_at', { ascending: false })
+        .limit(8),
+    ])
+
+    if (liveResult.ok) {
+      wooLive = liveResult.product
+      wooFetchedAt = liveResult.fetchedAt
+      wooDiff = buildWooDiff({
+        itemStatus: data.status as ItemStatus,
+        wcStatusMirror: data.wc_status as WcSyncStatus,
+        precioPublicadoWeb:
+          data.precio_publicado_web != null ? Number(data.precio_publicado_web) : null,
+        approvedDescription: approvedSuggestion?.descripcion_larga ?? null,
+        live: liveResult.product,
+      })
+    } else {
+      wooLiveError = liveResult.message
+    }
+    wooLog = (logRows ?? []) as WooLogEntry[]
+  }
 
   // S024 — completeness preflight. Pure evaluation over already-loaded data (no Woo, no writes).
   const preflightInput: PreflightInput = {
@@ -214,7 +265,29 @@ export default async function InventoryItemPage({
           fechaVenta={data.fecha_venta ?? null}
           saleNotes={saleNotes}
           hasWcProduct={data.wc_product_id != null}
+          wooStockStatus={wooLive?.stockStatus ?? null}
         />
+
+        {data.wc_product_id != null && (
+          <WooSyncPanel
+            itemId={data.id}
+            wcProductId={data.wc_product_id}
+            live={wooLive}
+            liveError={wooLiveError}
+            fetchedAt={wooFetchedAt}
+            diff={wooDiff}
+            studioPrice={
+              data.precio_publicado_web != null ? Number(data.precio_publicado_web) : null
+            }
+            approvedSuggestionId={approvedSuggestion?.id ?? null}
+            wpAdminUrl={
+              wpSiteBase
+                ? `${wpSiteBase}/wp-admin/post.php?post=${data.wc_product_id}&action=edit`
+                : null
+            }
+            log={wooLog}
+          />
+        )}
 
         <VintedPanel
           itemId={data.id}
@@ -391,10 +464,11 @@ export default async function InventoryItemPage({
 
         <ProductPreflightPanel result={preflight} editHref={`/inventory/${data.id}/edit`} />
 
-        {approvedSuggestion && (
+        {/* Draft creation only — once linked, the web lives in «Sincronización web». */}
+        {approvedSuggestion && data.wc_product_id == null && (
           <WcDraftPanel
             itemId={data.id}
-            wcProductId={data.wc_product_id ?? null}
+            wcProductId={null}
             wcStatus={data.wc_status as string}
             wcError={data.wc_error ?? null}
             precioPubWeb={data.precio_publicado_web ? Number(data.precio_publicado_web) : null}

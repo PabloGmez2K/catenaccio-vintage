@@ -162,6 +162,101 @@ function parsePrice(value: string | undefined): number | null {
   return Number.isFinite(n) ? n : null
 }
 
+// ── Single-product live detail (GET) ──────────────────────────────────────────
+// Adds description + sale_price on top of the catalog fields. Used by the item
+// detail sync panel and by the controlled write layer for fresh pre-write reads.
+
+export interface WooProductDetail extends WooCatalogProduct {
+  description: string
+  salePrice: number | null
+}
+
+export type WooProductDetailResult =
+  | { ok: true; product: WooProductDetail; fetchedAt: string }
+  | { ok: false; code: string; message: string }
+
+type WcProductDetailRaw = WcProductRaw & {
+  description?: string
+  sale_price?: string
+}
+
+const PRODUCT_DETAIL_FIELDS = `${PRODUCT_FIELDS},description,sale_price`
+
+export function parseProductDetailRaw(raw: unknown): WooProductDetail | null {
+  const base = parseProduct((raw ?? {}) as WcProductRaw)
+  if (!base) return null
+  const detailRaw = raw as WcProductDetailRaw
+  return {
+    ...base,
+    description: typeof detailRaw.description === 'string' ? detailRaw.description : '',
+    salePrice: parsePrice(detailRaw.sale_price),
+  }
+}
+
+export async function fetchWooProductDetail(productId: number): Promise<WooProductDetailResult> {
+  const siteUrl = process.env.WP_SITE_URL
+  const appUser = process.env.WP_APP_USER
+  const appPassword = process.env.WP_APP_PASSWORD
+
+  if (!siteUrl || !appUser || !appPassword) {
+    return {
+      ok: false,
+      code: 'missing_credentials',
+      message: 'La conexión con la tienda no está configurada en el servidor.',
+    }
+  }
+  if (!Number.isInteger(productId) || productId <= 0) {
+    return { ok: false, code: 'invalid_product_id', message: 'ID de producto no válido.' }
+  }
+
+  const base = siteUrl.replace(/\/$/, '')
+  const url = new URL(`/wp-json/wc/v3/products/${productId}`, base)
+  url.searchParams.set('_fields', PRODUCT_DETAIL_FIELDS)
+
+  let response: Response
+  try {
+    response = await fetch(url.toString(), {
+      method: 'GET',
+      headers: {
+        Authorization: `Basic ${Buffer.from(`${appUser}:${appPassword}`).toString('base64')}`,
+        Accept: 'application/json',
+      },
+      cache: 'no-store',
+    })
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Error de red'
+    return { ok: false, code: 'network_error', message: sanitizeMessage(msg, appUser, appPassword) }
+  }
+
+  if (!response.ok) {
+    if (response.status === 404) {
+      return {
+        ok: false,
+        code: 'product_not_found',
+        message: 'El producto ya no existe en la web (o no es accesible).',
+      }
+    }
+    return {
+      ok: false,
+      code: 'wc_get_failed',
+      message: sanitizeMessage(await parseWcError(response), appUser, appPassword),
+    }
+  }
+
+  let raw: unknown
+  try {
+    raw = await response.json()
+  } catch {
+    return { ok: false, code: 'invalid_response', message: 'Respuesta no parseable de WooCommerce.' }
+  }
+
+  const product = parseProductDetailRaw(raw)
+  if (!product) {
+    return { ok: false, code: 'invalid_response', message: 'Producto sin ID válido en la respuesta.' }
+  }
+  return { ok: true, product, fetchedAt: new Date().toISOString() }
+}
+
 // ── GET plumbing (same shape as taxonomy-sync.ts) ─────────────────────────────
 
 type WcFetchContext = {
@@ -238,5 +333,8 @@ function sanitizeMessage(msg: string, user: string, password: string): string {
   let s = msg
   if (user) s = s.replaceAll(user, '[REDACTED]')
   if (password) s = s.replaceAll(password, '[REDACTED]')
+  if (user && password) {
+    s = s.replaceAll(Buffer.from(`${user}:${password}`).toString('base64'), '[REDACTED]')
+  }
   return s.slice(0, 500)
 }
