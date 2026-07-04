@@ -111,3 +111,45 @@ Validacion V2:
 - Secret scan sobre diff/archivos nuevos: CLEAN
 
 No tocado en V2: Woo writes, Supabase remoto, SQL, Vercel, `.env.local`, deploy, push, storefront.
+
+## V3 - Campos Woo Utiles, SEO Base y Fotos Web
+
+**Continuacion:** WOO_TO_STUDIO_LINK_HYDRATION_FIX_V3
+**Fecha:** 2026-07-04
+**Resultado:** DONE local, pendiente prueba Pablo.
+
+Pablo valido V2 como "mucho mejor", pero la ficha importada seguia incompleta: faltaban condicion/marca, medidas ACF, descripcion Woo como base del flujo SEO y una via operativa para fotos web.
+
+Cambios V3:
+
+- `WooProductDetail` conserva ahora la galeria Woo completa (`images[]` con id/src/name/alt/position), no solo la primera imagen.
+- `woo-hydration.ts` sube a `woo_link_hydration_v3` e hidrata nuevos campos:
+  - `pa_condicion`/atributo condicion -> `football_shirt_details.condicion` si Woo trae nombre humano.
+  - `pa_marca`/atributo marca -> `marca_display` si Woo trae nombre humano.
+  - `medida_axila` -> `ancho_cm`.
+  - `medida_largo` -> `largo_cm`.
+- Si condicion/marca llegan solo como ID numerico y sin nombre de atributo, quedan pendientes con nota; nunca se muestran IDs como texto humano.
+- `Rehidratar desde Woo` rellena marca/condicion/medidas solo si el campo local esta vacio/placeholdereado; no pisa valores manuales.
+- `ManualSeoPanel` muestra "Descripcion actual de Woo" de forma segura, la incluye al copiar el prompt SEO, y permite precargarla en el formulario como base. No crea contenido aprobado ni sobrescribe SEO manual existente.
+- `ItemImagesPanel` muestra "Fotos actuales en Woo" como galeria y anade accion local "Importar fotos de Woo a Studio".
+- `importWooImagesToStudio` hace GET Woo + insert local en `media_assets`; evita duplicados por URL, conserva orden, no borra fotos Studio existentes y no toca Woo ni Storage remoto.
+
+Critico fresco V3:
+
+- `pa_condicion` ignorada: corregido si Woo trae option/nombre; si solo trae ID, queda pendiente con nota.
+- `pa_marca` ignorada: corregido si Woo trae option/nombre; si solo trae ID, queda pendiente con nota.
+- Medidas ACF ignoradas: corregido con normalizacion numerica (`55`, `55.0`, `55 cm`, `55,0`).
+- Descripcion Woo ignorada: corregido como base visible/pre-cargable en SEO manual, sin aprobar automaticamente.
+- Fotos Woo visibles pero no accionables: corregido con galeria + import local a `media_assets`.
+- Sobrescritura de manuales: rehydrate solo rellena vacios/placeholders; SEO Woo no se guarda sin accion de Pablo.
+- Woo writes accidentales: no se anaden PUT/POST/DELETE Woo; las nuevas acciones son GET Woo + Supabase local.
+
+Validacion V3:
+
+- `npm run typecheck`: PASS
+- `npm run lint`: PASS
+- `npm run build`: PASS (9 rutas)
+- `git diff --check`: PASS
+- Secret scan sobre diff/archivos nuevos: CLEAN
+
+No tocado en V3: Woo writes, Supabase remoto por agente, SQL, Vercel, `.env.local`, deploy, push, storefront.

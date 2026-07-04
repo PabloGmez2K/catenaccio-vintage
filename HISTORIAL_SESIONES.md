@@ -2264,3 +2264,25 @@ Validacion: typecheck PASS, lint PASS, build PASS (9 rutas), `git diff --check` 
 
 **Siguiente:** Pablo usa `Rehidratar desde Woo` sobre una ficha vinculada afectada y/o vincula una nueva; debe ver Equipo/Temporada como nombres humanos o pendiente, nunca `170`/`172`, y el coste debe quedar pendiente en el form.
 **agent_events ref:** 2026-07-04T18:13:30Z (WOO_TO_STUDIO_LINK_HYDRATION_FIX_V2)
+
+---
+
+## Sesion WOO_TO_STUDIO_LINK_HYDRATION_FIX_V3
+
+**Fecha:** 2026-07-04
+**Agente:** Codex
+**Modo:** FIX_BLOCKER_FIRST / CODE_ALLOWED / LOCAL_ONLY / WOO_GET_ONLY / NO_WOO_WRITES / NO_DEPLOY / NO_PUSH
+**Resultado:** DONE local — pendiente prueba Pablo
+
+Pablo valido V2 como mucho mejor, pero la ficha Woo->Studio seguia sin traer campos utiles que ya existian en Woo: condicion (`pa_condicion`), marca (`pa_marca`), medidas ACF (`medida_axila`, `medida_largo`), descripcion Woo como base SEO y fotos Woo gestionables desde Studio.
+
+Diagnostico confirmado: `WooProductDetail` ya leia `attributes` como `id/name/slug/options[]`, `meta_data` como mapa y `description`; solo conservaba la primera imagen (`imageSrc`) aunque Woo devuelve `images[]`. `ItemForm` espera condicion como string, marca en `marca_display`, medidas numericas `ancho_cm`/`largo_cm`. SEO manual vive en `ai_suggestions` y solo `editado_aprobado`/`aprobado` alimenta el bridge; no hay estado draft, asi que no se guarda descripcion Woo como aprobada automaticamente.
+
+Implementado: `product-catalog.ts` parsea galeria Woo completa. `woo-hydration.ts` sube a V3 e hidrata condicion/marca si Woo trae nombres humanos por atributo/opcion, medidas ACF con normalizacion numerica, snapshot/notas/event payload actualizados. `Rehidratar desde Woo` rellena estos campos solo si estan vacios/placeholders. `ManualSeoPanel` muestra "Descripcion actual de Woo", la anade al prompt copiado y permite usarla como base del formulario sin sobrescribir contenido aprobado. `ItemImagesPanel` muestra galeria Woo y accion `Importar fotos de Woo a Studio`, que hace GET Woo + insert local en `media_assets`, evita duplicados por URL, conserva orden y no borra fotos Studio existentes.
+
+Critico fresco: se revisaron blockers de pa_condicion/pa_marca/medidas/descripcion/fotos/manual overwrite/IDs numericos/Woo writes/duplicados. Queda aceptado que si marca/condicion llegan solo como ID numerico y Woo no trae option/nombre, se dejan pendientes con nota en vez de inventar o mostrar IDs.
+
+Validacion: typecheck PASS, lint PASS, build PASS (9 rutas), `git diff --check` PASS, secret scan CLEAN. Cero Woo writes ejecutados por el agente; no SQL remoto, no `.env.local`, no deploy, no push.
+
+**Siguiente:** Pablo prueba una ficha afectada con `Rehidratar desde Woo` y una vinculacion nueva: condicion/marca/medidas deben aparecer si Woo las trae; SEO manual debe mostrar descripcion Woo como base; fotos Woo deben verse y poder importarse a Studio sin duplicar.
+**agent_events ref:** 2026-07-04T18:52:00Z (WOO_TO_STUDIO_LINK_HYDRATION_FIX_V3)

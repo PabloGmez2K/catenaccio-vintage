@@ -54,10 +54,13 @@ type LoadedDetails = {
   temporada_display: string | null
   talla: string | null
   condicion: string | null
+  marca_display: string | null
   categoria: number | null
   categoria_display: string | null
   jugador: string | null
   jugador_display: string | null
+  largo_cm: number | null
+  ancho_cm: number | null
 }
 
 type Loaded =
@@ -547,7 +550,7 @@ export async function rehydrateItemFromWoo(itemId: string): Promise<WooSyncResul
     ctx.supabase
       .from('football_shirt_details')
       .select(
-        'liga, liga_display, equipo, equipo_display, temporada, temporada_display, talla, condicion, categoria, categoria_display, jugador, jugador_display'
+        'liga, liga_display, equipo, equipo_display, temporada, temporada_display, talla, condicion, marca_display, categoria, categoria_display, jugador, jugador_display, largo_cm, ancho_cm'
       )
       .eq('item_id', ctx.item.id)
       .eq('owner_id', ctx.userId)
@@ -610,6 +613,18 @@ export async function rehydrateItemFromWoo(itemId: string): Promise<WooSyncResul
   if (!details.condicion?.trim() && hydrated.details.condicion) {
     detailPatch.condicion = hydrated.details.condicion
   }
+  if (isNumericToken(details.condicion) && hydrated.details.condicion) {
+    detailPatch.condicion = hydrated.details.condicion
+  }
+  if (!details.marca_display?.trim() && hydrated.details.marca_display) {
+    detailPatch.marca_display = hydrated.details.marca_display
+  }
+  if (details.ancho_cm == null && hydrated.details.ancho_cm != null) {
+    detailPatch.ancho_cm = hydrated.details.ancho_cm
+  }
+  if (details.largo_cm == null && hydrated.details.largo_cm != null) {
+    detailPatch.largo_cm = hydrated.details.largo_cm
+  }
   if (details.categoria == null && hydrated.details.categoria != null) {
     detailPatch.categoria = hydrated.details.categoria
     detailPatch.categoria_display = hydrated.details.categoria_display
@@ -671,6 +686,101 @@ export async function rehydrateItemFromWoo(itemId: string): Promise<WooSyncResul
     ok: true,
     message:
       `Ficha rehidratada desde Woo (${updatedCount} campos locales revisados). La web no se ha modificado.` +
+      (logged ? '' : LOG_FAILED_SUFFIX),
+  }
+}
+
+// ── 7. Importar referencias de fotos Woo a Studio (GET Woo + Supabase only) ──
+
+function filenameFromWooImage(src: string, id: number | null, index: number): string {
+  try {
+    const pathname = new URL(src).pathname
+    const last = pathname.split('/').filter(Boolean).pop()
+    if (last) return last.slice(0, 180)
+  } catch {
+    // Fall through to deterministic local label.
+  }
+  return `woo-image-${id ?? index + 1}.jpg`
+}
+
+export async function importWooImagesToStudio(itemId: string): Promise<WooSyncResult> {
+  const loaded = await loadLinkedItem(itemId)
+  if (!loaded.ok) return { ok: false, error: loaded.error }
+  const ctx = loaded
+
+  const liveResult = await fetchWooProductDetail(ctx.item.wc_product_id)
+  if (!liveResult.ok) {
+    return { ok: false, error: `No se pudo leer el producto: ${liveResult.message}` }
+  }
+  const live = liveResult.product
+  if (live.images.length === 0) {
+    return { ok: false, error: 'Woo no devuelve fotos para este producto.' }
+  }
+
+  const owned = await ctx.supabase
+    .from('inventory_items')
+    .select('workspace_id')
+    .eq('id', ctx.item.id)
+    .eq('owner_id', ctx.userId)
+    .single()
+  if (owned.error || !owned.data) {
+    return { ok: false, error: 'Item no encontrado o sin acceso.' }
+  }
+
+  const { data: existingRows } = await ctx.supabase
+    .from('media_assets')
+    .select('public_url, sort_order, is_primary')
+    .eq('item_id', ctx.item.id)
+    .eq('owner_id', ctx.userId)
+
+  const existingUrls = new Set((existingRows ?? []).map((row) => row.public_url).filter(Boolean))
+  const hasPrimary = (existingRows ?? []).some((row) => row.is_primary === true)
+  const currentMaxSort = Math.max(-1, ...(existingRows ?? []).map((row) => Number(row.sort_order ?? -1)))
+  const newImages = live.images.filter((image) => !existingUrls.has(image.src))
+
+  if (newImages.length === 0) {
+    return { ok: true, message: 'Las fotos de Woo ya estaban registradas en Studio. No se duplico nada.' }
+  }
+
+  const rows = newImages.map((image, index) => ({
+    item_id: ctx.item.id,
+    workspace_id: owned.data.workspace_id,
+    owner_id: ctx.userId,
+    filename: image.name ?? filenameFromWooImage(image.src, image.id, index),
+    storage_bucket: null,
+    storage_path: null,
+    public_url: image.src,
+    mime_type: null,
+    size_bytes: null,
+    wc_media_id: image.id,
+    upload_status: 'wc_assigned',
+    sort_order: currentMaxSort + index + 1,
+    is_primary: !hasPrimary && index === 0,
+  }))
+
+  const { error: insertError } = await ctx.supabase.from('media_assets').insert(rows)
+  if (insertError) {
+    return { ok: false, error: `No se pudieron importar las fotos: ${insertError.message}` }
+  }
+
+  const logged = await logWooEvent(
+    ctx,
+    'woo_images_imported',
+    `Fotos Woo importadas a Studio como referencias locales: ${rows.length}. La web no se ha modificado.`,
+    {
+      operation: 'importar fotos Woo a Studio',
+      wc_product_id: ctx.item.wc_product_id,
+      imported: rows.length,
+      skipped_duplicates: live.images.length - rows.length,
+      woo_write_attempted: false,
+      wc_media_ids: rows.map((row) => row.wc_media_id).filter(Boolean),
+    }
+  )
+  revalidateItem(itemId)
+  return {
+    ok: true,
+    message:
+      `Fotos Woo importadas a Studio: ${rows.length}. No se ha modificado Woo.` +
       (logged ? '' : LOG_FAILED_SUFFIX),
   }
 }

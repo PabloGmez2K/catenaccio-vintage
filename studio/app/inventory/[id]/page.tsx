@@ -138,6 +138,7 @@ export default async function InventoryItemPage({
           'wc_state_refreshed',
           'created_from_woo',
           'woo_rehydrated',
+          'woo_images_imported',
         ])
         .order('created_at', { ascending: false })
         .limit(8),
@@ -493,13 +494,20 @@ export default async function InventoryItemPage({
           </section>
         )}
 
-        <ItemImagesPanel itemId={data.id} images={images} webImageSrc={wooLive?.imageSrc ?? null} />
+        <ItemImagesPanel
+          itemId={data.id}
+          images={images}
+          webImageSrc={wooLive?.imageSrc ?? null}
+          webImages={wooLive?.images ?? []}
+        />
 
         <ManualSeoPanel
           itemId={data.id}
           promptText={manualSeoPromptText}
           approvedSuggestion={approvedSuggestion}
           precioPubWeb={data.precio_publicado_web != null ? Number(data.precio_publicado_web) : null}
+          wooDescription={wooLive?.description ?? null}
+          wooTitle={wooLive?.name ?? data.referencia ?? null}
         />
 
         <ProductPreflightPanel result={preflight} editHref={`/inventory/${data.id}/edit`} />

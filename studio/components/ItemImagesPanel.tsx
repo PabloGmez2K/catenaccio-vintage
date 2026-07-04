@@ -4,6 +4,7 @@ import { useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/browser'
 import { registerUploadedItemImage, reorderItemImages, deleteItemImage, type ImageActionResult } from '@/app/inventory/image-actions'
+import { importWooImagesToStudio } from '@/app/inventory/[id]/woo-sync-actions'
 import {
   IMAGE_STORAGE_BUCKET,
   IMAGE_MAX_SIZE_BYTES,
@@ -13,6 +14,7 @@ import {
   formatBytes,
 } from '@/lib/media/image-upload'
 import type { MediaAsset } from '@/lib/types'
+import type { WooProductImage } from '@/lib/wc/product-catalog'
 
 // S026A — image pipeline panel for the item detail page. Supabase Storage +
 // media_assets metadata only. NO WordPress, NO WooCommerce, NO publish.
@@ -31,10 +33,12 @@ export function ItemImagesPanel({
   itemId,
   images,
   webImageSrc,
+  webImages = [],
 }: {
   itemId: string
   images: MediaAsset[]
   webImageSrc?: string | null
+  webImages?: WooProductImage[]
 }) {
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -57,6 +61,22 @@ export function ItemImagesPanel({
       const result = await action()
       if (result.ok) {
         setStatusDetail(savedMessage)
+        router.refresh()
+        clearStatusSoon()
+      } else {
+        setError(result.error)
+        setStatusDetail(null)
+      }
+    })
+  }
+
+  function runImportWooImages() {
+    setError(null)
+    setStatusDetail('Importando fotos desde Woo...')
+    startTransition(async () => {
+      const result = await importWooImagesToStudio(itemId)
+      if (result.ok) {
+        setStatusDetail(result.message)
         router.refresh()
         clearStatusSoon()
       } else {
@@ -225,7 +245,7 @@ export function ItemImagesPanel({
   }
 
   function handleDelete(imageId: string, filename: string) {
-    if (!window.confirm(`¿Eliminar "${filename}"?\n\nSe borra del Storage y de Studio. No afecta a Woo/WordPress.`)) {
+    if (!window.confirm(`¿Eliminar "${filename}"?\n\nSe borra de Studio. Si tiene archivo en Storage tambien se elimina. No afecta a Woo/WordPress.`)) {
       return
     }
     runMutation(() => deleteItemImage(itemId, imageId), 'Eliminando foto…', 'Foto eliminada ✓')
@@ -235,7 +255,38 @@ export function ItemImagesPanel({
     <section className="detail-section images-section">
       <h3>Fotos Studio {images.length > 0 && <span className="images-count">({images.length})</span>}</h3>
 
-      {webImageSrc && (
+      {webImages.length > 0 ? (
+        <div className="web-image-available">
+          <div>
+            <span className="web-image-title">Fotos actuales en Woo ({webImages.length})</span>
+            <p className="images-autosave-hint">
+              Disponibles en la web. Puedes importarlas como referencias locales en Studio sin tocar Woo.
+            </p>
+            <button
+              type="button"
+              className="btn-secondary btn-sm"
+              onClick={runImportWooImages}
+              disabled={isPending}
+            >
+              Importar fotos de Woo a Studio
+            </button>
+          </div>
+          <div className="web-image-gallery">
+            {webImages.slice(0, 6).map((image) => (
+              <a
+                key={`${image.id ?? image.src}-${image.position ?? 0}`}
+                href={image.src}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="web-image-link"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={image.src} alt={image.alt ?? ''} className="web-image-thumb" />
+              </a>
+            ))}
+          </div>
+        </div>
+      ) : webImageSrc && (
         <div className="web-image-available">
           <div>
             <span className="web-image-title">Imagen web disponible desde Woo</span>
@@ -286,7 +337,12 @@ export function ItemImagesPanel({
       )}
 
       {images.length === 0 ? (
-        <p className="images-empty">Sin fotos todavía. Sube al menos una para completar la ficha.</p>
+        <p className="images-empty">
+          Sin fotos Studio todavía.
+          {webImages.length > 0
+            ? ' Hay fotos en Woo disponibles arriba; puedes importarlas o subir fotos definitivas.'
+            : ' Sube al menos una para completar la ficha.'}
+        </p>
       ) : (
         <div className="images-grid">
           {images.map((img, index) => (

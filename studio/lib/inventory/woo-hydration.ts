@@ -3,7 +3,7 @@ import type { WooProductDetail } from '@/lib/wc/product-catalog'
 import type { CachedTaxonomySlug, CachedTermsBySlug } from '@/lib/wc/term-cache'
 import type { ItemStatus, WcCategoryCacheRow } from '@/lib/types'
 
-export const WOO_LINK_HYDRATION_VERSION = 'woo_link_hydration_v2'
+export const WOO_LINK_HYDRATION_VERSION = 'woo_link_hydration_v3'
 
 type ResolvedTerm = {
   id: string | null
@@ -20,10 +20,13 @@ type HydratedDetails = {
   temporada_display: string | null
   talla: string
   condicion: string
+  marca_display: string | null
   categoria: number | null
   categoria_display: string | null
   jugador: string | null
   jugador_display: string | null
+  largo_cm: number | null
+  ancho_cm: number | null
 }
 
 export type WooHydrationResult = {
@@ -50,6 +53,15 @@ function metaText(meta: WooProductDetail['metaData'], key: string): string | nul
     return first != null ? String(first).trim() || null : null
   }
   return null
+}
+
+function metaNumber(meta: WooProductDetail['metaData'], key: string): number | null {
+  const raw = metaText(meta, key)
+  if (!raw) return null
+  const normalized = raw.replace(',', '.').replace(/\s*cm\s*$/i, '').trim()
+  if (!/^\d+(?:\.\d+)?$/.test(normalized)) return null
+  const value = Number(normalized)
+  return Number.isFinite(value) ? value : null
 }
 
 function inferSizeFromTitle(title: string): string | null {
@@ -147,8 +159,8 @@ function buildInternalNotes(live: WooProductDetail, inferredSize: string | null,
   if (live.status === 'publish' && live.stockStatus === 'outofstock') {
     lines.push('Revisar: la web esta publicada pero agotada; Studio no la marca como activa normal.')
   }
-  if (live.imageSrc) {
-    lines.push('Imagen web disponible desde Woo; no se ha copiado a Fotos Studio.')
+  if (live.images.length > 0) {
+    lines.push(`Imagenes web disponibles desde Woo: ${live.images.length}. No se han copiado a Fotos Studio automaticamente.`)
   }
   if (inferredSize) {
     lines.push(`Talla inferida del titulo: ${inferredSize}. Revisar antes de publicar cambios.`)
@@ -167,7 +179,7 @@ function buildInternalNotes(live: WooProductDetail, inferredSize: string | null,
     lines.push(...pendingNotes)
   }
 
-  const usefulMetaKeys = ['liga', 'equipo', 'ano_temporada', 'talla', 'condicion', 'jugador'].filter(
+  const usefulMetaKeys = ['liga', 'equipo', 'ano_temporada', 'talla', 'condicion', 'marca', 'medida_axila', 'medida_largo', 'jugador'].filter(
     (key) => metaText(live.metaData, key) != null
   )
   if (usefulMetaKeys.length > 0) {
@@ -187,7 +199,18 @@ export function buildWooHydration(
   const referencia = live.name.trim().slice(0, 200) || `Producto web ${live.id}`
   const inferredSize = inferSizeFromTitle(referencia)
   const importedSize = metaText(live.metaData, 'talla') ?? inferredSize ?? ''
-  const importedCondition = metaText(live.metaData, 'condicion') ?? ''
+  const conditionMeta = metaText(live.metaData, 'condicion')
+  const conditionAttribute = attributeOption(live, ['condicion', 'condition'])
+  const conditionDisplay =
+    conditionAttribute && !isNumericToken(conditionAttribute) ? conditionAttribute : null
+  const importedCondition =
+    conditionDisplay ?? (conditionMeta && !isNumericToken(conditionMeta) ? conditionMeta : '')
+  const brandMeta = metaText(live.metaData, 'marca')
+  const brandAttribute = attributeOption(live, ['marca', 'brand', 'fabricante'])
+  const brandDisplay = brandAttribute && !isNumericToken(brandAttribute) ? brandAttribute : null
+  const importedBrand = brandDisplay ?? (brandMeta && !isNumericToken(brandMeta) ? brandMeta : null)
+  const anchoCm = metaNumber(live.metaData, 'medida_axila')
+  const largoCm = metaNumber(live.metaData, 'medida_largo')
   const category = live.categories.find((cat) => cat.id > 0) ?? null
   const cachedCategory = category ? categories.find((c) => c.id === category.id) : null
 
@@ -207,7 +230,35 @@ export function buildWooHydration(
     attributeOption(live, ['jugador']),
     'Jugador'
   )
-  const pendingNotes = [league.note, team.note, season.note, player.note].filter(
+  const conditionRawId =
+    conditionMeta && isNumericToken(conditionMeta)
+      ? conditionMeta
+      : conditionAttribute && isNumericToken(conditionAttribute)
+        ? conditionAttribute
+        : null
+  const brandRawId =
+    brandMeta && isNumericToken(brandMeta)
+      ? brandMeta
+      : brandAttribute && isNumericToken(brandAttribute)
+        ? brandAttribute
+        : null
+  const conditionNote =
+    conditionRawId && !conditionDisplay
+      ? `Condicion: Woo trae ID ${conditionRawId}, pero no hay nombre de atributo en el payload. Campo dejado pendiente.`
+      : null
+  const brandNote =
+    brandRawId && !brandDisplay
+      ? `Marca: Woo trae ID ${brandRawId}, pero no hay nombre de atributo en el payload. Campo dejado pendiente.`
+      : null
+  const measureNotes = [
+    metaText(live.metaData, 'medida_axila') && anchoCm == null
+      ? `Ancho: Woo trae "${metaText(live.metaData, 'medida_axila')}", pero no es numerico. Campo dejado pendiente.`
+      : null,
+    metaText(live.metaData, 'medida_largo') && largoCm == null
+      ? `Largo: Woo trae "${metaText(live.metaData, 'medida_largo')}", pero no es numerico. Campo dejado pendiente.`
+      : null,
+  ]
+  const pendingNotes = [league.note, team.note, season.note, player.note, conditionNote, brandNote, ...measureNotes].filter(
     (note): note is string => Boolean(note)
   )
 
@@ -221,10 +272,13 @@ export function buildWooHydration(
     temporada_display: season.display,
     talla: importedSize,
     condicion: isNumericToken(importedCondition) ? '' : importedCondition,
+    marca_display: importedBrand,
     categoria: category?.id ?? null,
     categoria_display: cachedCategory?.name ?? category?.name ?? null,
     jugador: player.id,
     jugador_display: player.display,
+    largo_cm: largoCm,
+    ancho_cm: anchoCm,
   }
 
   const snapshot = {
@@ -241,6 +295,7 @@ export function buildWooHydration(
       sale_price: live.salePrice,
       permalink: live.permalink,
       image_src: live.imageSrc,
+      images: live.images,
       categories: live.categories,
       attributes: live.attributes,
       meta_subset: {
@@ -249,6 +304,9 @@ export function buildWooHydration(
         ano_temporada: metaText(live.metaData, 'ano_temporada'),
         talla: importedSize || null,
         condicion: importedCondition || null,
+        marca: importedBrand,
+        medida_axila: metaText(live.metaData, 'medida_axila'),
+        medida_largo: metaText(live.metaData, 'medida_largo'),
         jugador: metaText(live.metaData, 'jugador'),
       },
       resolved_terms: {
@@ -274,6 +332,7 @@ export function buildWooHydration(
       stock_web: live.stockStatus,
       precio_web: webPrice,
       imagen_web_disponible: live.imageSrc != null,
+      imagenes_web: live.images.length,
       import_version: WOO_LINK_HYDRATION_VERSION,
       wc_status: mapWooStatusToMirror(live.status),
       pending_term_notes: pendingNotes,

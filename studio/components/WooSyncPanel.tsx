@@ -40,6 +40,7 @@ const LOG_LABELS: Record<string, string> = {
   wc_state_refreshed: 'Estado local actualizado',
   created_from_woo: 'Ficha creada desde la web',
   woo_rehydrated: 'Ficha rehidratada desde Woo',
+  woo_images_imported: 'Fotos Woo importadas a Studio',
 }
 
 const WOO_STATUS_LABELS: Record<string, string> = {

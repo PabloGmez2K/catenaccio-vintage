@@ -18,6 +18,7 @@ export interface WooCatalogProduct {
   dateCreated: string | null
   dateModified: string | null
   imageSrc: string | null
+  images: WooProductImage[]
   categories: WooProductCategory[]
   attributes: WooProductAttribute[]
 }
@@ -45,7 +46,7 @@ type WcProductRaw = {
   manage_stock?: boolean
   date_created?: string
   date_modified?: string
-  images?: Array<{ id?: number; src?: string }>
+  images?: Array<{ id?: number; src?: string; name?: string; alt?: string; position?: number }>
   categories?: Array<{ id?: number; name?: string; slug?: string }>
   attributes?: Array<{ id?: number; name?: string; slug?: string; options?: string[] }>
 }
@@ -61,6 +62,14 @@ export interface WooProductAttribute {
   name: string
   slug: string | null
   options: string[]
+}
+
+export interface WooProductImage {
+  id: number | null
+  src: string
+  name: string | null
+  alt: string | null
+  position: number
 }
 
 // Keep the payload lean: we only read what the stock manager screen shows.
@@ -172,9 +181,28 @@ function parseProduct(raw: WcProductRaw): WooCatalogProduct | null {
     dateCreated: raw.date_created ?? null,
     dateModified: raw.date_modified ?? null,
     imageSrc: raw.images?.[0]?.src ?? null,
+    images: parseImages(raw.images),
     categories: parseCategories(raw.categories),
     attributes: parseAttributes(raw.attributes),
   }
+}
+
+function parseImages(raw: WcProductRaw['images']): WooProductImage[] {
+  if (!Array.isArray(raw)) return []
+  return raw
+    .map((image, index) => {
+      const src = typeof image.src === 'string' ? image.src.trim() : ''
+      if (!src) return null
+      return {
+        id: typeof image.id === 'number' && image.id > 0 ? image.id : null,
+        src,
+        name: typeof image.name === 'string' && image.name.trim() ? image.name.trim() : null,
+        alt: typeof image.alt === 'string' && image.alt.trim() ? image.alt.trim() : null,
+        position: typeof image.position === 'number' ? image.position : index,
+      }
+    })
+    .filter((image): image is WooProductImage => image !== null)
+    .sort((a, b) => (a.position ?? 0) - (b.position ?? 0))
 }
 
 function parseCategories(raw: WcProductRaw['categories']): WooProductCategory[] {

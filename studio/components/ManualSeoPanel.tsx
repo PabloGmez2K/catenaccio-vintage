@@ -10,13 +10,21 @@ export function ManualSeoPanel({
   promptText,
   approvedSuggestion,
   precioPubWeb,
+  wooDescription,
+  wooTitle,
 }: {
   itemId: string
   promptText: string
   approvedSuggestion: AiSuggestion | null
   precioPubWeb: number | null
+  wooDescription?: string | null
+  wooTitle?: string | null
 }) {
   const router = useRouter()
+  const wooDescriptionText = htmlToPlainText(wooDescription ?? '')
+  const promptWithWooBase = wooDescriptionText
+    ? `${promptText}\n\n[DESCRIPCION ACTUAL EN WOO - USAR COMO BASE]\n${wooDescriptionText}`
+    : promptText
 
   const [copied, setCopied] = useState(false)
   const [showPrompt, setShowPrompt] = useState(false)
@@ -32,7 +40,7 @@ export function ManualSeoPanel({
 
   async function handleCopy() {
     try {
-      await navigator.clipboard.writeText(promptText)
+      await navigator.clipboard.writeText(promptWithWooBase)
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch {
@@ -65,6 +73,12 @@ export function ManualSeoPanel({
         router.refresh()
       }
     })
+  }
+
+  function useWooDescriptionAsBase() {
+    if (!titulo.trim() && wooTitle?.trim()) setTitulo(wooTitle.trim())
+    setDescripcion(wooDescriptionText)
+    setShowForm(true)
   }
 
   return (
@@ -116,6 +130,27 @@ export function ManualSeoPanel({
         </div>
       )}
 
+      {wooDescriptionText && (
+        <div className="manual-seo-woo-base">
+          <div className="manual-seo-field">
+            <span className="manual-seo-label">Descripcion actual de Woo</span>
+            <p className="manual-seo-value manual-seo-value--body">{wooDescriptionText}</p>
+          </div>
+          {!approvedSuggestion && (
+            <p className="manual-seo-field-hint">
+              Descripcion importada desde Woo como base. Puedes mejorarla con el prompt SEO antes de sincronizar.
+            </p>
+          )}
+          <button
+            type="button"
+            className="btn-secondary btn-sm"
+            onClick={useWooDescriptionAsBase}
+          >
+            Usar descripcion Woo como base
+          </button>
+        </div>
+      )}
+
       {/* ── Prompt copy section (always visible) ──────────────── */}
       <div className="manual-seo-actions-row">
         <button
@@ -149,7 +184,7 @@ export function ManualSeoPanel({
         <textarea
           className="manual-seo-prompt-textarea"
           readOnly
-          value={promptText}
+          value={promptWithWooBase}
           rows={14}
           onClick={e => (e.target as HTMLTextAreaElement).select()}
         />
@@ -235,4 +270,19 @@ export function ManualSeoPanel({
       )}
     </section>
   )
+}
+
+function htmlToPlainText(html: string): string {
+  return html
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>/gi, '\n\n')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/&lt;/gi, '<')
+    .replace(/&gt;/gi, '>')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
 }
