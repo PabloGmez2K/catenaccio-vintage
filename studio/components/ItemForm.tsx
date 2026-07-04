@@ -52,6 +52,7 @@ export interface ItemFormDefaults {
   condicion_notas?: string
   autenticidad?: string
   coste?: string
+  cost_pending?: boolean
   precio_objetivo?: string
   fecha_compra?: string
   proveedor?: string
@@ -153,7 +154,7 @@ export function ItemForm({
   const [anchoCm, setAnchoCm] = useState(defaultValues.ancho_cm ?? '')
   const [condicionNotas, setCondicionNotas] = useState(defaultValues.condicion_notas ?? '')
   const [autenticidad, setAutenticidad] = useState(defaultValues.autenticidad ?? '')
-  const [coste, setCoste] = useState(defaultValues.coste ?? '')
+  const [coste, setCoste] = useState(defaultValues.cost_pending ? '' : (defaultValues.coste ?? ''))
   const [precioObjetivo, setPrecioObjetivo] = useState(defaultValues.precio_objetivo ?? '')
   const [fechaCompra, setFechaCompra] = useState(defaultValues.fecha_compra ?? TODAY)
   const [proveedor, setProveedor] = useState(defaultValues.proveedor ?? '')
@@ -712,9 +713,15 @@ export function ItemForm({
                 step="0.01"
                 value={coste}
                 onChange={(e) => setCoste(e.target.value)}
-                placeholder="0.00"
+                placeholder={defaultValues.cost_pending ? 'Pendiente' : '0.00'}
               />
               <FieldError msg={fe.coste} />
+              {defaultValues.cost_pending && (
+                <p className="field-help">
+                  Coste pendiente importado desde Woo. El 0 guardado es tecnico; introduce el
+                  coste real antes de operar margenes.
+                </p>
+              )}
             </div>
 
             <div className="form-field">

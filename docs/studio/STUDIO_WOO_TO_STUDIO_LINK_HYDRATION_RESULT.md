@@ -82,3 +82,32 @@ No debe pasar:
 ## No Tocado
 
 Woo writes, Supabase remoto, SQL, Vercel, `.env.local`, deploy y push.
+
+## V2 - Rehidratacion Tras Prueba Real
+
+**Continuacion:** WOO_TO_STUDIO_LINK_HYDRATION_FIX_V2
+**Fecha:** 2026-07-04
+**Resultado:** DONE local, pendiente prueba Pablo.
+
+Pablo valido el commit inicial `be88a08` como PARTIAL. La ficha nueva ya no estaba vacia, pero el formulario mostraba `170` como Equipo y `172` como Temporada. Causa raiz: V1 copio los term IDs de `meta_data` (`equipo`, `ano_temporada`) a `football_shirt_details.equipo/temporada` y dejo `*_display` vacio; la pagina de edicion hacia fallback de `*_display` a los campos ID, asi que el input humano interpretaba esos numeros como texto nuevo.
+
+Cambios V2:
+
+- Nuevo helper `studio/lib/inventory/woo-hydration.ts` para resolver Woo detail GET hacia datos Studio.
+- IDs numericos de `pa_equipo`, `pa_ano`, `pa_liga`, `pa_jugador` se resuelven contra `wc_terms`; si no resuelven, no se muestran como texto humano y queda nota pendiente.
+- Caso documentado por repo: `pa_equipo` ID `170` -> `FC Barcelona`; `pa_ano` ID `172` -> `2000-01`.
+- `linkWooProductToStudio` reutiliza el helper V2; no copia IDs crudos a campos display.
+- Nueva accion `rehydrateItemFromWoo`: GET Woo + Supabase local only. Corrige fichas ya vinculadas con placeholders o IDs numericos sin sobreescribir campos humanos completados manualmente.
+- `WooSyncPanel` muestra accion confirmada `Rehidratar desde Woo`; el copy explicita que no modifica Woo.
+- Edicion de item: el coste pendiente importado desde Woo se muestra vacio con placeholder/help text, no como `0` real.
+- Detalle/edicion dejan de hacer fallback visible de Equipo/Temporada a IDs numericos.
+
+Validacion V2:
+
+- `npm run typecheck`: PASS
+- `npm run lint`: PASS
+- `npm run build`: PASS (9 rutas)
+- `git diff --check`: PASS
+- Secret scan sobre diff/archivos nuevos: CLEAN
+
+No tocado en V2: Woo writes, Supabase remoto, SQL, Vercel, `.env.local`, deploy, push, storefront.

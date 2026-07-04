@@ -4,6 +4,7 @@ import { AppShell } from '@/components/AppShell'
 import { ErrorState } from '@/components/ErrorState'
 import { ItemForm, type ItemFormDefaults } from '@/components/ItemForm'
 import { getCategorySelectorData } from '@/lib/wc/category-cache'
+import { isPendingImportedCost } from '@/lib/inventory/cost'
 import { loadTermOptions } from '@/lib/wc/term-options'
 
 export default async function EditItemPage({
@@ -43,6 +44,7 @@ export default async function EditItemPage({
   }
 
   const shirt = data.football_shirt_details
+  const costPending = isPendingImportedCost(Number(data.coste), data.notas_internas ?? null)
 
   const [{ options: categoryOptions, recommendedNames }, termOptions] = await Promise.all([
     getCategorySelectorData(supabase),
@@ -51,7 +53,8 @@ export default async function EditItemPage({
 
   const defaultValues: ItemFormDefaults = {
     referencia: data.referencia ?? '',
-    coste: data.coste != null ? String(data.coste) : '',
+    coste: costPending ? '' : data.coste != null ? String(data.coste) : '',
+    cost_pending: costPending,
     precio_objetivo: data.precio_objetivo != null ? String(data.precio_objetivo) : '',
     fecha_compra: data.fecha_compra ?? '',
     proveedor: data.proveedor ?? '',
@@ -59,8 +62,8 @@ export default async function EditItemPage({
     notas_internas: data.notas_internas ?? '',
     // Shirt fields — use defaults if shirt row exists
     liga_display: shirt?.liga_display ?? '',
-    equipo_display: shirt?.equipo_display ?? shirt?.equipo ?? '',
-    temporada_display: shirt?.temporada_display ?? shirt?.temporada ?? '',
+    equipo_display: shirt?.equipo_display ?? '',
+    temporada_display: shirt?.temporada_display ?? '',
     marca_display: shirt?.marca_display ?? '',
     talla: shirt?.talla ?? '',
     condicion: shirt?.condicion ?? '',

@@ -17,12 +17,19 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { fetchWooProductDetail } from '@/lib/wc/product-catalog'
 import {
+  buildWooHydration,
+  isNumericToken,
+  WOO_LINK_HYDRATION_VERSION,
+} from '@/lib/inventory/woo-hydration'
+import {
   formatWooPrice,
   trashWooProduct,
   updateWooProduct,
   TRASH_VETOED_PRODUCT_IDS,
 } from '@/lib/wc/write-client'
 import { mapWooStatusToMirror, normalizeDescription } from '@/lib/inventory/woo-diff'
+import { loadCachedCategories } from '@/lib/wc/category-cache'
+import { loadCachedTerms } from '@/lib/wc/term-cache'
 
 export type WooSyncResult =
   | { ok: true; message: string }
@@ -36,6 +43,21 @@ type LoadedItem = {
   wc_product_id: number
   wc_status: string
   precio_publicado_web: number | null
+}
+
+type LoadedDetails = {
+  liga: string | null
+  liga_display: string | null
+  equipo: string | null
+  equipo_display: string | null
+  temporada: string | null
+  temporada_display: string | null
+  talla: string | null
+  condicion: string | null
+  categoria: number | null
+  categoria_display: string | null
+  jugador: string | null
+  jugador_display: string | null
 }
 
 type Loaded =
@@ -139,6 +161,47 @@ function revalidateItem(itemId: string) {
   revalidatePath('/inventory')
   revalidatePath(`/inventory/${itemId}`)
   revalidatePath('/inventory/woo')
+}
+
+function hasHumanText(value: string | null | undefined): boolean {
+  return Boolean(value?.trim()) && !isNumericToken(value)
+}
+
+function shouldHydrateTerm(currentId: string | null, currentDisplay: string | null): boolean {
+  return (
+    !hasHumanText(currentDisplay) ||
+    isNumericToken(currentDisplay) ||
+    (isNumericToken(currentId) && !hasHumanText(currentDisplay))
+  )
+}
+
+function appendRehydrationNotes(existing: string | null, hydrationNotes: string): string {
+  const marker = `Rehidratacion Woo (${WOO_LINK_HYDRATION_VERSION})`
+  if (!existing?.trim()) return `${marker}:\n${hydrationNotes}`
+  if (existing.includes(marker)) return existing
+  return `${existing.trim()}\n\n${marker}:\n${hydrationNotes}`
+}
+
+function applyTermPatch(
+  patch: Record<string, unknown>,
+  idField: string,
+  displayField: string,
+  currentId: string | null,
+  currentDisplay: string | null,
+  nextId: string | null,
+  nextDisplay: string | null,
+  required: boolean
+) {
+  if (!shouldHydrateTerm(currentId, currentDisplay)) return
+  if (nextDisplay) {
+    patch[idField] = nextId ?? (required ? '' : null)
+    patch[displayField] = nextDisplay
+    return
+  }
+  if (isNumericToken(currentId) || isNumericToken(currentDisplay)) {
+    patch[idField] = required ? '' : null
+    patch[displayField] = null
+  }
 }
 
 // ── 1. Precio: Studio → Woo (PUT regular_price) ───────────────────────────────
@@ -456,4 +519,158 @@ export async function refreshLocalWooMirror(itemId: string): Promise<WooSyncResu
   })
   revalidateItem(itemId)
   return { ok: true, message: 'Estado local actualizado desde la web.' }
+}
+
+// ── 6. Rehidratar datos Studio desde Woo (GET Woo + Supabase local only) ─────
+
+export async function rehydrateItemFromWoo(itemId: string): Promise<WooSyncResult> {
+  const loaded = await loadLinkedItem(itemId)
+  if (!loaded.ok) return { ok: false, error: loaded.error }
+  const ctx = loaded
+
+  const liveResult = await fetchWooProductDetail(ctx.item.wc_product_id)
+  if (!liveResult.ok) {
+    return { ok: false, error: `No se pudo leer el producto: ${liveResult.message}` }
+  }
+  const live = liveResult.product
+  if (live.status === 'trash') {
+    return { ok: false, error: 'El producto esta en la papelera de la web; no se rehidrata la ficha.' }
+  }
+
+  const [{ data: currentItem }, { data: currentDetails }, terms, categories] = await Promise.all([
+    ctx.supabase
+      .from('inventory_items')
+      .select('id, status, notas_internas, precio_publicado_web')
+      .eq('id', ctx.item.id)
+      .eq('owner_id', ctx.userId)
+      .single(),
+    ctx.supabase
+      .from('football_shirt_details')
+      .select(
+        'liga, liga_display, equipo, equipo_display, temporada, temporada_display, talla, condicion, categoria, categoria_display, jugador, jugador_display'
+      )
+      .eq('item_id', ctx.item.id)
+      .eq('owner_id', ctx.userId)
+      .single(),
+    loadCachedTerms(ctx.supabase, ['pa_liga', 'pa_equipo', 'pa_ano', 'pa_jugador']),
+    loadCachedCategories(ctx.supabase),
+  ])
+
+  if (!currentItem || !currentDetails) {
+    return { ok: false, error: 'No se pudo leer la ficha local antes de rehidratar.' }
+  }
+
+  const now = new Date().toISOString()
+  const hydrated = buildWooHydration(live, terms, categories, now)
+  const details = currentDetails as LoadedDetails
+  const detailPatch: Record<string, unknown> = {}
+
+  applyTermPatch(
+    detailPatch,
+    'liga',
+    'liga_display',
+    details.liga,
+    details.liga_display,
+    hydrated.details.liga,
+    hydrated.details.liga_display,
+    false
+  )
+  applyTermPatch(
+    detailPatch,
+    'equipo',
+    'equipo_display',
+    details.equipo,
+    details.equipo_display,
+    hydrated.details.equipo || null,
+    hydrated.details.equipo_display,
+    true
+  )
+  applyTermPatch(
+    detailPatch,
+    'temporada',
+    'temporada_display',
+    details.temporada,
+    details.temporada_display,
+    hydrated.details.temporada || null,
+    hydrated.details.temporada_display,
+    true
+  )
+  applyTermPatch(
+    detailPatch,
+    'jugador',
+    'jugador_display',
+    details.jugador,
+    details.jugador_display,
+    hydrated.details.jugador,
+    hydrated.details.jugador_display,
+    false
+  )
+
+  if (!details.talla?.trim() && hydrated.details.talla) detailPatch.talla = hydrated.details.talla
+  if (!details.condicion?.trim() && hydrated.details.condicion) {
+    detailPatch.condicion = hydrated.details.condicion
+  }
+  if (details.categoria == null && hydrated.details.categoria != null) {
+    detailPatch.categoria = hydrated.details.categoria
+    detailPatch.categoria_display = hydrated.details.categoria_display
+  }
+
+  const itemPatch: Record<string, unknown> = {
+    wc_status: mapWooStatusToMirror(live.status),
+    wc_error: null,
+    wc_last_sync_at: now,
+    wc_payload_snapshot: hydrated.snapshot,
+    notas_internas: appendRehydrationNotes(currentItem.notas_internas ?? null, hydrated.notes),
+  }
+  if (currentItem.precio_publicado_web == null && hydrated.webPrice != null) {
+    itemPatch.precio_publicado_web = hydrated.webPrice
+  }
+  if (
+    (currentItem.status === 'publicada_web' || currentItem.status === 'borrador_web') &&
+    hydrated.status !== currentItem.status
+  ) {
+    itemPatch.status = hydrated.status
+  }
+
+  const { error: itemError } = await ctx.supabase
+    .from('inventory_items')
+    .update(itemPatch)
+    .eq('id', ctx.item.id)
+    .eq('owner_id', ctx.userId)
+  if (itemError) {
+    return { ok: false, error: `No se pudo actualizar la ficha local: ${itemError.message}` }
+  }
+
+  if (Object.keys(detailPatch).length > 0) {
+    const { error: detailsError } = await ctx.supabase
+      .from('football_shirt_details')
+      .update(detailPatch)
+      .eq('item_id', ctx.item.id)
+      .eq('owner_id', ctx.userId)
+    if (detailsError) {
+      return { ok: false, error: `No se pudieron actualizar los detalles locales: ${detailsError.message}` }
+    }
+  }
+
+  const logged = await logWooEvent(
+    ctx,
+    'woo_rehydrated',
+    'Ficha rehidratada desde Woo. No se ha modificado la web.',
+    {
+      ...hydrated.eventPayload,
+      operation: 'rehidratar desde Woo',
+      updated_detail_fields: Object.keys(detailPatch),
+      updated_item_fields: Object.keys(itemPatch),
+      woo_write_attempted: false,
+    }
+  )
+  revalidateItem(itemId)
+
+  const updatedCount = Object.keys(detailPatch).length + Object.keys(itemPatch).length
+  return {
+    ok: true,
+    message:
+      `Ficha rehidratada desde Woo (${updatedCount} campos locales revisados). La web no se ha modificado.` +
+      (logged ? '' : LOG_FAILED_SUFFIX),
+  }
 }

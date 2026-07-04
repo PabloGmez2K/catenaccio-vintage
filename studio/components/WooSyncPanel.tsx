@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   refreshLocalWooMirror,
+  rehydrateItemFromWoo,
   syncWooDescription,
   syncWooPrice,
   syncWooStockOut,
@@ -20,7 +21,7 @@ import type { WooDiffResult } from '@/lib/inventory/woo-diff'
 // confirm() dialogs for web writes. Results and errors stay visible, and the
 // persistent log (item_lifecycle_events) renders below.
 
-type WooAction = 'price' | 'stock' | 'description' | 'trash'
+type WooAction = 'price' | 'stock' | 'description' | 'trash' | 'rehydrate'
 
 export interface WooLogEntry {
   id: string
@@ -38,6 +39,7 @@ const LOG_LABELS: Record<string, string> = {
   wc_sync_error: 'Error de sincronización',
   wc_state_refreshed: 'Estado local actualizado',
   created_from_woo: 'Ficha creada desde la web',
+  woo_rehydrated: 'Ficha rehidratada desde Woo',
 }
 
 const WOO_STATUS_LABELS: Record<string, string> = {
@@ -235,6 +237,45 @@ export function WooSyncPanel({
               {runningAction === 'mirror' ? 'Actualizando…' : 'Actualizar estado local'}
             </button>
           )}
+
+          <div className="woo-action">
+            {armed !== 'rehydrate' ? (
+              <button
+                type="button"
+                className="btn-secondary btn-sm"
+                onClick={() => setArmed('rehydrate')}
+                disabled={busy}
+              >
+                Rehidratar desde Woo
+              </button>
+            ) : (
+              <div className="woo-confirm">
+                <p className="woo-confirm-text">
+                  Lee de nuevo el producto <strong>#{wcProductId}</strong> y corrige datos locales
+                  pendientes o importados como IDs. No modifica Woo y no sobreescribe campos humanos
+                  completados a mano.
+                </p>
+                <div className="woo-confirm-actions">
+                  <button
+                    type="button"
+                    className="btn-primary btn-sm"
+                    onClick={() => run('rehydrate', () => rehydrateItemFromWoo(itemId))}
+                    disabled={busy}
+                  >
+                    Confirmar rehidratacion
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-secondary btn-sm"
+                    onClick={() => setArmed(null)}
+                    disabled={busy}
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
 
           {diff.canSyncPrice && studioPrice != null && (
             <div className="woo-action">

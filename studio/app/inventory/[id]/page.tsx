@@ -39,6 +39,11 @@ function formatAuthenticityLabel(value: string | null): string {
   return value
 }
 
+function displayTermValue(display: string | null): string {
+  if (!display?.trim()) return 'Pendiente de mapear'
+  return /^\d+$/.test(display.trim()) ? 'Pendiente de mapear' : display
+}
+
 export default async function InventoryItemPage({
   params,
 }: {
@@ -132,6 +137,7 @@ export default async function InventoryItemPage({
           'wc_sync_error',
           'wc_state_refreshed',
           'created_from_woo',
+          'woo_rehydrated',
         ])
         .order('created_at', { ascending: false })
         .limit(8),
@@ -391,15 +397,11 @@ export default async function InventoryItemPage({
             {/* Catalogue taxonomy */}
             <div className="field-row">
               <span className="field-label">Equipo</span>
-              <span className="field-value">
-                {shirt.equipo_display ?? shirt.equipo}
-              </span>
+              <span className="field-value">{displayTermValue(shirt.equipo_display)}</span>
             </div>
             <div className="field-row">
               <span className="field-label">Temporada</span>
-              <span className="field-value">
-                {shirt.temporada_display ?? shirt.temporada}
-              </span>
+              <span className="field-value">{displayTermValue(shirt.temporada_display)}</span>
             </div>
             <div className="field-row">
               <span className="field-label">Talla</span>

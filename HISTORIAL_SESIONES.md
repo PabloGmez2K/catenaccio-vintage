@@ -2244,3 +2244,23 @@ Validacion: typecheck PASS, lint PASS, build PASS, `git diff --check` PASS, secr
 
 **Siguiente:** Pablo prueba desde `/inventory/woo` con Woo product #1792 (`2014-15 France Away Shirt - (XXL)`, publicado agotado, EUR 45) o equivalente y confirma que la ficha creada no es placeholder vacio ni enganosa.
 **agent_events ref:** 2026-07-04T17:52:16Z (WOO_TO_STUDIO_LINK_HYDRATION_FIX)
+
+---
+
+## Sesion WOO_TO_STUDIO_LINK_HYDRATION_FIX_V2
+
+**Fecha:** 2026-07-04
+**Agente:** Codex
+**Modo:** FIX_BLOCKER_FIRST / CODE_ALLOWED / LOCAL_ONLY / WOO_GET_ONLY / NO_WOO_WRITES / NO_DEPLOY / NO_PUSH
+**Resultado:** DONE local — pendiente prueba Pablo
+
+Pablo valido `be88a08` como PARTIAL: la ficha nueva ya no estaba vacia, pero Equipo aparecia como `170`, Temporada como `172`, el formulario los trataba como terminos nuevos de texto, y Coste seguia pareciendo `0` real en edicion. Diagnostico confirmado: V1 guardaba los meta IDs Woo en `football_shirt_details.equipo/temporada` y dejaba `*_display` vacio; la pagina de edicion hacia fallback de `*_display` a los campos ID.
+
+Se creo `studio/lib/inventory/woo-hydration.ts` como helper comun para `linkWooProductToStudio` y la nueva accion `rehydrateItemFromWoo`. La hidratacion resuelve IDs numericos de `pa_equipo`, `pa_ano`, `pa_liga` y `pa_jugador` contra `wc_terms`; si no resuelve, deja el campo pendiente y anota el bloqueo, nunca muestra el ID como texto humano. Caso cubierto por cache/documentacion del repo: `170` -> FC Barcelona y `172` -> 2000-01. La rehidratacion lee Woo por GET y solo escribe local en Supabase; rellena placeholders/IDs numericos, pero no sobreescribe campos humanos completados manualmente.
+
+`WooSyncPanel` suma la accion confirmada `Rehidratar desde Woo`, con copy explicito de que no modifica Woo. La edicion de item ya no muestra el coste tecnico `0`: si el coste importado esta pendiente, el input queda vacio con placeholder/help text. La ficha de detalle y la edicion dejan de hacer fallback visible de Equipo/Temporada a IDs numericos.
+
+Validacion: typecheck PASS, lint PASS, build PASS (9 rutas), `git diff --check` PASS, secret scan CLEAN. Cero Woo writes ejecutados por el agente; no SQL, no Supabase remoto, no `.env.local`, no deploy, no push.
+
+**Siguiente:** Pablo usa `Rehidratar desde Woo` sobre una ficha vinculada afectada y/o vincula una nueva; debe ver Equipo/Temporada como nombres humanos o pendiente, nunca `170`/`172`, y el coste debe quedar pendiente en el form.
+**agent_events ref:** 2026-07-04T18:13:30Z (WOO_TO_STUDIO_LINK_HYDRATION_FIX_V2)
