@@ -10,11 +10,8 @@ import {
   deriveWebChannel,
   requiresAction,
 } from '@/lib/inventory/operational-view'
+import { isPendingImportedCost } from '@/lib/inventory/cost'
 
-// One inventory row. Desktop renders the dense table row unchanged; on mobile
-// the row collapses to a COMPACT line (thumb + reference + key badges + price)
-// and tapping it expands the remaining fields and actions — Pablo's requested
-// mobile pattern, replacing the long always-open cards.
 export function InventoryRow({
   item,
   thumbUrl,
@@ -37,9 +34,10 @@ export function InventoryRow({
   const web = deriveWebChannel(op)
   const action = requiresAction(op)
   const sold = item.status === 'vendida'
+  const costPending = isPendingImportedCost(Number(item.coste), item.notas_internas)
   const precioVendido = item.precio_vendido != null ? Number(item.precio_vendido) : null
   const margenBase = sold && precioVendido != null ? precioVendido : precioWeb
-  const margen = margenBase != null ? (margenBase - Number(item.coste)).toFixed(2) : null
+  const margen = margenBase != null && !costPending ? (margenBase - Number(item.coste)).toFixed(2) : null
   const vinted = deriveVintedChannel(item.vinted_status)
   const archived = item.status === 'archivada'
   const compactPrice = sold && precioVendido != null ? precioVendido : precioWeb
@@ -54,11 +52,10 @@ export function InventoryRow({
   return (
     <tr className={rowClasses || undefined}>
       <td data-label="Referencia" className="cell-referencia">
-        {/* Desktop reference cell (hidden on mobile) */}
         <span className="row-desktop-ref">
           {action.flag && (
-            <span className="attention-dot" title={action.reason ?? 'Requiere acción'}>
-              ●
+            <span className="attention-dot" title={action.reason ?? 'Requiere accion'}>
+              !
             </span>
           )}
           <Link href={`/inventory/${item.id}`} className="item-link">
@@ -66,7 +63,6 @@ export function InventoryRow({
           </Link>
         </span>
 
-        {/* Mobile compact summary (hidden on desktop) — tap to expand */}
         <button
           type="button"
           className="row-mobile-summary"
@@ -81,7 +77,7 @@ export function InventoryRow({
           )}
           <span className="row-mobile-main">
             <span className="row-mobile-ref">
-              {action.flag && <span className="attention-dot">●</span>}
+              {action.flag && <span className="attention-dot">!</span>}
               {item.referencia}
             </span>
             <span className="row-mobile-badges">
@@ -91,13 +87,13 @@ export function InventoryRow({
           </span>
           <span className="row-mobile-side">
             <span className="row-mobile-price">
-              {compactPrice != null ? `€${compactPrice.toFixed(0)}` : '—'}
+              {compactPrice != null ? `EUR ${compactPrice.toFixed(0)}` : '-'}
             </span>
             <span
               className={`row-mobile-chevron${expanded ? ' row-mobile-chevron--open' : ''}`}
               aria-hidden="true"
             >
-              ▾
+              v
             </span>
           </span>
         </button>
@@ -112,21 +108,27 @@ export function InventoryRow({
         {vinted ? (
           <span className={`status-badge badge-${vinted.tone}`}>{vinted.label}</span>
         ) : (
-          '—'
+          '-'
         )}
       </td>
       <td data-label="Coste" className="num">
-        €{Number(item.coste).toFixed(2)}
+        {costPending ? 'Pendiente' : `EUR ${Number(item.coste).toFixed(2)}`}
       </td>
       <td data-label="Precio web" className="num">
-        {precioWeb != null ? `€${precioWeb.toFixed(2)}` : '—'}
+        {precioWeb != null ? `EUR ${precioWeb.toFixed(2)}` : '-'}
       </td>
       <td
         data-label="Margen"
         className="num"
-        title={sold && precioVendido != null ? 'Margen real (venta)' : 'Margen esperado (precio web)'}
+        title={
+          costPending
+            ? 'Margen pendiente: falta coste real'
+            : sold && precioVendido != null
+              ? 'Margen real (venta)'
+              : 'Margen esperado (precio web)'
+        }
       >
-        {margen != null ? `€${margen}` : '—'}
+        {costPending ? 'Pendiente' : margen != null ? `EUR ${margen}` : '-'}
       </td>
       <td data-label="Fotos">
         <StatusBadge type="photo" value={item.photo_status} />

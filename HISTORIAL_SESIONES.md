@@ -2227,3 +2227,20 @@ Sesion en dos actos: la implementacion original (WOO_WRITE_SYNC_FOUNDATION_WITH_
 
 **Siguiente:** Pablo prueba las 3 operaciones (precio, venta->agotado, papelera de borrador) desde `npm run dev` segun la guia del RESULT §7 y confirma `PABLO_WOO_WRITE_SYNC_OK`. Despues, por friccion real: restock/undo hacia la web, metricas agregadas de ventas o S030 drift.
 **agent_events ref:** 2026-07-04T (WOO_WRITE_SYNC_FOUNDATION)
+---
+
+## Sesion WOO_TO_STUDIO_LINK_HYDRATION_FIX
+
+**Fecha:** 2026-07-04
+**Agente:** Codex
+**Modo:** FIX_BLOCKER_FIRST / LOCAL_ONLY / WOO_GET_ONLY / NO_WOO_WRITE / NO_DEPLOY / NO_PUSH
+**Resultado:** DONE local — pendiente prueba Pablo con producto #1792 o equivalente
+
+Fix blocker del flujo Woo -> Studio detectado por Pablo tras `WOO_WRITE_SYNC_FOUNDATION`: al vincular un producto Woo existente, Studio creaba una ficha casi vacia y enganosa. Se corrigio `linkWooProductToStudio` para hidratar desde GET detalle Woo (`meta_data`, categories, attributes, imagen), guardar snapshot/resumen, precio web, estado/stock reales y notas internas claras. `publish + outofstock` entra como `reservada` (estado seguro) en vez de activa normal. `coste=0` queda solo como placeholder tecnico por schema; la UI muestra `Coste pendiente` y no calcula margen con ese valor. Fotos Studio queda separado de Imagen web disponible desde Woo.
+
+Tambien se corrigio el falso alineamiento: `buildWooDiff` expone `hasDifferences`/`reviewMessages`, y `WooSyncPanel` ya no muestra "Studio y la web estan alineados" si hay diferencias manuales de stock/status; en su lugar muestra una decision pendiente. La auditoria web muestra antes de vincular que se importara.
+
+Validacion: typecheck PASS, lint PASS, build PASS, `git diff --check` PASS, secret scan CLEAN. Cero Woo writes ejecutados por el agente; no SQL, no Supabase remoto, no `.env.local`, no deploy, no push. Ver `docs/studio/STUDIO_WOO_TO_STUDIO_LINK_HYDRATION_RESULT.md`.
+
+**Siguiente:** Pablo prueba desde `/inventory/woo` con Woo product #1792 (`2014-15 France Away Shirt - (XXL)`, publicado agotado, EUR 45) o equivalente y confirma que la ficha creada no es placeholder vacio ni enganosa.
+**agent_events ref:** 2026-07-04T17:52:16Z (WOO_TO_STUDIO_LINK_HYDRATION_FIX)

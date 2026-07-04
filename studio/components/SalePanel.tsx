@@ -27,6 +27,7 @@ export function SalePanel({
   referencia,
   status,
   coste,
+  costPending,
   canalVenta,
   precioVendido,
   fechaVenta,
@@ -38,6 +39,7 @@ export function SalePanel({
   referencia: string
   status: ItemStatus
   coste: number
+  costPending: boolean
   canalVenta: SaleChannel | null
   precioVendido: number | null
   fechaVenta: string | null
@@ -115,7 +117,7 @@ export function SalePanel({
     })
   }
 
-  const margen = sold && precioVendido != null ? precioVendido - coste : null
+  const margen = sold && precioVendido != null && !costPending ? precioVendido - coste : null
 
   return (
     <section className="detail-section sale-section" id="venta">

@@ -18,11 +18,19 @@ export function WooAuditRowActions({
   productId,
   productName,
   productStatus,
+  productStock,
+  productPrice,
+  hasWebImage,
+  importHints,
   linkedItemId,
 }: {
   productId: number
   productName: string
   productStatus: string
+  productStock: string
+  productPrice: number | null
+  hasWebImage: boolean
+  importHints: string[]
   linkedItemId: string | null
 }) {
   const router = useRouter()
@@ -61,6 +69,12 @@ export function WooAuditRowActions({
             Se crea una ficha en el inventario de Studio vinculada a «{productName}» (producto
             #{productId}). La web <strong>no se modifica</strong>. Coste y detalles quedan
             pendientes de completar.
+            <br />
+            Importa: titulo, precio web, estado, stock, enlace Woo y{' '}
+            {hasWebImage ? 'referencia a imagen web' : 'sin imagen web'}. Vista previa:{' '}
+            {productStatus} Â· {productStock} Â·{' '}
+            {productPrice != null ? `EUR ${productPrice.toFixed(2)}` : 'precio no disponible'}
+            {importHints.length > 0 && <> Â· {importHints.join(' Â· ')}</>}
             {isDraft && (
               <>
                 {' '}

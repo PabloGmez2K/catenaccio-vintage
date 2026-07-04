@@ -127,6 +127,19 @@ export function WooCatalogTable({
                       productId={product.id}
                       productName={product.name}
                       productStatus={product.status}
+                      productStock={stock.label}
+                      productPrice={product.regularPrice ?? product.price}
+                      hasWebImage={product.imageSrc != null}
+                      importHints={[
+                        product.categories.length > 0
+                          ? `Categorias: ${product.categories.map((c) => c.name).join(', ')}`
+                          : '',
+                        product.attributes.length > 0
+                          ? `Atributos: ${product.attributes
+                              .map((a) => `${a.name}${a.options.length > 0 ? `=${a.options.join('/')}` : ''}`)
+                              .join('; ')}`
+                          : '',
+                      ].filter(Boolean)}
                       linkedItemId={studio?.id ?? null}
                     />
                   </div>

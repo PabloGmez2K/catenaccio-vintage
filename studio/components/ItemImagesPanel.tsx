@@ -30,9 +30,11 @@ import type { MediaAsset } from '@/lib/types'
 export function ItemImagesPanel({
   itemId,
   images,
+  webImageSrc,
 }: {
   itemId: string
   images: MediaAsset[]
+  webImageSrc?: string | null
 }) {
   const router = useRouter()
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -231,7 +233,22 @@ export function ItemImagesPanel({
 
   return (
     <section className="detail-section images-section">
-      <h3>Fotos {images.length > 0 && <span className="images-count">({images.length})</span>}</h3>
+      <h3>Fotos Studio {images.length > 0 && <span className="images-count">({images.length})</span>}</h3>
+
+      {webImageSrc && (
+        <div className="web-image-available">
+          <div>
+            <span className="web-image-title">Imagen web disponible desde Woo</span>
+            <p className="images-autosave-hint">
+              No esta copiada a Fotos Studio. Usala como referencia o sube las fotos definitivas aqui.
+            </p>
+          </div>
+          <a href={webImageSrc} target="_blank" rel="noopener noreferrer" className="web-image-link">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={webImageSrc} alt="" className="web-image-thumb" />
+          </a>
+        </div>
+      )}
 
       <p className="images-autosave-hint">
         Las fotos se guardan automáticamente al subir, ordenar o eliminar. Arrastra las tarjetas para

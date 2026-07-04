@@ -17,6 +17,7 @@ import { buildSuggestionContext } from '@/lib/ai/suggestion-context'
 import { buildManualSeoPrompt } from '@/lib/seo/manual-seo-prompt'
 import { evaluateProductPreflight, type PreflightInput } from '@/lib/preflight/product-preflight'
 import { listItemImages } from '@/app/inventory/image-actions'
+import { isPendingImportedCost } from '@/lib/inventory/cost'
 import { notFound } from 'next/navigation'
 import type {
   ItemStatus,
@@ -90,6 +91,7 @@ export default async function InventoryItemPage({
   const manualSeoPromptText = buildManualSeoPrompt(ctx)
 
   const shirt = data.football_shirt_details
+  const costPending = isPendingImportedCost(Number(data.coste), data.notas_internas ?? null)
 
   // S026A — images uploaded to Supabase Storage for this item (media_assets).
   const images = await listItemImages(supabase, id)
@@ -185,6 +187,7 @@ export default async function InventoryItemPage({
         }
       : null,
     imageCount: images.length,
+    webImageAvailable: wooLive?.imageSrc != null,
     attachImagesEnabled,
   }
   const preflight = evaluateProductPreflight(preflightInput)
@@ -227,6 +230,39 @@ export default async function InventoryItemPage({
           <h3>Precios</h3>
           <div className="field-row">
             <span className="field-label">Coste</span>
+            <span className="field-value">
+              {costPending ? 'Coste pendiente' : `EUR ${Number(data.coste).toFixed(2)}`}
+            </span>
+          </div>
+          {data.precio_objetivo != null && (
+            <div className="field-row">
+              <span className="field-label">Precio objetivo</span>
+              <span className="field-value">EUR {Number(data.precio_objetivo).toFixed(2)}</span>
+            </div>
+          )}
+          {data.precio_objetivo != null && (
+            <div className="field-row">
+              <span className="field-label">Margen esperado</span>
+              <span className="field-value">
+                {costPending
+                  ? 'Margen pendiente: falta coste real'
+                  : `EUR ${(Number(data.precio_objetivo) - Number(data.coste)).toFixed(2)}`}
+              </span>
+            </div>
+          )}
+          {data.precio_publicado_web != null && (
+            <div className="field-row">
+              <span className="field-label">Precio web</span>
+              <span className="field-value">EUR {Number(data.precio_publicado_web).toFixed(2)}</span>
+            </div>
+          )}
+        </section>
+
+        {false && (
+        <section className="detail-section">
+          <h3>Precios</h3>
+          <div className="field-row">
+            <span className="field-label">Coste</span>
             <span className="field-value">€{Number(data.coste).toFixed(2)}</span>
           </div>
           {data.precio_objetivo != null && (
@@ -254,12 +290,14 @@ export default async function InventoryItemPage({
             </div>
           )}
         </section>
+        )}
 
         <SalePanel
           itemId={data.id}
           referencia={data.referencia}
           status={data.status as ItemStatus}
           coste={Number(data.coste)}
+          costPending={costPending}
           canalVenta={(data.canal_venta ?? null) as SaleChannel | null}
           precioVendido={data.precio_vendido != null ? Number(data.precio_vendido) : null}
           fechaVenta={data.fecha_venta ?? null}
@@ -453,7 +491,7 @@ export default async function InventoryItemPage({
           </section>
         )}
 
-        <ItemImagesPanel itemId={data.id} images={images} />
+        <ItemImagesPanel itemId={data.id} images={images} webImageSrc={wooLive?.imageSrc ?? null} />
 
         <ManualSeoPanel
           itemId={data.id}

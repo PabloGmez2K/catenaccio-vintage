@@ -83,6 +83,7 @@ export interface PreflightInput {
   approvedSeo: PreflightSeoInput | null
   /** S026A — count of images uploaded to Supabase Storage for this item. */
   imageCount: number
+  webImageAvailable?: boolean
   /** S026B — whether Woo draft create currently attaches Studio images (shadow-first flag). */
   attachImagesEnabled: boolean
 }
@@ -283,9 +284,11 @@ export function evaluateProductPreflight(input: PreflightInput): ProductPrefligh
           id: 'imagenes',
           label: 'Fotos',
           status: 'warning',
-          message: input.attachImagesEnabled
-            ? 'Sin fotos subidas. El borrador se puede crear, pero saldrá sin imágenes.'
-            : 'Sin fotos subidas.',
+          message: input.webImageAvailable
+            ? 'Fotos Studio sin subir. Hay imagen web disponible desde Woo, pero no sustituye las fotos de Studio.'
+            : input.attachImagesEnabled
+              ? 'Sin fotos subidas. El borrador se puede crear, pero saldrá sin imágenes.'
+              : 'Fotos Studio sin subir.',
           fixHint: 'Sube al menos una foto en el panel "Fotos" de la ficha.',
         }
   )

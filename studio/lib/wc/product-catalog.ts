@@ -18,6 +18,8 @@ export interface WooCatalogProduct {
   dateCreated: string | null
   dateModified: string | null
   imageSrc: string | null
+  categories: WooProductCategory[]
+  attributes: WooProductAttribute[]
 }
 
 export type WooCatalogResult =
@@ -44,6 +46,21 @@ type WcProductRaw = {
   date_created?: string
   date_modified?: string
   images?: Array<{ id?: number; src?: string }>
+  categories?: Array<{ id?: number; name?: string; slug?: string }>
+  attributes?: Array<{ id?: number; name?: string; slug?: string; options?: string[] }>
+}
+
+export interface WooProductCategory {
+  id: number
+  name: string
+  slug: string | null
+}
+
+export interface WooProductAttribute {
+  id: number | null
+  name: string
+  slug: string | null
+  options: string[]
 }
 
 // Keep the payload lean: we only read what the stock manager screen shows.
@@ -60,6 +77,8 @@ const PRODUCT_FIELDS = [
   'date_created',
   'date_modified',
   'images',
+  'categories',
+  'attributes',
 ].join(',')
 
 export async function fetchWooCatalog(): Promise<WooCatalogResult> {
@@ -153,7 +172,31 @@ function parseProduct(raw: WcProductRaw): WooCatalogProduct | null {
     dateCreated: raw.date_created ?? null,
     dateModified: raw.date_modified ?? null,
     imageSrc: raw.images?.[0]?.src ?? null,
+    categories: parseCategories(raw.categories),
+    attributes: parseAttributes(raw.attributes),
   }
+}
+
+function parseCategories(raw: WcProductRaw['categories']): WooProductCategory[] {
+  if (!Array.isArray(raw)) return []
+  return raw
+    .filter((cat) => typeof cat.id === 'number' && cat.id > 0 && typeof cat.name === 'string')
+    .map((cat) => ({ id: cat.id!, name: cat.name!.trim(), slug: cat.slug ?? null }))
+    .filter((cat) => cat.name.length > 0)
+}
+
+function parseAttributes(raw: WcProductRaw['attributes']): WooProductAttribute[] {
+  if (!Array.isArray(raw)) return []
+  return raw
+    .filter((attr) => typeof attr.name === 'string' && attr.name.trim().length > 0)
+    .map((attr) => ({
+      id: typeof attr.id === 'number' && attr.id > 0 ? attr.id : null,
+      name: attr.name!.trim(),
+      slug: attr.slug ?? null,
+      options: Array.isArray(attr.options)
+        ? attr.options.map((opt) => opt.trim()).filter(Boolean)
+        : [],
+    }))
 }
 
 function parsePrice(value: string | undefined): number | null {
@@ -169,6 +212,7 @@ function parsePrice(value: string | undefined): number | null {
 export interface WooProductDetail extends WooCatalogProduct {
   description: string
   salePrice: number | null
+  metaData: Record<string, unknown>
 }
 
 export type WooProductDetailResult =
@@ -178,9 +222,10 @@ export type WooProductDetailResult =
 type WcProductDetailRaw = WcProductRaw & {
   description?: string
   sale_price?: string
+  meta_data?: Array<{ key?: string; value?: unknown }>
 }
 
-const PRODUCT_DETAIL_FIELDS = `${PRODUCT_FIELDS},description,sale_price`
+const PRODUCT_DETAIL_FIELDS = `${PRODUCT_FIELDS},description,sale_price,meta_data`
 
 export function parseProductDetailRaw(raw: unknown): WooProductDetail | null {
   const base = parseProduct((raw ?? {}) as WcProductRaw)
@@ -190,7 +235,19 @@ export function parseProductDetailRaw(raw: unknown): WooProductDetail | null {
     ...base,
     description: typeof detailRaw.description === 'string' ? detailRaw.description : '',
     salePrice: parsePrice(detailRaw.sale_price),
+    metaData: parseMetaData(detailRaw.meta_data),
   }
+}
+
+function parseMetaData(raw: WcProductDetailRaw['meta_data']): Record<string, unknown> {
+  if (!Array.isArray(raw)) return {}
+  const out: Record<string, unknown> = {}
+  for (const entry of raw) {
+    if (typeof entry.key === 'string' && entry.key.trim()) {
+      out[entry.key] = entry.value
+    }
+  }
+  return out
 }
 
 export async function fetchWooProductDetail(productId: number): Promise<WooProductDetailResult> {

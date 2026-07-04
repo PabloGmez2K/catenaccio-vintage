@@ -209,6 +209,16 @@ export function WooSyncPanel({
                 {r.note}
               </p>
             ))}
+          {diff.reviewMessages.length > 0 && (
+            <div className="woo-diff-review">
+              <span className="woo-diff-review-title">Decision pendiente</span>
+              <ul>
+                {diff.reviewMessages.map((message) => (
+                  <li key={message}>{message}</li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       )}
 
@@ -416,8 +426,19 @@ export function WooSyncPanel({
             !diff.canSyncStockOut &&
             !diff.canSyncDescription &&
             !diff.canTrashDraft &&
-            !diff.mirrorOutOfDate && (
+            !diff.mirrorOutOfDate &&
+            !diff.hasDifferences && (
               <p className="woo-sync-clean">Studio y la web están alineados. Nada que sincronizar.</p>
+            )}
+          {!diff.canSyncPrice &&
+            !diff.canSyncStockOut &&
+            !diff.canSyncDescription &&
+            !diff.canTrashDraft &&
+            diff.hasDifferences && (
+              <p className="woo-sync-review">
+                Hay diferencias sin accion automatica segura. Revisa la decision arriba antes de dar
+                la ficha por alineada.
+              </p>
             )}
         </div>
       )}

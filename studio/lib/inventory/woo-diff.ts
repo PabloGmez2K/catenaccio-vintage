@@ -32,6 +32,8 @@ export interface WooDiffResult {
   canSyncDescription: boolean
   canTrashDraft: boolean
   mirrorOutOfDate: boolean
+  hasDifferences: boolean
+  reviewMessages: string[]
   expectedMirror: WcSyncStatus
 }
 
@@ -99,6 +101,7 @@ export function normalizeDescription(html: string): string {
 export function buildWooDiff(input: WooDiffInput): WooDiffResult {
   const { live } = input
   const rows: WooDiffRow[] = []
+  const reviewMessages: string[] = []
 
   // ── Precio ──────────────────────────────────────────────────────────────────
   const studioPrice = input.precioPublicadoWeb
@@ -138,6 +141,16 @@ export function buildWooDiff(input: WooDiffInput): WooDiffResult {
   const wooInStock = live.stockStatus === 'instock' || live.stockStatus === 'onbackorder'
   const stockDiffers = soldOrReserved && wooInStock
   const canSyncStockOut = soldOrReserved && wooInStock && live.status !== 'trash'
+  if (!soldOrReserved && live.stockStatus === 'outofstock') {
+    reviewMessages.push(
+      'Revisar: la web esta agotada pero Studio no esta marcado como vendida o reservada. Decide entre registrar venta, mantener activa y reponer Woo, o revisar manualmente.'
+    )
+  }
+  if (soldOrReserved && wooInStock) {
+    reviewMessages.push(
+      'Studio esta vendida/reservada y la web aun tiene stock. Deja Woo agotado cuando actives esta accion.'
+    )
+  }
   rows.push({
     key: 'stock',
     label: 'Stock',
@@ -169,6 +182,9 @@ export function buildWooDiff(input: WooDiffInput): WooDiffResult {
   // (e.g. in WP Admin), «Actualizar estado local» is how the ficha heals.
   const expectedMirror = mapWooStatusToMirror(live.status)
   const mirrorOutOfDate = input.wcStatusMirror !== expectedMirror
+  if (mirrorOutOfDate) {
+    reviewMessages.push('El estado local guardado no coincide con el estado real de Woo. Actualiza el estado local si la lectura es correcta.')
+  }
   rows.push({
     key: 'estado',
     label: 'Estado web',
@@ -199,6 +215,8 @@ export function buildWooDiff(input: WooDiffInput): WooDiffResult {
     })
   }
 
+  const hasDifferences = rows.some((row) => row.differs)
+
   return {
     rows,
     canSyncPrice,
@@ -209,6 +227,8 @@ export function buildWooDiff(input: WooDiffInput): WooDiffResult {
       : false,
     canTrashDraft: live.status === 'draft' || live.status === 'pending',
     mirrorOutOfDate,
+    hasDifferences,
+    reviewMessages,
     expectedMirror,
   }
 }
