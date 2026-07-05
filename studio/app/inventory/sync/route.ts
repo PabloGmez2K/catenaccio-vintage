@@ -1,7 +1,14 @@
 import { NextResponse } from 'next/server'
+import { redirect } from 'next/navigation'
 import { syncWcTaxonomyCache } from '@/lib/wc/taxonomy-sync'
 
 export const dynamic = 'force-dynamic'
+
+// Opening this URL in a browser is not a screen: the operative sync UI lives in
+// Auditoría web (TaxonomySyncPanel). Redirect humans there instead of a 405.
+export async function GET() {
+  redirect('/inventory/woo#sync-taxonomias')
+}
 
 export async function POST() {
   const result = await syncWcTaxonomyCache()

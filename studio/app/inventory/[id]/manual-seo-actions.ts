@@ -17,8 +17,9 @@ export type ManualSeoFields = {
 // Saves manually written SEO content (from an external AI like ChatGPT / Claude.ai)
 // into ai_suggestions as status='editado_aprobado'. Never calls any API.
 // Never touches football_shirt_details or WooCommerce.
-// If precio_sugerido is provided and valid, also updates inventory_items.precio_publicado_web
-// so the WC bridge can read it directly without Pablo editing the base form.
+// The web price is NOT set from here anymore: it lives in Editar → «Precio y
+// coste» (STUDIO_OPERATIVE_EDIT_SURFACE). precio_sugerido, when present, is
+// stored on the suggestion as reference only.
 export async function saveManualSeoContent(
   itemId: string,
   fields: ManualSeoFields
@@ -115,19 +116,7 @@ export async function saveManualSeoContent(
     notes: 'Manual SEO content saved from copied prompt workflow',
   })
 
-  // If a valid positive price was provided, propagate it to inventory_items.precio_publicado_web.
-  // This lets the WC bridge read it without Pablo having to edit the base item form separately.
-  // precio_objetivo is NOT used as fallback — only an explicit price from this form counts.
-  if (fields.precio_sugerido != null && fields.precio_sugerido > 0) {
-    await supabase
-      .from('inventory_items')
-      .update({ precio_publicado_web: fields.precio_sugerido })
-      .eq('id', itemId)
-      .eq('owner_id', user.id)
-    // Best-effort: if the update fails, the suggestion was already saved correctly.
-    // The WcDraftPanel warning will remain visible and Pablo can retry.
-  }
-
   revalidatePath(`/inventory/${itemId}`)
+  revalidatePath(`/inventory/${itemId}/edit`)
   return { ok: true }
 }

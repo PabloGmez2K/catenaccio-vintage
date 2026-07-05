@@ -54,10 +54,19 @@ export interface ItemFormDefaults {
   coste?: string
   cost_pending?: boolean
   precio_objetivo?: string
+  precio_publicado_web?: string
   fecha_compra?: string
   proveedor?: string
   notas_compra?: string
   notas_internas?: string
+}
+
+// Why marca may be empty for a Woo-linked item — surfaced under the field so an
+// empty value is never a silent failure (STUDIO_OPERATIVE_EDIT_SURFACE fix).
+export interface MarcaFieldContext {
+  wooState: 'present' | 'absent' | 'unresolved' | 'unknown' | 'not_linked'
+  cacheEmpty: boolean
+  wooValue?: string | null
 }
 
 interface CategoryOption {
@@ -78,6 +87,10 @@ interface ItemFormProps {
   recommendedCategoryNames?: { withLiga: string | null; withoutLiga: string | null }
   // Cache-backed term suggestions per taxonomy (S024A). Empty per slug if unsynced.
   termOptions?: TermOptionsBySlug
+  // Woo-side brand state for linked items (server-computed on the edit page).
+  marcaContext?: MarcaFieldContext | null
+  // Real pa_marca cache names for the datalist (fallbacks to the static list when empty).
+  marcaCacheNames?: string[]
 }
 
 function FieldError({ msg }: { msg?: string }) {
@@ -92,6 +105,8 @@ export function ItemForm({
   categoryOptions = [],
   recommendedCategoryNames,
   termOptions = {},
+  marcaContext = null,
+  marcaCacheNames = [],
 }: ItemFormProps) {
   const serverAction = mode === 'edit' ? updateInventoryItem : createInventoryItem
   const [state, formAction, isPending] = useActionState<ActionState, FormData>(
@@ -156,6 +171,7 @@ export function ItemForm({
   const [autenticidad, setAutenticidad] = useState(defaultValues.autenticidad ?? '')
   const [coste, setCoste] = useState(defaultValues.cost_pending ? '' : (defaultValues.coste ?? ''))
   const [precioObjetivo, setPrecioObjetivo] = useState(defaultValues.precio_objetivo ?? '')
+  const [precioWeb, setPrecioWeb] = useState(defaultValues.precio_publicado_web ?? '')
   const [fechaCompra, setFechaCompra] = useState(defaultValues.fecha_compra ?? TODAY)
   const [proveedor, setProveedor] = useState(defaultValues.proveedor ?? '')
   const [notasCompra, setNotasCompra] = useState(defaultValues.notas_compra ?? '')
@@ -356,13 +372,48 @@ export function ItemForm({
                 autoComplete="off"
               />
               <datalist id="marca-list">
-                {marcaOptions.map((o) => (
-                  <option key={o.label} value={o.label} />
+                {(marcaCacheNames.length > 0
+                  ? marcaCacheNames
+                  : marcaOptions.map((o) => o.label)
+                ).map((name) => (
+                  <option key={name} value={name} />
                 ))}
               </datalist>
-              <p className="field-help">
-                Si no aparece en la lista, puedes escribirla. Studio la guardará como pendiente de mapeo para Woo.
-              </p>
+              {marcaContext?.wooState === 'absent' && (
+                <p className="field-help">
+                  La web no trae marca para este producto (pa_marca sin datos en Woo). El valor
+                  que pongas aquí vive en Studio.
+                </p>
+              )}
+              {marcaContext?.wooState === 'unresolved' && (
+                <p className="field-help">
+                  La web trae la marca como ID sin nombre resoluble. Sincroniza taxonomías en
+                  Auditoría web y usa «Rehidratar desde Woo» en la ficha.
+                </p>
+              )}
+              {marcaContext?.wooState === 'present' && marcaContext.wooValue && (
+                <p className="field-help">
+                  Marca en la web: <strong>{marcaContext.wooValue}</strong>
+                  {marcaDisplay.trim() === '' ? ' — puedes copiarla aquí o rehidratar desde la ficha.' : '.'}
+                </p>
+              )}
+              {marcaContext?.wooState === 'unknown' && (
+                <p className="field-help">
+                  No se pudo leer la web ahora mismo; el estado de la marca en Woo queda sin
+                  verificar.
+                </p>
+              )}
+              {marcaContext?.cacheEmpty && (
+                <p className="field-help">
+                  La caché de marcas está vacía: ejecuta «Sincronizar taxonomías Woo» en
+                  Auditoría web para poder resolver marcas de la web.
+                </p>
+              )}
+              {(!marcaContext || marcaContext.wooState === 'not_linked') && (
+                <p className="field-help">
+                  Si no aparece en la lista, puedes escribirla. Studio la guardará como pendiente de mapeo para Woo.
+                </p>
+              )}
             </div>
 
             <div className={`form-field ${fe.talla ? 'has-error' : ''}`}>
@@ -721,14 +772,14 @@ export function ItemForm({
           </div>
         </section>
 
-        {/* ── 4. Datos internos ────────────────────────────────────────── */}
+        {/* ── 4. Precio y coste (comercial) ────────────────────────────── */}
         <section className="form-section">
-          <h3>Datos internos</h3>
+          <h3>Precio y coste</h3>
 
           <div className="form-row">
             <div className={`form-field ${fe.coste ? 'has-error' : ''}`}>
               <label htmlFor="coste">
-                Coste (€) <span className="required">*</span>
+                Coste (€) {!defaultValues.cost_pending && <span className="required">*</span>}
               </label>
               <input
                 id="coste"
@@ -743,12 +794,39 @@ export function ItemForm({
               <FieldError msg={fe.coste} />
               {defaultValues.cost_pending && (
                 <p className="field-help">
-                  Coste pendiente importado desde Woo. El 0 guardado es tecnico; introduce el
-                  coste real antes de operar margenes.
+                  Coste pendiente importado desde Woo. Puedes guardar con el coste vacío — la
+                  ficha seguirá marcada como «Coste pendiente» hasta que introduzcas el real.
                 </p>
               )}
             </div>
 
+            <div className={`form-field ${fe.precio_publicado_web ? 'has-error' : ''}`}>
+              <label htmlFor="precio_publicado_web">Precio web (€)</label>
+              <input
+                id="precio_publicado_web"
+                name="precio_publicado_web"
+                type="number"
+                min="0"
+                step="0.01"
+                value={precioWeb}
+                onChange={(e) => setPrecioWeb(e.target.value)}
+                placeholder="0.00"
+              />
+              <FieldError msg={fe.precio_publicado_web} />
+              <p className="field-help">
+                Precio de venta en la tienda. Cambiarlo aquí no toca la web: se envía después
+                desde «Sincronización web» en la ficha, con confirmación.
+              </p>
+              {Boolean(defaultValues.precio_publicado_web) && precioWeb.trim() === '' && (
+                <p className="field-help field-help--warning">
+                  Guardar con este campo vacío borra el precio web guardado (€
+                  {Number(defaultValues.precio_publicado_web).toFixed(2)}).
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div className="form-row">
             <div className="form-field">
               <label htmlFor="precio_objetivo">Precio objetivo (€)</label>
               <input
@@ -762,8 +840,25 @@ export function ItemForm({
                 placeholder="0.00"
               />
               <FieldError msg={fe.precio_objetivo} />
+              {(() => {
+                const c = Number(coste)
+                const p = Number(precioObjetivo || precioWeb)
+                if (!coste.trim() || !(precioObjetivo.trim() || precioWeb.trim())) return null
+                if (isNaN(c) || isNaN(p) || p <= 0) return null
+                return (
+                  <p className="field-help">
+                    Margen estimado ({precioObjetivo.trim() ? 'objetivo' : 'precio web'} −
+                    coste): €{(p - c).toFixed(2)}
+                  </p>
+                )
+              })()}
             </div>
           </div>
+        </section>
+
+        {/* ── 5. Datos internos ────────────────────────────────────────── */}
+        <section className="form-section">
+          <h3>Datos internos</h3>
 
           <div className="form-row">
             <div className={`form-field ${fe.fecha_compra ? 'has-error' : ''}`}>

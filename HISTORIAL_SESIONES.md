@@ -2312,3 +2312,30 @@ Validacion: typecheck PASS, lint PASS, build PASS (9 rutas), `git diff --check` 
 
 **Siguiente:** Pablo re-ejecuta el sync de taxonomias desde Studio (puebla pa_talla/pa_condicion/pa_marca), prueba una ficha vinculada (tabla de campos de catalogo, Rehidratar desde Woo, editar con condicion importada visible en el select) y vincula un producto nuevo desde Auditoria web; confirma `PABLO_WOO_SYNC_CONTRACT_OK`. Despues, por friccion real: whitelist PUT de meta ACF con preview (cierra talla/condicion/medidas/defectos) o S030 drift.
 **agent_events ref:** 2026-07-05T (STUDIO_WOO_SYNC_CONTRACT)
+
+---
+
+## Sesion STUDIO_OPERATIVE_EDIT_SURFACE_AND_SYNC_UI_FIX
+
+**Fecha:** 2026-07-05
+**Agente:** Claude Code (Fable 5)
+**Modo:** FIX_BLOCKER_FIRST / PRODUCT_OPERABILITY_FIX / CODE_ALLOWED / LOCAL_ONLY / WOO_GET_ONLY_PLUS_LOCAL_SUPABASE_WRITES / NO_DEPLOY / NO_PUSH
+**Resultado:** DONE local — pendiente `PABLO_OPERATIVE_EDIT_OK`
+
+Pablo probo el contrato Woo<->Studio (`c9ae4f3`) en UI real y no lo valido por operabilidad, no por datos. Diagnostico confirmado: `/inventory/sync` era una route API POST-only (405 al abrirla en navegador — nunca fue pantalla); el precio web NO existia como campo en Editar (solo se fijaba desde el formulario SEO via saveManualSeoContent); el panel SEO solo se montaba en la ficha; marca vacia era un fallo silencioso (sin distinguir producto-sin-marca / cache pa_marca vacia / ID sin resolver); las fotos no tenian acceso desde Editar.
+
+Implementado, sin nueva arquitectura (el contrato de datos no cambia):
+
+- **Sync UI**: `components/TaxonomySyncPanel.tsx` + server action `app/inventory/woo/sync-actions.ts` en Auditoria web — estado de las 7 caches (con vacias resaltadas), boton «Sincronizar taxonomias Woo», spinner, resultado por taxonomia + categorias + fecha, errores saneados (incluido fallo de transporte del action) y aviso de que solo lee de la web. Visible incluso si el GET del catalogo falla. `GET /inventory/sync` redirige a `/inventory/woo#sync-taxonomias`; el POST tecnico se mantiene.
+- **Editar comercial**: bloque «Precio y coste» en ItemForm (coste + NUEVO campo precio web `precio_publicado_web` + precio objetivo + margen estimado); persistido en create+update de `actions.ts`; «Datos internos» queda con fecha/proveedor/notas. Vaciar el precio web avisa antes de borrar el valor guardado. El formulario SEO ya no tiene input de precio y `manual-seo-actions.ts` ya no escribe `precio_publicado_web` (precio_sugerido queda como referencia en la sugerencia).
+- **SEO en Editar**: `ManualSeoPanel` (componente compartido, no duplicado) montado tambien en la pagina Editar, con la descripcion Woo viva como base (GET de detalle solo para fichas vinculadas, ahora con timeout de 10s para que una tienda colgada no bloquee el render).
+- **Marca explicable**: contexto server-computado bajo el campo Marca en Editar (presente-en-Woo con valor / no-presente / ID-sin-resolver / cache-vacia / web-ilegible) y subtexto en la fila Marca de la ficha; el datalist usa la cache real `pa_marca` cuando esta poblada.
+- **Fotos**: ancla `#fotos` en el panel de la ficha + bloque de acceso desde Editar con contador.
+- **Coste pendiente**: una ficha importada de Woo con el placeholder tecnico (coste 0 + nota) puede guardarse con el coste vacio — antes no se podia guardar NINGUN cambio sin inventar un coste (nota N3 del critico, friccion real contra la mision).
+
+Critico fresco adversarial (subagente independiente, mision «demuestra que Studio sigue sin ser operativo para editar una ficha Woo vinculada»): **VEREDICTO LIMPIO — 0 blockers**, 15 verificaciones OK con evidencia file:line (guardar no pierde precio/talla/condicion/marca importadas; fieldErrors sin perdida de estado; sync-actions cumple reglas de 'use server'; item no vinculado no hace GET a Woo; /inventory/new y Vinted/venta intactos; 0 writes nuevos a Woo; sin secretos). 6 notas -> 5 corregidas en sesion (N1 try/catch de transporte en el panel, N2 timeout del GET, N3 coste pendiente bloqueaba guardar, N4 aviso al vaciar precio, N5 orden de decodificacion de entidades) y 1 aceptada (N6 precio_sugerido como superficie de referencia inofensiva).
+
+Validacion: typecheck PASS, lint PASS, build PASS (9 rutas), `git diff --check` PASS, secret scan CLEAN. 0 Woo writes ejecutados y 0 implementados (whitelist intacta); sin SQL, sin Supabase remoto manual, sin `.env.local`, sin deploy, sin push.
+
+**Siguiente:** Pablo ejecuta «Sincronizar taxonomias Woo» desde Auditoria web (puebla pa_talla/pa_condicion/pa_marca), abre una ficha vinculada, pulsa Editar y verifica: precio web editable en «Precio y coste», condicion importada seleccionada, marca con explicacion, SEO con descripcion Woo como base, acceso a fotos; guarda y confirma que la ficha muestra lo mismo. Confirma `PABLO_OPERATIVE_EDIT_OK`.
+**agent_events ref:** 2026-07-05T (STUDIO_OPERATIVE_EDIT_SURFACE_AND_SYNC_UI_FIX)

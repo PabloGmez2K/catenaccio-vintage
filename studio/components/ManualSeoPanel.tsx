@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { saveManualSeoContent } from '@/app/inventory/[id]/manual-seo-actions'
 import type { AiSuggestion } from '@/lib/types'
@@ -32,7 +33,6 @@ export function ManualSeoPanel({
 
   const [titulo, setTitulo] = useState('')
   const [descripcion, setDescripcion] = useState('')
-  const [precio, setPrecio] = useState('')
   const [notas, setNotas] = useState('')
 
   const [error, setError] = useState<string | null>(null)
@@ -52,17 +52,10 @@ export function ManualSeoPanel({
     e.preventDefault()
     setError(null)
 
-    const precioNum = precio.trim() === '' ? null : Number(precio)
-    if (precio.trim() !== '' && (isNaN(precioNum!) || precioNum! < 0)) {
-      setError('El precio debe ser un número positivo o quedar en blanco')
-      return
-    }
-
     startTransition(async () => {
       const result = await saveManualSeoContent(itemId, {
         titulo_seo: titulo.trim(),
         descripcion_larga: descripcion.trim(),
-        precio_sugerido: precioNum,
         notas_tasacion: notas.trim() || undefined,
       })
 
@@ -114,7 +107,11 @@ export function ManualSeoPanel({
               </p>
             ) : (
               <p className="manual-seo-value manual-seo-value--missing">
-                Sin precio — introduce el precio al guardar el contenido SEO
+                Sin precio web — se fija en{' '}
+                <Link href={`/inventory/${itemId}/edit`} className="row-action-link">
+                  Editar → Precio y coste
+                </Link>
+                , no aquí.
               </p>
             )}
           </div>
@@ -224,21 +221,14 @@ export function ManualSeoPanel({
             />
           </div>
 
-          <div className="manual-seo-form-field">
-            <label className="manual-seo-form-label">Precio web / WooCommerce (€)</label>
-            <input
-              className="manual-seo-input manual-seo-input--short"
-              type="number"
-              min="0"
-              step="0.01"
-              value={precio}
-              onChange={e => setPrecio(e.target.value)}
-              placeholder="ej. 85.00"
-            />
-            <p className="manual-seo-field-hint">
-              Usa el precio recomendado por ChatGPT o ajusta el precio final. Se guardará como precio del borrador WooCommerce.
-            </p>
-          </div>
+          <p className="manual-seo-field-hint">
+            El precio web no se guarda desde aquí: si el resultado trae un precio sugerido,
+            fíjalo en{' '}
+            <Link href={`/inventory/${itemId}/edit`} className="row-action-link">
+              Editar → Precio y coste
+            </Link>
+            .
+          </p>
 
           <div className="manual-seo-form-field">
             <label className="manual-seo-form-label">Notas internas (opcional)</label>
@@ -273,16 +263,18 @@ export function ManualSeoPanel({
 }
 
 function htmlToPlainText(html: string): string {
+  // &amp; decodes LAST so double-escaped entities (&amp;lt;) resolve to their
+  // literal text instead of double-decoding into markup.
   return html
     .replace(/<br\s*\/?>/gi, '\n')
     .replace(/<\/p>/gi, '\n\n')
     .replace(/<[^>]+>/g, '')
     .replace(/&nbsp;/gi, ' ')
-    .replace(/&amp;/gi, '&')
     .replace(/&quot;/gi, '"')
     .replace(/&#39;/gi, "'")
     .replace(/&lt;/gi, '<')
     .replace(/&gt;/gi, '>')
+    .replace(/&amp;/gi, '&')
     .replace(/\n{3,}/g, '\n\n')
     .trim()
 }

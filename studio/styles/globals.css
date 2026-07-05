@@ -2447,6 +2447,93 @@ body {
   padding-left: 18px;
 }
 
+/* STUDIO_OPERATIVE_EDIT_SURFACE — taxonomy sync panel, edit extras, field subnotes */
+.taxonomy-sync-panel {
+  margin-top: 20px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface, #ffffff);
+}
+
+.taxonomy-sync-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.taxonomy-sync-header h3 {
+  margin: 0 0 4px;
+  font-size: 14px;
+}
+
+.taxonomy-sync-sub {
+  font-size: 12px;
+  color: var(--color-text-muted);
+  line-height: 1.5;
+  max-width: 560px;
+  margin: 0;
+}
+
+.taxonomy-sync-status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.taxonomy-sync-warning {
+  margin-top: 8px;
+  padding: 8px 10px;
+  border: 1px solid #fcd34d;
+  background: #fffbeb;
+  border-radius: var(--radius);
+  font-size: 12px;
+  color: #92400e;
+  line-height: 1.5;
+}
+
+.taxonomy-sync-result p {
+  margin: 0 0 4px;
+}
+
+.taxonomy-sync-result-list {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.taxonomy-sync-error-code {
+  font-size: 11px;
+  color: var(--color-text-muted);
+}
+
+.edit-extras {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.edit-photos-access .btn-secondary {
+  margin-top: 4px;
+}
+
+.field-subnote {
+  display: block;
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+  line-height: 1.4;
+}
+
+.field-help--warning {
+  color: #92400e;
+}
+
 /* STUDIO_WOO_SYNC_CONTRACT — catalog comparison, unmapped data, sync contract */
 .woo-catalog-details,
 .woo-contract-details {

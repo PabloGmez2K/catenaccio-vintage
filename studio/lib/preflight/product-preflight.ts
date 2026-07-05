@@ -238,7 +238,7 @@ export function evaluateProductPreflight(input: PreflightInput): ProductPrefligh
   seoChecks.push(
     precioValid
       ? { id: 'precio', label: 'Precio web', status: 'pass', message: `Precio web: €${Number(precio).toFixed(2)}` }
-      : { id: 'precio', label: 'Precio web', status: 'blocker', message: 'Precio web vacío o inválido (debe ser mayor que 0).', fixHint: 'Añade el precio web al guardar el contenido SEO o edita el item.' }
+      : { id: 'precio', label: 'Precio web', status: 'blocker', message: 'Precio web vacío o inválido (debe ser mayor que 0).', fixHint: 'Fija el precio web en Editar → «Precio y coste».' }
   )
   groups.push(makeGroup('seo_precio', 'SEO y precio', seoChecks))
 

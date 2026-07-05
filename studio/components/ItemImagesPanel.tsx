@@ -252,7 +252,7 @@ export function ItemImagesPanel({
   }
 
   return (
-    <section className="detail-section images-section">
+    <section className="detail-section images-section" id="fotos">
       <h3>Fotos Studio {images.length > 0 && <span className="images-count">({images.length})</span>}</h3>
 
       {webImages.length > 0 ? (

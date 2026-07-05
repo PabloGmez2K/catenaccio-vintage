@@ -204,10 +204,41 @@ bloqueantes; corregidas en la misma sesión:
 Aceptadas como riesgo residual documentado: N3 (ambigüedad inherente de un meta
 string numérico, §2) y N5b/c (residuos legacy hasta rehidratar, §7).
 
-## 13. Siguiente bloque recomendado
+## 13. Superficie operativa (STUDIO_OPERATIVE_EDIT_SURFACE — 2026-07-05)
 
-1. Pablo re-ejecuta el **sync de taxonomías** desde Studio (puebla las 3 cachés nuevas).
-2. Pablo prueba: ficha vinculada → «Campos de catálogo», Rehidratar, editar
-   (condición importada visible), ficha nueva vinculada desde Auditoría web.
+Ajustes de operabilidad tras la prueba real de Pablo (sin cambiar el contrato de
+datos):
+
+- **Sync de taxonomías con UI**: panel «Taxonomías y categorías Woo» en
+  Auditoría web (`/inventory/woo#sync-taxonomias`), con estado de las 7 cachés,
+  botón «Sincronizar taxonomías Woo», resultado por taxonomía y errores
+  saneados. `GET /inventory/sync` (la route técnica POST-only) redirige al
+  panel; ya no es un destino de usuario.
+- **Precio web vive en Editar**: bloque «Precio y coste» (coste + precio web +
+  precio objetivo + margen estimado). El formulario SEO ya **no** fija el precio
+  del item (`saveManualSeoContent` dejó de escribir `precio_publicado_web`);
+  `precio_sugerido` queda solo como referencia en la sugerencia.
+- **SEO dentro de Editar**: el panel de contenido SEO manual (con la descripción
+  Woo viva como base) se monta también en la página Editar. El envío a Woo sigue
+  siendo acción controlada del panel «Sincronización web».
+- **Marca explicable**: bajo el campo Marca (Editar) y en la ficha se distingue
+  «no presente en Woo» / «ID sin resolver — sincroniza y rehidrata» / «en la
+  web: X» / «caché de marcas vacía» / «web ilegible ahora». El datalist de marca
+  usa la caché real `pa_marca` cuando está poblada.
+- **Fotos accesibles desde Editar**: bloque con contador y enlace al panel de
+  fotos de la ficha (`#fotos`), donde viven subir/ordenar/importar de Woo.
+- **Coste pendiente ya no bloquea el guardado**: una ficha importada con el
+  placeholder técnico puede guardarse con el coste vacío (sigue «Coste
+  pendiente»); vaciar el precio web avisa antes de borrar el valor guardado.
+- Lectura viva de producto con timeout de 10 s (una tienda colgada no bloquea
+  ficha/Editar).
+
+## 14. Siguiente bloque recomendado
+
+1. Pablo ejecuta el **sync de taxonomías** desde Auditoría web → «Sincronizar
+   taxonomías Woo» (puebla las 3 cachés nuevas).
+2. Pablo prueba: ficha vinculada → «Campos de catálogo», Rehidratar, Editar
+   (precio web, condición importada, SEO con base Woo), ficha nueva vinculada
+   desde Auditoría web.
 3. Por fricción real: ampliar whitelist PUT a meta ACF con preview (cierra
    «Solo comparación» de talla/condición/medidas/defectos), o S030 drift.

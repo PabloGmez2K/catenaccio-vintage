@@ -1,7 +1,9 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { AppShell } from '@/components/AppShell'
 import { WooCatalogTable } from '@/components/WooCatalogTable'
+import { TaxonomySyncPanel, type CachedTaxonomyStatus } from '@/components/TaxonomySyncPanel'
 import { fetchWooCatalog } from '@/lib/wc/product-catalog'
 import {
   buildStockOverview,
@@ -9,6 +11,41 @@ import {
   type StudioLinkItem,
   type WooCatalogFilter,
 } from '@/lib/inventory/stock-overview'
+
+// Current cache state per contract taxonomy so the sync panel can show which
+// caches are empty (marca/condición/talla until the first 7-taxonomy sync).
+const CONTRACT_TAXONOMIES: Array<{ slug: string; label: string }> = [
+  { slug: 'pa_equipo', label: 'Equipo' },
+  { slug: 'pa_liga', label: 'Liga' },
+  { slug: 'pa_jugador', label: 'Jugador' },
+  { slug: 'pa_ano', label: 'Temporada' },
+  { slug: 'pa_talla', label: 'Talla' },
+  { slug: 'pa_condicion', label: 'Condición' },
+  { slug: 'pa_marca', label: 'Marca' },
+]
+
+async function loadTaxonomyCacheStatus(supabase: SupabaseClient): Promise<CachedTaxonomyStatus[]> {
+  const [{ data: termRows }, { data: taxonomyRows }] = await Promise.all([
+    supabase.from('wc_terms').select('taxonomy_slug'),
+    supabase.from('wc_taxonomies').select('slug, synced_at'),
+  ])
+  const counts = new Map<string, number>()
+  for (const row of termRows ?? []) {
+    const slug = (row as { taxonomy_slug: string }).taxonomy_slug
+    counts.set(slug, (counts.get(slug) ?? 0) + 1)
+  }
+  const syncedAt = new Map<string, string>()
+  for (const row of taxonomyRows ?? []) {
+    const r = row as { slug: string; synced_at: string | null }
+    if (r.synced_at) syncedAt.set(r.slug, r.synced_at)
+  }
+  return CONTRACT_TAXONOMIES.map((t) => ({
+    slug: t.slug,
+    label: t.label,
+    terms: counts.get(t.slug) ?? 0,
+    syncedAt: syncedAt.get(t.slug) ?? null,
+  }))
+}
 
 // Web audit — live view of the Woo catalog, demoted to a secondary surface
 // (WOO_WRITE_SYNC): /inventory is the single main inventory; this screen exists
@@ -49,14 +86,17 @@ export default async function WooCatalogPage({
 
   const supabase = await createClient()
 
-  // Studio side of the linking (local, fast) + live Woo catalog (external GET).
-  const [{ data: studioData, error: studioError }, catalog] = await Promise.all([
-    supabase
-      .from('inventory_items')
-      .select('id, referencia, status, wc_product_id, wc_status')
-      .order('created_at', { ascending: false }),
-    fetchWooCatalog(),
-  ])
+  // Studio side of the linking (local, fast) + live Woo catalog (external GET)
+  // + current taxonomy cache state for the sync panel.
+  const [{ data: studioData, error: studioError }, catalog, taxonomyCacheStatus] =
+    await Promise.all([
+      supabase
+        .from('inventory_items')
+        .select('id, referencia, status, wc_product_id, wc_status')
+        .order('created_at', { ascending: false }),
+      fetchWooCatalog(),
+      loadTaxonomyCacheStatus(supabase),
+    ])
 
   const wpSiteBase = process.env.WP_SITE_URL?.replace(/\/$/, '') ?? null
 
@@ -84,6 +124,9 @@ export default async function WooCatalogPage({
             </Link>
           </div>
         </div>
+        {/* The taxonomy sync uses its own endpoints — it can work even when the
+            product catalog read fails, so keep it reachable here too. */}
+        <TaxonomySyncPanel cacheStatus={taxonomyCacheStatus} />
       </AppShell>
     )
   }
@@ -192,6 +235,8 @@ export default async function WooCatalogPage({
       ) : (
         <WooCatalogTable rows={visible} wpSiteBase={wpSiteBase} />
       )}
+
+      <TaxonomySyncPanel cacheStatus={taxonomyCacheStatus} />
 
       {overview.orphans.length > 0 && (
         <section className="orphans-section">

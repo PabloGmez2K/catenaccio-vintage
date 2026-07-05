@@ -10,6 +10,7 @@ import {
 } from '@/lib/wc-terms-mvp'
 import { loadCachedTerms, matchCachedTermId } from '@/lib/wc/term-cache'
 import { loadCachedCategories } from '@/lib/wc/category-cache'
+import { isPendingImportedCost } from '@/lib/inventory/cost'
 
 export type ActionState = {
   error?: string
@@ -128,6 +129,12 @@ export async function createInventoryItem(
     fieldErrors.precio_objetivo = 'Debe ser un número positivo'
   }
 
+  // Commercial web price (Precio y coste block). Optional; clearing it is explicit.
+  const precioWebRaw = str(formData, 'precio_publicado_web')
+  if (precioWebRaw !== null && (isNaN(Number(precioWebRaw)) || Number(precioWebRaw) < 0)) {
+    fieldErrors.precio_publicado_web = 'Debe ser un número positivo'
+  }
+
   if (Object.keys(fieldErrors).length > 0) {
     return { fieldErrors, values: snapshotValues(formData) }
   }
@@ -179,6 +186,7 @@ export async function createInventoryItem(
       fecha_compra: fechaCompra,
       coste: Number(costeRaw),
       precio_objetivo: precioObjetivoRaw ? Number(precioObjetivoRaw) : null,
+      precio_publicado_web: precioWebRaw ? Number(precioWebRaw) : null,
       proveedor: str(formData, 'proveedor'),
       notas_compra: str(formData, 'notas_compra'),
       notas_internas: str(formData, 'notas_internas'),
@@ -275,6 +283,22 @@ export async function updateInventoryItem(
     }
   }
 
+  // Current row: needed to allow saving a Woo-imported ficha whose cost is still
+  // the technical pending placeholder (0 + note) without inventing a real cost.
+  const { data: currentItem, error: currentError } = await supabase
+    .from('inventory_items')
+    .select('coste, notas_internas')
+    .eq('id', itemId)
+    .eq('owner_id', user.id)
+    .single()
+  if (currentError || !currentItem) {
+    return { error: 'Item no encontrado o sin acceso.', values: snapshotValues(formData) }
+  }
+  const costePendingAllowed = isPendingImportedCost(
+    Number(currentItem.coste),
+    currentItem.notas_internas ?? null
+  )
+
   const referencia = req(formData, 'referencia')
   const equipoDisplay = req(formData, 'equipo_display')
   const temporadaDisplay = req(formData, 'temporada_display')
@@ -294,8 +318,13 @@ export async function updateInventoryItem(
   if (!condicion) fieldErrors.condicion = 'Obligatoria'
   if (!productType) fieldErrors.product_type = 'Obligatorio'
   if (!authenticityType) fieldErrors.authenticity_type = 'Obligatoria'
-  if (!costeRaw || isNaN(Number(costeRaw)) || Number(costeRaw) < 0)
+  if (!costeRaw) {
+    // Empty cost only saves while the stored cost is still the imported pending
+    // placeholder — the ficha keeps showing «Coste pendiente».
+    if (!costePendingAllowed) fieldErrors.coste = 'Debe ser un número positivo'
+  } else if (isNaN(Number(costeRaw)) || Number(costeRaw) < 0) {
     fieldErrors.coste = 'Debe ser un número positivo'
+  }
   if (!fechaCompra) fieldErrors.fecha_compra = 'Obligatoria'
 
   const precioObjetivoRaw = str(formData, 'precio_objetivo')
@@ -304,6 +333,12 @@ export async function updateInventoryItem(
     (isNaN(Number(precioObjetivoRaw)) || Number(precioObjetivoRaw) < 0)
   ) {
     fieldErrors.precio_objetivo = 'Debe ser un número positivo'
+  }
+
+  // Commercial web price (Precio y coste block). Optional; clearing it is explicit.
+  const precioWebRaw = str(formData, 'precio_publicado_web')
+  if (precioWebRaw !== null && (isNaN(Number(precioWebRaw)) || Number(precioWebRaw) < 0)) {
+    fieldErrors.precio_publicado_web = 'Debe ser un número positivo'
   }
 
   if (Object.keys(fieldErrors).length > 0) {
@@ -346,8 +381,10 @@ export async function updateInventoryItem(
     .update({
       referencia,
       fecha_compra: fechaCompra,
-      coste: Number(costeRaw),
+      // Empty + pending-allowed keeps the stored technical placeholder untouched.
+      coste: costeRaw ? Number(costeRaw) : Number(currentItem.coste),
       precio_objetivo: precioObjetivoRaw ? Number(precioObjetivoRaw) : null,
+      precio_publicado_web: precioWebRaw ? Number(precioWebRaw) : null,
       proveedor: str(formData, 'proveedor'),
       notas_compra: str(formData, 'notas_compra'),
       notas_internas: str(formData, 'notas_internas'),

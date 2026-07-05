@@ -307,8 +307,17 @@ export async function fetchWooProductDetail(productId: number): Promise<WooProdu
         Accept: 'application/json',
       },
       cache: 'no-store',
+      // A HUNG (not down) store must not block the ficha/edit render for minutes.
+      signal: AbortSignal.timeout(10_000),
     })
   } catch (err) {
+    if (err instanceof Error && (err.name === 'TimeoutError' || err.name === 'AbortError')) {
+      return {
+        ok: false,
+        code: 'network_error',
+        message: 'La web tardó demasiado en responder (más de 10 segundos). Reintenta en un momento.',
+      }
+    }
     const msg = err instanceof Error ? err.message : 'Error de red'
     return { ok: false, code: 'network_error', message: sanitizeMessage(msg, appUser, appPassword) }
   }

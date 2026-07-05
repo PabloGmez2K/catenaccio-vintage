@@ -479,7 +479,20 @@ export default async function InventoryItemPage({
             )}
             <div className="field-row">
               <span className="field-label">Marca</span>
-              <span className="field-value">{optionalTermValue(shirt.marca_display)}</span>
+              <span className="field-value">
+                {optionalTermValue(shirt.marca_display)}
+                {/* Empty brand is never a silent failure: say WHY when we know the web side. */}
+                {!shirt.marca_display?.trim() && wooExtraction && (
+                  <span className="field-subnote">
+                    {wooExtraction.fields.marca.origin === 'absent' &&
+                      'No presente en Woo para este producto.'}
+                    {wooExtraction.fields.marca.origin === 'unresolved' &&
+                      'La web trae un ID sin resolver — sincroniza taxonomías en Auditoría web y rehidrata.'}
+                    {wooExtraction.fields.marca.display &&
+                      `En la web: ${wooExtraction.fields.marca.display} — usa «Rehidratar desde Woo» para importarla.`}
+                  </span>
+                )}
+              </span>
             </div>
             <div className="field-row">
               <span className="field-label">Medidas</span>
