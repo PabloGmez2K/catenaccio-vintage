@@ -205,6 +205,15 @@ export function ItemForm({
 
   const isShirt = productType === 'Shirt'
 
+  // Woo-imported values may not match the canonical option lists. Injecting the
+  // current value as an extra option keeps it visible and round-trips it on save
+  // instead of rendering an empty select and silently losing the imported value
+  // (summary ↔ edit parity, STUDIO_WOO_SYNC_CONTRACT).
+  const tallaImported =
+    talla.trim() !== '' && !tallaOptions.some((o) => o.label === talla)
+  const condicionImported =
+    condicion.trim() !== '' && !condicionOptions.some((o) => o.label === condicion)
+
   // Heuristic recommendation shown when the category is left "Automática" (S023E).
   // Reactive to liga: liga present → Otros Clubs; liga empty → Selecciones.
   // Mirrors resolveHeuristicCategoryId in lib/wc/category-cache.ts.
@@ -367,6 +376,7 @@ export function ItemForm({
                 onChange={(e) => setTalla(e.target.value)}
               >
                 <option value="">— Seleccionar —</option>
+                {tallaImported && <option value={talla}>{talla} · importado de Woo</option>}
                 {tallaOptions.map((o) => (
                   <option key={o.label} value={o.label}>
                     {o.label}
@@ -374,6 +384,12 @@ export function ItemForm({
                 ))}
               </select>
               <FieldError msg={fe.talla} />
+              {tallaImported && (
+                <p className="field-help">
+                  Valor importado de la web que no está en la lista estándar. Se conserva tal cual;
+                  cámbialo solo si quieres normalizarlo.
+                </p>
+              )}
             </div>
           </div>
 
@@ -388,6 +404,9 @@ export function ItemForm({
               onChange={(e) => setCondicion(e.target.value)}
             >
               <option value="">— Seleccionar —</option>
+              {condicionImported && (
+                <option value={condicion}>{condicion} · importado de Woo</option>
+              )}
               {condicionOptions.map((o) => (
                 <option key={o.label} value={o.label}>
                   {o.label}
@@ -395,6 +414,12 @@ export function ItemForm({
               ))}
             </select>
             <FieldError msg={fe.condicion} />
+            {condicionImported && (
+              <p className="field-help">
+                Condición importada de la web que no está en la lista estándar. Se conserva tal
+                cual; cámbiala solo si quieres normalizarla.
+              </p>
+            )}
           </div>
 
           <div className={`form-field ${fe.categoria ? 'has-error' : ''}`}>

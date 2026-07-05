@@ -1,10 +1,19 @@
 import { createClient } from '@/lib/supabase/server'
 
 const WC_TAXONOMIES = [
-  { id: 4, slug: 'pa_equipo', labelStudio: 'Equipo' },
-  { id: 5, slug: 'pa_liga', labelStudio: 'Liga' },
-  { id: 6, slug: 'pa_jugador', labelStudio: 'Jugador' },
-  { id: 7, slug: 'pa_ano', labelStudio: 'Ano' },
+  // Attribute IDs confirmed in probe S007 (API_READONLY_PROBE_RESULT.md §4).
+  // 1–3 added by STUDIO_WOO_SYNC_CONTRACT: they let the hydration contract
+  // resolve talla/condición/marca term IDs to human names. No SQL change —
+  // wc_taxonomies/wc_terms accept any slug.
+  // required: false = best-effort. The critical four go FIRST so an optional
+  // taxonomy failure can never abort the run before they are refreshed.
+  { id: 4, slug: 'pa_equipo', labelStudio: 'Equipo', required: true },
+  { id: 5, slug: 'pa_liga', labelStudio: 'Liga', required: true },
+  { id: 6, slug: 'pa_jugador', labelStudio: 'Jugador', required: true },
+  { id: 7, slug: 'pa_ano', labelStudio: 'Ano', required: true },
+  { id: 1, slug: 'pa_talla', labelStudio: 'Talla', required: false },
+  { id: 2, slug: 'pa_condicion', labelStudio: 'Condicion', required: false },
+  { id: 3, slug: 'pa_marca', labelStudio: 'Marca', required: false },
 ] as const
 
 type WcAttribute = {
@@ -108,12 +117,16 @@ export async function syncWcTaxonomyCache(): Promise<WcTaxonomySyncResult> {
 
   try {
     const attributes = await wcGet<WcAttribute[]>(ctx, '/wp-json/wc/v3/products/attributes')
-    const relevantAttributes = WC_TAXONOMIES.map((expected) => {
+    const relevantAttributes = WC_TAXONOMIES.flatMap((expected) => {
       const attribute = attributes.find((candidate) => candidate.id === expected.id)
       if (!attribute) {
-        throw new Error(`missing_wc_attribute:${expected.id}:${expected.slug}`)
+        if (expected.required) {
+          throw new Error(`missing_wc_attribute:${expected.id}:${expected.slug}`)
+        }
+        console.warn(`[taxonomy-sync] optional attribute ${expected.id}:${expected.slug} not found in Woo — skipped`)
+        return []
       }
-      return { expected, attribute }
+      return [{ expected, attribute }]
     })
 
     const taxonomyRows = relevantAttributes.map(({ expected, attribute }) => ({
@@ -146,12 +159,28 @@ export async function syncWcTaxonomyCache(): Promise<WcTaxonomySyncResult> {
     const taxonomySummaries: TaxonomySummary[] = []
     const allTerms: Array<WcTerm & { taxonomy_slug: string }> = []
 
-    for (const taxonomy of WC_TAXONOMIES) {
-      const terms = await wcGetPaginated<WcTerm>(
-        ctx,
-        `/wp-json/wc/v3/products/attributes/${taxonomy.id}/terms`,
-        { hide_empty: 'false' }
-      )
+    // Iterate only the attributes actually present in Woo (optional ones may be skipped).
+    for (const { expected: taxonomy, attribute } of relevantAttributes) {
+      let terms: WcTerm[]
+      try {
+        terms = await wcGetPaginated<WcTerm>(
+          ctx,
+          `/wp-json/wc/v3/products/attributes/${taxonomy.id}/terms`,
+          { hide_empty: 'false' }
+        )
+      } catch (err) {
+        // Optional taxonomies are best-effort end to end: a failed term fetch
+        // must not abort the sync of the remaining taxonomies.
+        if (taxonomy.required) throw err
+        console.warn(
+          `[taxonomy-sync] optional taxonomy ${taxonomy.slug} terms fetch failed — skipped: ${sanitizeMessage(
+            err instanceof Error ? err.message : 'unknown error',
+            appUser,
+            appPassword
+          )}`
+        )
+        continue
+      }
 
       allTerms.push(
         ...terms.map((term) => ({
@@ -160,11 +189,10 @@ export async function syncWcTaxonomyCache(): Promise<WcTaxonomySyncResult> {
         }))
       )
 
-      const sourceAttribute = relevantAttributes.find(({ expected }) => expected.id === taxonomy.id)
       taxonomySummaries.push({
         attributeId: taxonomy.id,
         slug: taxonomy.slug,
-        name: sourceAttribute?.attribute.name ?? taxonomy.labelStudio,
+        name: attribute.name ?? taxonomy.labelStudio,
         terms: terms.length,
       })
 
@@ -186,6 +214,14 @@ export async function syncWcTaxonomyCache(): Promise<WcTaxonomySyncResult> {
           .upsert(termRows, { onConflict: 'id' })
 
         if (termError) {
+          // Best-effort for optional taxonomies also on the cache write: a stale
+          // UNIQUE(taxonomy_id, slug) collision there must not fail the whole sync.
+          if (!taxonomy.required) {
+            console.warn(
+              `[taxonomy-sync] optional taxonomy ${taxonomy.slug} cache upsert failed — skipped: ${termError.message.slice(0, 200)}`
+            )
+            continue
+          }
           return {
             ok: false,
             code: 'supabase_terms_upsert_failed',

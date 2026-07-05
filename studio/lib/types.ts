@@ -153,7 +153,17 @@ export interface AiSuggestion {
 
 export interface WcTaxonomyCacheRow {
   id: number
-  slug: 'pa_equipo' | 'pa_liga' | 'pa_jugador' | 'pa_ano'
+  // The 7 real store taxonomies (probe S007). pa_talla/pa_condicion/pa_marca
+  // added to the cache in STUDIO_WOO_SYNC_CONTRACT so Woo term IDs for
+  // condición/marca resolve to human names instead of staying pending.
+  slug:
+    | 'pa_equipo'
+    | 'pa_liga'
+    | 'pa_jugador'
+    | 'pa_ano'
+    | 'pa_talla'
+    | 'pa_condicion'
+    | 'pa_marca'
   name: string
   label_studio: string | null
   source: 'wc_sync' | 'studio_created'

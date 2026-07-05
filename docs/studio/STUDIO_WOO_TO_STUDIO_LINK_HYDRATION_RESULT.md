@@ -153,3 +153,36 @@ Validacion V3:
 - Secret scan sobre diff/archivos nuevos: CLEAN
 
 No tocado en V3: Woo writes, Supabase remoto por agente, SQL, Vercel, `.env.local`, deploy, push, storefront.
+
+## V4 - Contrato canonico (STUDIO_WOO_SYNC_CONTRACT)
+
+**Continuacion:** STUDIO_WOO_SYNC_CONTRACT_WITH_FABLE
+**Fecha:** 2026-07-04
+**Resultado:** la hidratacion deja de ser logica propia y pasa a consumir el contrato canonico.
+
+La hidratacion sube a `woo_link_hydration_v4` y se reconstruye sobre
+`studio/lib/inventory/woo-studio-sync-contract.ts` (fuente unica de mapeo
+Woo ↔ Studio). Ver `docs/studio/STUDIO_WOO_SYNC_CONTRACT.md` para el contrato
+completo. Cambios frente a V3:
+
+- Resolucion de las 7 taxonomias reales (`pa_talla`/`pa_condicion`/`pa_marca`
+  incluidas) contra la cache `wc_terms`, ampliada sin SQL en `taxonomy-sync.ts`
+  (las 3 nuevas son best-effort: no pueden romper la sync de las 4 criticas).
+- `defectos` (ACF) se hidrata a `condicion_notas`; `patrocinador`/`sponsor` a
+  `sponsor`; `marca` guarda tambien su term ID cuando la cache lo conoce.
+- Atributos y meta Woo sin destino se recogen estructuradamente
+  (`unmappedAttributes`/`unmappedMeta`), visibles en el panel de sincronizacion
+  y persistidos en el snapshot — ya no viven solo en una linea de notas.
+- La politica "rellenar solo vacios/placeholders, nunca pisar manuales" se
+  extrae a `buildRehydrationDetailPatch` (funcion pura compartida por link y
+  rehidratacion). Las notas de rehidratacion ya no se duplican al subir de
+  version (marcador generico).
+- Valor numerico en taxonomias de formato string (una talla "38") se interpreta
+  primero como nombre literal de termino y solo despues como term ID — evita
+  corromper datos por colision de IDs.
+- Paridad resumen ↔ editar: talla/condicion importadas fuera de las listas
+  canonicas se inyectan como opcion en el select de edicion; marca y medidas
+  visibles siempre en la ficha; marca se resuelve contra `pa_marca` al guardar.
+- Panel «Sincronizacion web»: nueva tabla «Campos de catalogo Studio ↔ Web»
+  (Igual/Distinto/Solo en la web/Solo en Studio/Pendiente de mapear), seccion de
+  datos Woo sin mapear y contrato de readiness Studio → Web.

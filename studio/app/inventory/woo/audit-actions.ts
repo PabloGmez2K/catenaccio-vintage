@@ -55,7 +55,15 @@ export async function linkWooProductToStudio(productId: number): Promise<WooAudi
 
   const now = new Date().toISOString()
   const [terms, categories] = await Promise.all([
-    loadCachedTerms(supabase, ['pa_liga', 'pa_equipo', 'pa_ano', 'pa_jugador']),
+    loadCachedTerms(supabase, [
+      'pa_liga',
+      'pa_equipo',
+      'pa_ano',
+      'pa_jugador',
+      'pa_talla',
+      'pa_condicion',
+      'pa_marca',
+    ]),
     loadCachedCategories(supabase),
   ])
   const hydrated = buildWooHydration(live, terms, categories, now)

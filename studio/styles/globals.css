@@ -2447,6 +2447,74 @@ body {
   padding-left: 18px;
 }
 
+/* STUDIO_WOO_SYNC_CONTRACT — catalog comparison, unmapped data, sync contract */
+.woo-catalog-details,
+.woo-contract-details {
+  margin: 10px 0;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  font-size: 12px;
+}
+
+.woo-catalog-summary {
+  cursor: pointer;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.woo-catalog-details[open] .woo-catalog-summary,
+.woo-contract-details[open] .woo-catalog-summary {
+  margin-bottom: 8px;
+}
+
+.woo-catalog-hint,
+.woo-unmapped-hint {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin-top: 6px;
+  line-height: 1.5;
+}
+
+.woo-unmapped {
+  margin: 10px 0;
+  padding: 8px 10px;
+  border: 1px solid var(--color-border);
+  background: var(--color-bg-muted, #fafafa);
+  border-radius: var(--radius);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.woo-unmapped-title {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.woo-unmapped-list {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.woo-unmapped-kind {
+  color: var(--color-text-muted);
+  font-size: 11px;
+}
+
+.woo-contract-list {
+  margin: 0;
+  padding-left: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  line-height: 1.5;
+}
+
 .woo-sync-actions {
   display: flex;
   flex-direction: column;

@@ -13,6 +13,14 @@ import {
 } from '@/app/inventory/[id]/woo-sync-actions'
 import type { WooProductDetail } from '@/lib/wc/product-catalog'
 import type { WooDiffResult } from '@/lib/inventory/woo-diff'
+import {
+  STUDIO_TO_WOO_READINESS,
+  SYNC_CAPABILITY_LABELS,
+  type CatalogFieldRow,
+  type CatalogRowState,
+  type UnmappedAttribute,
+  type UnmappedMeta,
+} from '@/lib/inventory/woo-studio-sync-contract'
 
 // WOO_WRITE_SYNC foundation — the item's web sync panel. Shows the LIVE Woo
 // state next to Studio's, the field-by-field diff, and the controlled actions.
@@ -59,6 +67,25 @@ const WOO_STATUS_TONES: Record<string, string> = {
   trash: 'badge-red',
 }
 
+// Catalog comparison badges (STUDIO_WOO_SYNC_CONTRACT).
+const CATALOG_STATE_LABELS: Record<CatalogRowState, string> = {
+  aligned: 'Igual',
+  different: 'Distinto',
+  woo_only: 'Solo en la web',
+  studio_only: 'Solo en Studio',
+  pending_mapping: 'Pendiente de mapear',
+  empty: 'Vacío',
+}
+
+const CATALOG_STATE_TONES: Record<CatalogRowState, string> = {
+  aligned: 'badge-gray',
+  different: 'badge-orange',
+  woo_only: 'badge-blue',
+  studio_only: 'badge-yellow',
+  pending_mapping: 'badge-red',
+  empty: 'badge-gray',
+}
+
 export function WooSyncPanel({
   itemId,
   wcProductId,
@@ -66,6 +93,9 @@ export function WooSyncPanel({
   liveError,
   fetchedAt,
   diff,
+  catalogRows,
+  unmappedAttributes = [],
+  unmappedMeta = [],
   studioPrice,
   approvedSuggestionId,
   wpAdminUrl,
@@ -77,6 +107,9 @@ export function WooSyncPanel({
   liveError: string | null
   fetchedAt: string | null
   diff: WooDiffResult | null
+  catalogRows?: CatalogFieldRow[] | null
+  unmappedAttributes?: UnmappedAttribute[]
+  unmappedMeta?: UnmappedMeta[]
   studioPrice: number | null
   approvedSuggestionId: string | null
   wpAdminUrl: string | null
@@ -105,6 +138,12 @@ export function WooSyncPanel({
   }
 
   const busy = isPending
+
+  // Catalog fields needing eyes (different / only-on-web / unresolved mapping).
+  // Gates the "alineados" message too: operational diff clean + catalog clean.
+  const catalogAttention = (catalogRows ?? []).filter(
+    (r) => r.state === 'different' || r.state === 'woo_only' || r.state === 'pending_mapping'
+  ).length
 
   return (
     <section className="detail-section woo-sync-section" id="sync-web">
@@ -224,6 +263,107 @@ export function WooSyncPanel({
           )}
         </div>
       )}
+
+      {/* ── Campos de catálogo Studio ↔ Web (contrato canónico) ───── */}
+      {catalogRows && catalogRows.length > 0 && (
+        <details className="woo-catalog-details">
+          <summary className="woo-catalog-summary">
+            Campos de catálogo Studio ↔ Web
+            {catalogAttention > 0 ? (
+              <span className="status-badge badge-orange">{catalogAttention} a revisar</span>
+            ) : (
+              <span className="status-badge badge-gray">alineados</span>
+            )}
+          </summary>
+          <table className="woo-diff-table">
+            <thead>
+              <tr>
+                <th>Campo</th>
+                <th>Studio</th>
+                <th>Web</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {catalogRows.map((row) => (
+                <tr key={row.key}>
+                  <td className="woo-diff-field">{row.label}</td>
+                  <td>{row.studioValue}</td>
+                  <td>{row.wooValue}</td>
+                  <td>
+                    <span className={`status-badge ${CATALOG_STATE_TONES[row.state]}`}>
+                      {CATALOG_STATE_LABELS[row.state]}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {catalogRows
+            .filter((r) => r.hint)
+            .map((r) => (
+              <p key={r.key} className="woo-diff-note">
+                {r.hint}
+              </p>
+            ))}
+          <p className="woo-catalog-hint">
+            «Solo en la web» se importa con Rehidratar. «Solo en Studio» y «Distinto» necesitan el
+            sync Studio → Web de ese campo (ver contrato abajo). «Pendiente de mapear» se resuelve
+            sincronizando taxonomías y rehidratando.
+          </p>
+        </details>
+      )}
+
+      {/* ── Datos Woo sin destino en Studio (visibles, no se pierden) ─ */}
+      {(unmappedAttributes.length > 0 || unmappedMeta.length > 0) && (
+        <div className="woo-unmapped">
+          <span className="woo-unmapped-title">Datos de la web que Studio no usa todavía</span>
+          <ul className="woo-unmapped-list">
+            {unmappedAttributes.map((attr) => (
+              <li key={`attr-${attr.name}`}>
+                <strong>{attr.name}</strong>
+                {attr.options.length > 0 ? `: ${attr.options.join(' / ')}` : ''}
+                <span className="woo-unmapped-kind"> · atributo Woo sin mapear</span>
+              </li>
+            ))}
+            {unmappedMeta.map((meta) => (
+              <li key={`meta-${meta.key}`}>
+                <strong>{meta.key}</strong>
+                {meta.preview ? `: ${meta.preview}` : ''}
+                <span className="woo-unmapped-kind"> · meta Woo sin destino</span>
+              </li>
+            ))}
+          </ul>
+          <p className="woo-unmapped-hint">
+            Estos datos existen en la web y se conservan aquí y en el snapshot de la ficha. No se
+            inventa destino: si alguno debe convertirse en campo de Studio, es una decisión de
+            producto.
+          </p>
+        </div>
+      )}
+
+      {/* ── Contrato de sincronización Studio → Web ───────────────── */}
+      <details className="woo-contract-details">
+        <summary className="woo-catalog-summary">Qué puede sincronizarse Studio → Web</summary>
+        <ul className="woo-contract-list">
+          {STUDIO_TO_WOO_READINESS.map((row) => (
+            <li key={row.field}>
+              <span
+                className={`status-badge ${
+                  row.capability === 'sync_now'
+                    ? 'badge-green'
+                    : row.capability === 'blocked_by_design'
+                      ? 'badge-red'
+                      : 'badge-yellow'
+                }`}
+              >
+                {SYNC_CAPABILITY_LABELS[row.capability]}
+              </span>
+              <strong> {row.field}</strong> — {row.detail}
+            </li>
+          ))}
+        </ul>
+      </details>
 
       {/* ── Acciones controladas ──────────────────────────────────── */}
       {live && diff && (
@@ -469,8 +609,21 @@ export function WooSyncPanel({
             !diff.canSyncDescription &&
             !diff.canTrashDraft &&
             !diff.mirrorOutOfDate &&
-            !diff.hasDifferences && (
+            !diff.hasDifferences &&
+            catalogAttention === 0 && (
               <p className="woo-sync-clean">Studio y la web están alineados. Nada que sincronizar.</p>
+            )}
+          {!diff.canSyncPrice &&
+            !diff.canSyncStockOut &&
+            !diff.canSyncDescription &&
+            !diff.canTrashDraft &&
+            !diff.mirrorOutOfDate &&
+            !diff.hasDifferences &&
+            catalogAttention > 0 && (
+              <p className="woo-sync-review">
+                Lo operativo (precio/stock/estado/descripción) está alineado, pero hay{' '}
+                {catalogAttention} campo(s) de catálogo a revisar arriba.
+              </p>
             )}
           {!diff.canSyncPrice &&
             !diff.canSyncStockOut &&

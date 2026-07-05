@@ -7,7 +7,6 @@ import {
   equipoOptions,
   temporadaOptions,
   marcaOptions,
-  resolveTermId,
 } from '@/lib/wc-terms-mvp'
 import { loadCachedTerms, matchCachedTermId } from '@/lib/wc/term-cache'
 import { loadCachedCategories } from '@/lib/wc/category-cache'
@@ -134,19 +133,26 @@ export async function createInventoryItem(
   }
 
   // Resolve WC term IDs from display labels against the Supabase taxonomy cache
-  // (S023A/S023B) — unmatched terms stored as ''. marca has no synced WC taxonomy
-  // and keeps resolving against the local presentation map (always '' today).
+  // (S023A/S023B) — unmatched terms stored as ''. marca resolves against the
+  // pa_marca cache (STUDIO_WOO_SYNC_CONTRACT — the store taxonomy exists even
+  // though products don't carry a marca meta yet).
   const ligaDisplay = str(formData, 'liga_display')
   const marcaDisplay = str(formData, 'marca_display')
   const jugadorDisplay = str(formData, 'jugador_display')
   const shirtVersion = req(formData, 'shirt_version') || 'Home'
   const sleeveLength = req(formData, 'sleeve_length') || 'Short Sleeve'
 
-  const cachedTerms = await loadCachedTerms(supabase, ['pa_liga', 'pa_equipo', 'pa_ano', 'pa_jugador'])
+  const cachedTerms = await loadCachedTerms(supabase, [
+    'pa_liga',
+    'pa_equipo',
+    'pa_ano',
+    'pa_jugador',
+    'pa_marca',
+  ])
   const ligaTermId = ligaDisplay ? matchCachedTermId(cachedTerms.pa_liga, ligaDisplay, ligaOptions) : ''
   const equipoTermId = matchCachedTermId(cachedTerms.pa_equipo, equipoDisplay, equipoOptions)
   const temporadaTermId = matchCachedTermId(cachedTerms.pa_ano, temporadaDisplay, temporadaOptions)
-  const marcaTermId = marcaDisplay ? resolveTermId(marcaOptions, marcaDisplay) : ''
+  const marcaTermId = marcaDisplay ? matchCachedTermId(cachedTerms.pa_marca, marcaDisplay, marcaOptions) : ''
   // jugador is open vocabulary — no static option list, no alias fallback. Resolved purely
   // against the WC term cache (S023A/D); unmatched names stay null until created via
   // TermCreateButton (S023D) and re-saved.
@@ -310,11 +316,17 @@ export async function updateInventoryItem(
   const shirtVersion = req(formData, 'shirt_version') || 'Home'
   const sleeveLength = req(formData, 'sleeve_length') || 'Short Sleeve'
 
-  const cachedTerms = await loadCachedTerms(supabase, ['pa_liga', 'pa_equipo', 'pa_ano', 'pa_jugador'])
+  const cachedTerms = await loadCachedTerms(supabase, [
+    'pa_liga',
+    'pa_equipo',
+    'pa_ano',
+    'pa_jugador',
+    'pa_marca',
+  ])
   const ligaTermId = ligaDisplay ? matchCachedTermId(cachedTerms.pa_liga, ligaDisplay, ligaOptions) : ''
   const equipoTermId = matchCachedTermId(cachedTerms.pa_equipo, equipoDisplay, equipoOptions)
   const temporadaTermId = matchCachedTermId(cachedTerms.pa_ano, temporadaDisplay, temporadaOptions)
-  const marcaTermId = marcaDisplay ? resolveTermId(marcaOptions, marcaDisplay) : ''
+  const marcaTermId = marcaDisplay ? matchCachedTermId(cachedTerms.pa_marca, marcaDisplay, marcaOptions) : ''
   const jugadorTermId = jugadorDisplay ? matchCachedTermId(cachedTerms.pa_jugador, jugadorDisplay) : ''
 
   // WC category override (S023E): optional, validated against the wc_categories cache.

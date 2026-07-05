@@ -18,9 +18,12 @@ import { createClient } from '@/lib/supabase/server'
 import { fetchWooProductDetail } from '@/lib/wc/product-catalog'
 import {
   buildWooHydration,
-  isNumericToken,
   WOO_LINK_HYDRATION_VERSION,
 } from '@/lib/inventory/woo-hydration'
+import {
+  buildRehydrationDetailPatch,
+  type RehydrationCurrentDetails,
+} from '@/lib/inventory/woo-studio-sync-contract'
 import {
   formatWooPrice,
   trashWooProduct,
@@ -43,24 +46,6 @@ type LoadedItem = {
   wc_product_id: number
   wc_status: string
   precio_publicado_web: number | null
-}
-
-type LoadedDetails = {
-  liga: string | null
-  liga_display: string | null
-  equipo: string | null
-  equipo_display: string | null
-  temporada: string | null
-  temporada_display: string | null
-  talla: string | null
-  condicion: string | null
-  marca_display: string | null
-  categoria: number | null
-  categoria_display: string | null
-  jugador: string | null
-  jugador_display: string | null
-  largo_cm: number | null
-  ancho_cm: number | null
 }
 
 type Loaded =
@@ -166,45 +151,16 @@ function revalidateItem(itemId: string) {
   revalidatePath('/inventory/woo')
 }
 
-function hasHumanText(value: string | null | undefined): boolean {
-  return Boolean(value?.trim()) && !isNumericToken(value)
-}
-
-function shouldHydrateTerm(currentId: string | null, currentDisplay: string | null): boolean {
-  return (
-    !hasHumanText(currentDisplay) ||
-    isNumericToken(currentDisplay) ||
-    (isNumericToken(currentId) && !hasHumanText(currentDisplay))
-  )
-}
+// One rehydration block per ficha, regardless of hydration version: the fresh
+// details always land in the woo_rehydrated event payload, so the notes don't
+// grow a new block on every contract/version bump.
+const REHYDRATION_MARKER = 'Rehidratacion Woo ('
 
 function appendRehydrationNotes(existing: string | null, hydrationNotes: string): string {
-  const marker = `Rehidratacion Woo (${WOO_LINK_HYDRATION_VERSION})`
-  if (!existing?.trim()) return `${marker}:\n${hydrationNotes}`
-  if (existing.includes(marker)) return existing
-  return `${existing.trim()}\n\n${marker}:\n${hydrationNotes}`
-}
-
-function applyTermPatch(
-  patch: Record<string, unknown>,
-  idField: string,
-  displayField: string,
-  currentId: string | null,
-  currentDisplay: string | null,
-  nextId: string | null,
-  nextDisplay: string | null,
-  required: boolean
-) {
-  if (!shouldHydrateTerm(currentId, currentDisplay)) return
-  if (nextDisplay) {
-    patch[idField] = nextId ?? (required ? '' : null)
-    patch[displayField] = nextDisplay
-    return
-  }
-  if (isNumericToken(currentId) || isNumericToken(currentDisplay)) {
-    patch[idField] = required ? '' : null
-    patch[displayField] = null
-  }
+  const header = `${REHYDRATION_MARKER}${WOO_LINK_HYDRATION_VERSION})`
+  if (!existing?.trim()) return `${header}:\n${hydrationNotes}`
+  if (existing.includes(REHYDRATION_MARKER)) return existing
+  return `${existing.trim()}\n\n${header}:\n${hydrationNotes}`
 }
 
 // ── 1. Precio: Studio → Woo (PUT regular_price) ───────────────────────────────
@@ -550,12 +506,20 @@ export async function rehydrateItemFromWoo(itemId: string): Promise<WooSyncResul
     ctx.supabase
       .from('football_shirt_details')
       .select(
-        'liga, liga_display, equipo, equipo_display, temporada, temporada_display, talla, condicion, marca_display, categoria, categoria_display, jugador, jugador_display, largo_cm, ancho_cm'
+        'liga, liga_display, equipo, equipo_display, temporada, temporada_display, talla, condicion, marca, marca_display, categoria, categoria_display, jugador, jugador_display, largo_cm, ancho_cm, condicion_notas, sponsor'
       )
       .eq('item_id', ctx.item.id)
       .eq('owner_id', ctx.userId)
       .single(),
-    loadCachedTerms(ctx.supabase, ['pa_liga', 'pa_equipo', 'pa_ano', 'pa_jugador']),
+    loadCachedTerms(ctx.supabase, [
+      'pa_liga',
+      'pa_equipo',
+      'pa_ano',
+      'pa_jugador',
+      'pa_talla',
+      'pa_condicion',
+      'pa_marca',
+    ]),
     loadCachedCategories(ctx.supabase),
   ])
 
@@ -564,71 +528,13 @@ export async function rehydrateItemFromWoo(itemId: string): Promise<WooSyncResul
   }
 
   const now = new Date().toISOString()
-  const hydrated = buildWooHydration(live, terms, categories, now)
-  const details = currentDetails as LoadedDetails
-  const detailPatch: Record<string, unknown> = {}
-
-  applyTermPatch(
-    detailPatch,
-    'liga',
-    'liga_display',
-    details.liga,
-    details.liga_display,
-    hydrated.details.liga,
-    hydrated.details.liga_display,
-    false
+  const hydrated = buildWooHydration(live, terms, categories, now, 'rehydrate')
+  // The fill-only-empty/placeholder policy lives in the sync contract — the same
+  // policy the link flow and this action must share. Never overwrites manual values.
+  const detailPatch = buildRehydrationDetailPatch(
+    currentDetails as RehydrationCurrentDetails,
+    hydrated.details
   )
-  applyTermPatch(
-    detailPatch,
-    'equipo',
-    'equipo_display',
-    details.equipo,
-    details.equipo_display,
-    hydrated.details.equipo || null,
-    hydrated.details.equipo_display,
-    true
-  )
-  applyTermPatch(
-    detailPatch,
-    'temporada',
-    'temporada_display',
-    details.temporada,
-    details.temporada_display,
-    hydrated.details.temporada || null,
-    hydrated.details.temporada_display,
-    true
-  )
-  applyTermPatch(
-    detailPatch,
-    'jugador',
-    'jugador_display',
-    details.jugador,
-    details.jugador_display,
-    hydrated.details.jugador,
-    hydrated.details.jugador_display,
-    false
-  )
-
-  if (!details.talla?.trim() && hydrated.details.talla) detailPatch.talla = hydrated.details.talla
-  if (!details.condicion?.trim() && hydrated.details.condicion) {
-    detailPatch.condicion = hydrated.details.condicion
-  }
-  if (isNumericToken(details.condicion) && hydrated.details.condicion) {
-    detailPatch.condicion = hydrated.details.condicion
-  }
-  if (!details.marca_display?.trim() && hydrated.details.marca_display) {
-    detailPatch.marca_display = hydrated.details.marca_display
-  }
-  if (details.ancho_cm == null && hydrated.details.ancho_cm != null) {
-    detailPatch.ancho_cm = hydrated.details.ancho_cm
-  }
-  if (details.largo_cm == null && hydrated.details.largo_cm != null) {
-    detailPatch.largo_cm = hydrated.details.largo_cm
-  }
-  if (details.categoria == null && hydrated.details.categoria != null) {
-    detailPatch.categoria = hydrated.details.categoria
-    detailPatch.categoria_display = hydrated.details.categoria_display
-  }
 
   const itemPatch: Record<string, unknown> = {
     wc_status: mapWooStatusToMirror(live.status),

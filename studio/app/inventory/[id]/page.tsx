@@ -13,6 +13,14 @@ import { VintedPanel } from '@/components/VintedPanel'
 import { WooSyncPanel, type WooLogEntry } from '@/components/WooSyncPanel'
 import { fetchWooProductDetail, type WooProductDetail } from '@/lib/wc/product-catalog'
 import { buildWooDiff, type WooDiffResult } from '@/lib/inventory/woo-diff'
+import {
+  buildCatalogComparison,
+  extractWooProduct,
+  type CatalogFieldRow,
+  type WooExtraction,
+} from '@/lib/inventory/woo-studio-sync-contract'
+import { loadCachedTerms } from '@/lib/wc/term-cache'
+import { loadCachedCategories } from '@/lib/wc/category-cache'
 import { buildSuggestionContext } from '@/lib/ai/suggestion-context'
 import { buildManualSeoPrompt } from '@/lib/seo/manual-seo-prompt'
 import { evaluateProductPreflight, type PreflightInput } from '@/lib/preflight/product-preflight'
@@ -41,6 +49,13 @@ function formatAuthenticityLabel(value: string | null): string {
 
 function displayTermValue(display: string | null): string {
   if (!display?.trim()) return 'Pendiente de mapear'
+  return /^\d+$/.test(display.trim()) ? 'Pendiente de mapear' : display
+}
+
+// Optional fields: empty is a legitimate "no value" (—), but a raw numeric ID is
+// still a pending mapping, never shown as human text.
+function optionalTermValue(display: string | null): string {
+  if (!display?.trim()) return '—'
   return /^\d+$/.test(display.trim()) ? 'Pendiente de mapear' : display
 }
 
@@ -120,6 +135,8 @@ export default async function InventoryItemPage({
   let wooFetchedAt: string | null = null
   let wooDiff: WooDiffResult | null = null
   let wooLog: WooLogEntry[] = []
+  let wooExtraction: WooExtraction | null = null
+  let catalogRows: CatalogFieldRow[] | null = null
 
   if (data.wc_product_id != null) {
     const [liveResult, { data: logRows }] = await Promise.all([
@@ -155,6 +172,41 @@ export default async function InventoryItemPage({
         approvedDescription: approvedSuggestion?.descripcion_larga ?? null,
         live: liveResult.product,
       })
+
+      // STUDIO_WOO_SYNC_CONTRACT — canonical field mapping of the live product
+      // and Studio↔Woo catalog comparison for the verification panel.
+      const [terms, categories] = await Promise.all([
+        loadCachedTerms(supabase, [
+          'pa_liga',
+          'pa_equipo',
+          'pa_ano',
+          'pa_jugador',
+          'pa_talla',
+          'pa_condicion',
+          'pa_marca',
+        ]),
+        loadCachedCategories(supabase),
+      ])
+      wooExtraction = extractWooProduct(liveResult.product, terms, categories)
+      catalogRows = buildCatalogComparison(
+        {
+          referencia: data.referencia ?? null,
+          liga_display: shirt?.liga_display ?? null,
+          equipo_display: shirt?.equipo_display ?? null,
+          temporada_display: shirt?.temporada_display ?? null,
+          jugador_display: shirt?.jugador_display ?? null,
+          talla: shirt?.talla ?? null,
+          condicion: shirt?.condicion ?? null,
+          marca_display: shirt?.marca_display ?? null,
+          ancho_cm: shirt?.ancho_cm != null ? Number(shirt.ancho_cm) : null,
+          largo_cm: shirt?.largo_cm != null ? Number(shirt.largo_cm) : null,
+          condicion_notas: shirt?.condicion_notas ?? null,
+          categoria: shirt?.categoria ?? null,
+          categoria_display: shirt?.categoria_display ?? null,
+        },
+        wooExtraction,
+        liveResult.product.name
+      )
     } else {
       wooLiveError = liveResult.message
     }
@@ -321,6 +373,9 @@ export default async function InventoryItemPage({
             liveError={wooLiveError}
             fetchedAt={wooFetchedAt}
             diff={wooDiff}
+            catalogRows={catalogRows}
+            unmappedAttributes={wooExtraction?.unmappedAttributes ?? []}
+            unmappedMeta={wooExtraction?.unmappedMeta ?? []}
             studioPrice={
               data.precio_publicado_web != null ? Number(data.precio_publicado_web) : null
             }
@@ -406,24 +461,34 @@ export default async function InventoryItemPage({
             </div>
             <div className="field-row">
               <span className="field-label">Talla</span>
-              <span className="field-value">{shirt.talla}</span>
+              <span className="field-value">
+                {/* A numeric talla can be a legit size name ("38"); legacy raw
+                    term IDs are healed by rehydrate, so show the value as-is. */}
+                {shirt.talla?.trim() || '—'}
+              </span>
             </div>
             <div className="field-row">
               <span className="field-label">Condición</span>
-              <span className="field-value">{shirt.condicion}</span>
+              <span className="field-value">{displayTermValue(shirt.condicion)}</span>
             </div>
             {shirt.liga_display && (
               <div className="field-row">
                 <span className="field-label">Liga</span>
-                <span className="field-value">{shirt.liga_display}</span>
+                <span className="field-value">{optionalTermValue(shirt.liga_display)}</span>
               </div>
             )}
-            {shirt.marca_display && (
-              <div className="field-row">
-                <span className="field-label">Marca</span>
-                <span className="field-value">{shirt.marca_display}</span>
-              </div>
-            )}
+            <div className="field-row">
+              <span className="field-label">Marca</span>
+              <span className="field-value">{optionalTermValue(shirt.marca_display)}</span>
+            </div>
+            <div className="field-row">
+              <span className="field-label">Medidas</span>
+              <span className="field-value">
+                {shirt.ancho_cm != null || shirt.largo_cm != null
+                  ? `${shirt.ancho_cm ?? '—'} × ${shirt.largo_cm ?? '—'} cm (ancho × largo)`
+                  : '—'}
+              </span>
+            </div>
             <div className="field-row">
               <span className="field-label">Categoría WC</span>
               <span className="field-value">
@@ -435,7 +500,7 @@ export default async function InventoryItemPage({
             {shirt.jugador_display && (
               <div className="field-row">
                 <span className="field-label">Jugador</span>
-                <span className="field-value">{shirt.jugador_display}</span>
+                <span className="field-value">{optionalTermValue(shirt.jugador_display)}</span>
               </div>
             )}
             {shirt.numero_dorsal && (

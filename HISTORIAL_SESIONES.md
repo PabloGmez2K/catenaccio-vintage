@@ -2286,3 +2286,29 @@ Validacion: typecheck PASS, lint PASS, build PASS (9 rutas), `git diff --check` 
 
 **Siguiente:** Pablo prueba una ficha afectada con `Rehidratar desde Woo` y una vinculacion nueva: condicion/marca/medidas deben aparecer si Woo las trae; SEO manual debe mostrar descripcion Woo como base; fotos Woo deben verse y poder importarse a Studio sin duplicar.
 **agent_events ref:** 2026-07-04T18:52:00Z (WOO_TO_STUDIO_LINK_HYDRATION_FIX_V3)
+
+---
+
+## Sesion STUDIO_WOO_SYNC_CONTRACT
+
+**Fecha:** 2026-07-04/05
+**Agente:** Claude Code (Fable 5)
+**Modo:** FOUNDATION_ARCHITECTURE_AND_CODE / HIGH_AUTONOMY / CODE_ALLOWED / LOCAL_ONLY / CONTROLLED_EXTERNAL_WRITE_DESIGN / NO_DEPLOY / NO_PUSH
+**Resultado:** DONE local — pendiente `PABLO_WOO_SYNC_CONTRACT_OK`
+
+Pablo redefine el enfoque: basta de parchear la hidratacion Woo->Studio campo a campo (V1/V2/V3); Studio debe tener una capa canonica de sincronizacion. Se implementa `studio/lib/inventory/woo-studio-sync-contract.ts` como fuente unica de verdad del mapeo Woo <-> Studio:
+
+- **Taxonomias**: las 7 reales de la tienda (pa_talla=1, pa_condicion=2, pa_marca=3, pa_equipo=4, pa_liga=5, pa_jugador=6, pa_ano=7) con attr ID, meta key ACF, formato (term_id / term_id_array / string) y campos Studio destino. Resolucion unica por ID -> slug -> nombre, con reglas de precedencia (meta string humano gana a residuo numerico; "38" literal antes que term ID 38) y garantia de que ningun ID numerico se muestra como texto humano.
+- **Meta/ACF**: medida_axila->ancho_cm, medida_largo->largo_cm, defectos->condicion_notas (nuevo), patrocinador/sponsor->sponsor (preparado), descripcion_del_producto reconocida como duplicado del description raiz.
+- **No mapeados**: atributos y meta Woo sin destino se recogen estructuradamente (unmappedAttributes/unmappedMeta), visibles en el panel y persistidos en snapshot. rank_math_* agrupado; claves `_` (refs ACF) excluidas.
+- **Rehidratacion**: politica unica y pura `buildRehydrationDetailPatch` (compartida por vincular y rehidratar) — rellena solo vacios/placeholders/IDs crudos, nunca pisa manuales; notas sin duplicacion entre versiones.
+- **Readiness Studio->Woo**: declarativo — precio/stock/descripcion/papelera = sync ahora (writes controlados existentes); titulo/talla/condicion/medidas/defectos/categoria = solo comparacion (PUT meta fuera de whitelist); equipo/temporada/liga/jugador = mapping inverso; marca = decision de producto; fotos = media sync futuro; publicar/despublicar = bloqueado por diseno.
+
+Integracion: hidratacion v4 sobre el contrato; cache `wc_terms` ampliada a las 7 taxonomias sin SQL (best-effort end-to-end, criticas primero); `actions.ts` resuelve marca contra pa_marca; ficha detalle calcula la extraccion viva y muestra medidas/marca siempre; `ItemForm` inyecta talla/condicion importadas como opcion del select (cierre de la paridad resumen<->editar: antes un valor Woo fuera de la lista canonica renderizaba el select vacio y se perdia al guardar); `WooSyncPanel` suma tabla «Campos de catalogo Studio<->Web», seccion de datos sin mapear y contrato de readiness; «alineados» exige diff operativo Y catalogo limpios.
+
+Critico fresco adversarial (subagente independiente, mision «demuestra que sigue siendo inconsistente o peligroso», se corto por limite de uso y se reanudo): **VEREDICTO LIMPIO — 0 blockers**, 11 reglas de casa verificadas con evidencia file:line. 8 notas: N1 alineados vs catalogo (corregida), N2 precedencia numerica (corregida), N4 mascara legacy liga/jugador (corregida), N5a parametro muerto (corregido), N6 orden de sync critico-primero + opcionales best-effort (corregida), N7 nota talla duplicada (corregida), N8 coste placeholder en rehydrate de ficha manual (corregida), N3/N5b-c ambiguedad residual documentada en el doc del contrato.
+
+Validacion: typecheck PASS, lint PASS, build PASS (9 rutas), `git diff --check` PASS, secret scan CLEAN. **0 Woo writes ejecutados por el agente**; sin writes nuevos implementados (whitelist write-client intacta); sin SQL (la ampliacion de cache no lo requiere); sin Supabase remoto tocado por agente; sin `.env.local`; sin deploy; sin push.
+
+**Siguiente:** Pablo re-ejecuta el sync de taxonomias desde Studio (puebla pa_talla/pa_condicion/pa_marca), prueba una ficha vinculada (tabla de campos de catalogo, Rehidratar desde Woo, editar con condicion importada visible en el select) y vincula un producto nuevo desde Auditoria web; confirma `PABLO_WOO_SYNC_CONTRACT_OK`. Despues, por friccion real: whitelist PUT de meta ACF con preview (cierra talla/condicion/medidas/defectos) o S030 drift.
+**agent_events ref:** 2026-07-05T (STUDIO_WOO_SYNC_CONTRACT)
