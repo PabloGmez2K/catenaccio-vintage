@@ -2339,3 +2339,21 @@ Validacion: typecheck PASS, lint PASS, build PASS (9 rutas), `git diff --check` 
 
 **Siguiente:** Pablo ejecuta «Sincronizar taxonomias Woo» desde Auditoria web (puebla pa_talla/pa_condicion/pa_marca), abre una ficha vinculada, pulsa Editar y verifica: precio web editable en «Precio y coste», condicion importada seleccionada, marca con explicacion, SEO con descripcion Woo como base, acceso a fotos; guarda y confirma que la ficha muestra lo mismo. Confirma `PABLO_OPERATIVE_EDIT_OK`.
 **agent_events ref:** 2026-07-05T (STUDIO_OPERATIVE_EDIT_SURFACE_AND_SYNC_UI_FIX)
+
+---
+
+## Sesion STUDIO_WOO_SYNC_RETRO_AND_NEXT_BLOCK_DOCS
+
+**Fecha:** 2026-07-05
+**Agente:** Codex
+**Modo:** DOCS_ONLY / CLOSE_AND_RETRO / NO_CODE / NO_DEPLOY / NO_PUSH / NO_WOO_WRITE
+**Resultado:** DONE
+
+Se cerro documentalmente el bloque largo de Studio Woo Sync tras el commit local `530cc3e` (`fix(studio): operative edit surface -- taxonomy sync UI, commercial price block, SEO inside edit, explainable brand, photo access`). Estado verificado al inicio: `main...origin/main [ahead 7]`, working tree limpio, sin push, sin deploy y sin writes a Woo ejecutados en esta sesion.
+
+Documentado: retro del coste de tokens y del cambio de barra de DONE desde "mapear Woo" hacia escenarios operativos reales (`abrir ficha -> editar precio -> editar descripcion -> guardar -> ver diff -> sincronizar Woo`); nuevo blocker `STUDIO_PRODUCT_DESCRIPTION_EDITOR_WP_PARITY`; brief del siguiente bloque con paridad WordPress/Woo (`description`/`post_content`, `short_description`/`post_excerpt`, HTML limpio, prompt ChatGPT/Claude, diff y sync controlado). Se actualizo BACKLOG, CONTEXTO, ledger y `SESSION_LEARNING_TRANSFER_QUEUE.md`.
+
+Validacion: `git diff --check` PASS; `agent_events.jsonl` valido; no se modifico codigo de `studio/`; no se tocaron Woo, Supabase, Vercel, deploy ni push.
+
+**Siguiente:** abrir `STUDIO_PRODUCT_DESCRIPTION_EDITOR_WP_PARITY` como bloque de producto/operabilidad antes de seguir con sync generico o MVP gate.
+**agent_events ref:** 2026-07-05T15:00:00Z (STUDIO_WOO_SYNC_RETRO_AND_NEXT_BLOCK_DOCS)

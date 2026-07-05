@@ -288,3 +288,27 @@ precios, pedidos, proveedores sensibles). Solo señales saneadas. Ver `DATA_AND_
 - privacy_level: INTERNAL_ONLY
 - Estado: CANDIDATE
 - Siguiente accion: Si Pablo confirma PABLO_WOO_WRITE_SYNC_OK sin rework, promover `EXTERNAL_WRITE_FOUNDATION_PATTERN` y `ADVERSARIAL_REVIEWER_BEFORE_USER` a patrones lafabrica.
+
+---
+
+### SLT-012 — DONE bar operativo y paridad con el sistema real antes de UI grande
+
+- Fecha: 2026-07-05
+- Proyecto: catenaccio-vintage
+- Sesion/bloque: STUDIO_WOO_SYNC_RETRO_AND_NEXT_BLOCK_DOCS
+- project_value: Cierra documentalmente el bloque largo de Studio Woo Sync y convierte el siguiente blocker en un brief accionable: `STUDIO_PRODUCT_DESCRIPTION_EDITOR_WP_PARITY`. Evita seguir gastando tokens en mappers correctos pero superficies operativas incompletas.
+- lafabrica:
+  - `OPERATIVE_SCENARIO_DONE_BAR`: en backoffices que integran un sistema vivo, definir DONE como flujo usuario-real (`abrir ficha -> editar -> guardar -> ver diff -> sincronizar -> ver log`), no como lista de componentes o campos mapeados.
+  - `REAL_SYSTEM_PARITY_GATE`: si el canal real es WordPress/WooCommerce, la UI interna debe nombrar y modelar los campos como el sistema real (`description`, `short_description`, precio, stock), salvo decision explicita. No esconder campos en paneles SEO, notas internas o nombres de roadmap.
+  - `SINGLE_OPERATIVE_SURFACE`: evitar dividir la operacion entre Inventario/Catalogo web si el operador piensa en "una ficha"; auditoria puede existir, pero la accion cotidiana debe vivir en la ficha.
+- brain:
+  - evidence: Retro saneada de un bloque complejo Studio <-> Woo donde el criterio de exito paso de integracion tecnica a operabilidad real con paridad WP Admin.
+  - skills: Traduccion de friccion del owner en brief de producto, guardrails de UX operativa y reduccion de coste de tokens por mejor definicion de DONE.
+  - service_angle: Diseno de backoffices/PIM que respetan el modelo mental del sistema legacy y reducen doble trabajo operador.
+  - content_angle: "Un mapper correcto no es una feature lista: define el DONE como la accion que hace el operador".
+  - portfolio_asset: Caso Catenaccio Studio: de Woo sync tecnico a editor de producto con paridad WordPress.
+- future_product: Checklist reusable para bloques de sync bidireccional en backoffices: campo activo externo, draft local, contenido aprobado, diff, confirmacion y log.
+- no_copy: Inventario real, precios reales, URLs privadas de admin, credenciales, datos de productos concretos.
+- privacy_level: INTERNAL_ONLY
+- Estado: CANDIDATE
+- Siguiente accion: Reusar en `STUDIO_PRODUCT_DESCRIPTION_EDITOR_WP_PARITY`; si evita otro bucle de microfixes, promover a patron lafabrica.

@@ -185,6 +185,20 @@ Registro de caminos conocidos por tipo de tarea recurrente. No es el historial (
 
 ---
 
+## STUDIO_OPERATIVE_SCENARIO_DONE_BAR — Definir DONE por flujo real, no por mapper
+
+- **Aplica a:** bloques de Studio que integran datos con WooCommerce y prometen operabilidad para Pablo (editar ficha, sincronizar, ventas, stock, descripcion, precio, fotos).
+- **Camino conocido:** (1) antes de CODE, escribir el flujo usuario-completo con verbos operativos (`abrir ficha -> editar campo -> guardar -> ver diff -> confirmar sync -> ver log`); (2) separar dato activo Woo, draft local Studio y contenido aprobado; (3) mapear nombres reales de Woo/WordPress (`description`, `short_description`, precio, stock) en vez de inventar paneles internos; (4) exigir que resumen, editar y panel de sync muestren el mismo dato; (5) cerrar con prueba de flujo real por Pablo o Antigravity, no solo con build/lint.
+- **Callejones sin salida:** perseguir "mapear Woo" como objetivo abstracto; esconder datos operativos en notas internas; poner campos comerciales dentro de paneles SEO; dividir Inventario/Catalogo web de forma que el operador no sepa donde actuar; cerrar una UI grande sin escenarios operativos escritos.
+- **Pitfalls:** una base tecnica puede estar limpia y aun asi no ser usable si el campo vive fuera de Editar o con un nombre distinto al que Pablo reconoce en WordPress; la paridad debe ser `resumen = editar = sync panel`.
+- **Cadena/agente recomendado:** Opus/Fable para definir bloque amplio + DONE bar cuando haya ambiguedad de producto; Sonnet para patch; Antigravity para validacion visual/operativa; Codex para cierre docs-only y checks deterministas.
+- **Ref ganadora:** `docs/studio/STUDIO_WOO_SYNC_RETRO_2026-07-05.md`, `docs/studio/STUDIO_PRODUCT_DESCRIPTION_EDITOR_WP_PARITY_BRIEF.md`, `docs/studio/STUDIO_WOO_SYNC_CONTRACT.md`.
+- **Historia:** 2026-07-04/05: hidratacion campo a campo -> contrato canonico -> fix de operabilidad. El nuevo blocker de Pablo (`STUDIO_PRODUCT_DESCRIPTION_EDITOR_WP_PARITY`) confirma que la barra real es operar una ficha Woo como en WP Admin, no tener un mapper correcto.
+- **Estado:** PROVISIONAL
+- **Actualizado:** 2026-07-05 — STUDIO_WOO_SYNC_RETRO_AND_NEXT_BLOCK_DOCS
+
+---
+
 ## Historial del Ledger
 
 | Fecha | Cambio |
