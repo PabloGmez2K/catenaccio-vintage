@@ -61,8 +61,9 @@ precios, pedidos, proveedores sensibles). Solo señales saneadas. Ver `DATA_AND_
 - future_product: No aplica
 - no_copy: Token cPanel API, credenciales de acceso, rutas de servidor, datos del hosting de Catenaccio.
 - privacy_level: INTERNAL_ONLY
-- Estado: CANDIDATE
-- Siguiente acción: Validar el patrón con la migración A0 completa (Sesiones 014-RELEASE). Si RELEASE exitoso → promover a PUBLIC_SAFE y transferir a lafabrica.
+- Estado: IMPORTED_TO_BOTH
+- Traza: 2026-07-11 → Brain + lafabrica como señal saneada INTERNAL_ONLY; no implica promoción a PUBLIC_SAFE.
+- Siguiente acción: Mantener el gate de validación antes de publicar el patrón.
 
 ---
 
@@ -105,8 +106,9 @@ precios, pedidos, proveedores sensibles). Solo señales saneadas. Ver `DATA_AND_
 - future_product: No aplica
 - no_copy: Token cPanel API real, credenciales del hosting, rutas internas del servidor, datos de Catenaccio.
 - privacy_level: INTERNAL_ONLY
-- Estado: CANDIDATE
-- Siguiente acción: El patrón es candidato a lafabrica solo después de validar el shadow release completo (A0 RELEASE exitoso).
+- Estado: IMPORTED_TO_BOTH
+- Traza: 2026-07-11 → Brain + lafabrica como señal saneada INTERNAL_ONLY; sin rutas ni datos de hosting.
+- Siguiente acción: Mantener el gate de validación antes de elevarlo a patrón público.
 
 ---
 
@@ -192,8 +194,9 @@ precios, pedidos, proveedores sensibles). Solo señales saneadas. Ver `DATA_AND_
 - future_product: Modulo reusable de knowledge graph ligero para verticales con taxonomias ricas, conectado a landings y agentes de analisis.
 - no_copy: Inventario real, estrategia comercial privada, oportunidades de compra/venta concretas, precios privados, datos de clientes, credenciales.
 - privacy_level: INTERNAL_ONLY
-- Estado: CANDIDATE
-- Siguiente accion: Reabrir en S028 LANDING_ARCHITECTURE; no implementar ni mezclar con S023C.
+- Estado: IMPORTED_TO_BOTH
+- Traza: 2026-07-11 → Brain + lafabrica como oportunidad saneada INTERNAL_ONLY.
+- Siguiente accion: Reabrir en el bloque de producto correspondiente; no implica implementación.
 
 ---
 
@@ -213,8 +216,9 @@ precios, pedidos, proveedores sensibles). Solo señales saneadas. Ver `DATA_AND_
 - future_product: Modulo reusable de prompt generation tools y taxonomy universe manager para verticales con taxonomias ricas.
 - no_copy: Datos reales de inventario, oportunidades comerciales concretas, precios privados, clientes, credenciales, URLs privadas de admin.
 - privacy_level: INTERNAL_ONLY
-- Estado: CANDIDATE
-- Siguiente accion: Reabrir tras S023D/S023E o en S028 LANDING_ARCHITECTURE; no implementar en el flujo critico actual.
+- Estado: IMPORTED_TO_BOTH
+- Traza: 2026-07-11 → Brain + lafabrica como patrón de prompt tools sin API prematura.
+- Siguiente accion: Reabrir fuera del flujo crítico; no implica implementación.
 
 ---
 
@@ -238,8 +242,9 @@ precios, pedidos, proveedores sensibles). Solo señales saneadas. Ver `DATA_AND_
 - future_product: Modulo reusable de media pipeline (upload directo + optimizacion + attach a canal) y checklist `VISUAL_UX_DONE_GATE` para cualquier vertical con backoffice visual.
 - no_copy: Imagenes/fotos reales de inventario, credenciales Supabase/Woo, URLs privadas de Storage/admin, precios, clientes, datos de camisetas concretas.
 - privacy_level: INTERNAL_ONLY
-- Estado: CANDIDATE
-- Siguiente accion: Validar `MEDIA_UPLOAD_BROWSER_TO_STORAGE` y `VISUAL_UX_DONE_GATE` en un segundo flujo visual (deploy de Studio o segunda pantalla). Si se repiten, promover a PATTERN en lafabrica y anotar skills en el Brain con `DIRECT_BRAIN_WRITE_ALLOWED`.
+- Estado: IMPORTED_TO_BOTH
+- Traza: 2026-07-11 → Brain + lafabrica como señal INTERNAL_ONLY; segunda validación sigue pendiente para promoción estable.
+- Siguiente accion: Validar en un segundo flujo antes de elevar a patrón estable.
 
 ---
 
@@ -262,8 +267,9 @@ precios, pedidos, proveedores sensibles). Solo señales saneadas. Ver `DATA_AND_
 - future_product: Modulo reusable de "channel mirror" read-only (catalogo externo + linking + review queue) para cualquier vertical con tienda + marketplaces manuales.
 - no_copy: Inventario real, precios de venta reales, margenes, URLs privadas, credenciales.
 - privacy_level: INTERNAL_ONLY
-- Estado: CANDIDATE
-- Siguiente accion: Validar el patron de mision amplia en una segunda sesion Fable; si el slice pasa PABLO_STOCK_MANAGER_FOUNDATION_OK sin bucle de rework, promover `HIGH_AUTONOMY_MISSION_PROMPT` a patron lafabrica.
+- Estado: IMPORTED_TO_BOTH
+- Traza: 2026-07-11 → Brain + lafabrica como señal INTERNAL_ONLY de schema-first, read-only-first y misión amplia.
+- Siguiente accion: La promoción estable sigue condicionada a segunda validación.
 
 ---
 
@@ -286,8 +292,9 @@ precios, pedidos, proveedores sensibles). Solo señales saneadas. Ver `DATA_AND_
 - future_product: Plantilla reusable de "controlled external write layer" (whitelist + preview/confirm + mirror + event log) para cualquier integracion SaaS.
 - no_copy: Credenciales, IDs de productos reales mas alla del veto documentado, precios reales.
 - privacy_level: INTERNAL_ONLY
-- Estado: CANDIDATE
-- Siguiente accion: Si Pablo confirma PABLO_WOO_WRITE_SYNC_OK sin rework, promover `EXTERNAL_WRITE_FOUNDATION_PATTERN` y `ADVERSARIAL_REVIEWER_BEFORE_USER` a patrones lafabrica.
+- Estado: IMPORTED_TO_BOTH
+- Traza: 2026-07-11 → Brain + lafabrica como señal INTERNAL_ONLY de recovery, controlled writes y revisión adversarial.
+- Siguiente accion: Mantener el gate humano antes de promoción estable.
 
 ---
 
@@ -310,5 +317,6 @@ precios, pedidos, proveedores sensibles). Solo señales saneadas. Ver `DATA_AND_
 - future_product: Checklist reusable para bloques de sync bidireccional en backoffices: campo activo externo, draft local, contenido aprobado, diff, confirmacion y log.
 - no_copy: Inventario real, precios reales, URLs privadas de admin, credenciales, datos de productos concretos.
 - privacy_level: INTERNAL_ONLY
-- Estado: CANDIDATE
-- Siguiente accion: Reusar en `STUDIO_PRODUCT_DESCRIPTION_EDITOR_WP_PARITY`; si evita otro bucle de microfixes, promover a patron lafabrica.
+- Estado: IMPORTED_TO_BOTH
+- Traza: 2026-07-11 → Brain + lafabrica como señal INTERNAL_ONLY de DONE operativo y paridad con sistema real.
+- Siguiente accion: Reusar y validar antes de promoción estable.
