@@ -2357,3 +2357,27 @@ Validacion: `git diff --check` PASS; `agent_events.jsonl` valido; no se modifico
 
 **Siguiente:** abrir `STUDIO_PRODUCT_DESCRIPTION_EDITOR_WP_PARITY` como bloque de producto/operabilidad antes de seguir con sync generico o MVP gate.
 **agent_events ref:** 2026-07-05T15:00:00Z (STUDIO_WOO_SYNC_RETRO_AND_NEXT_BLOCK_DOCS)
+
+---
+
+## CATENACCIO_MR014_ADOPTION_APPLY — 2026-09-02 (Claude Code Sonnet)
+
+**Modo:** DOCS_ONLY / A2 APPLY_LOCAL. **Resultado:** COMPLETED.
+
+Migro el sistema operativo documental de Catenaccio Vintage de su declaracion MR-003 (bootstrap 2026-06-26) a MR-014, siguiendo el modelo `AUDIT -> PLAN -> APPLY` de `CHILD_PROJECT_ADOPTION_MODEL.md` de lafabrica (verificado en `https://github.com/PabloGmez2K/lafabrica` SHA `7c1c8bb133f50caa0772b5f5d813c9e01764234f`, coincide con expected main). Handshake previo: remote main == local main == HEAD del worktree == BASELINE_HEAD (`d32cfe64189cf5b12cb5e50abcaa6152056fd664`), worktree CLEAN, branch `PabloGmez2K/lafabrica-orca-reactivation` correcto; `wip/s025a-readonly-console` intacta y no tocada; no existe `catenaccio-history-reconcile`.
+
+**Que se hizo:**
+- **ORCHESTRATOR.md** — nuevos §22-§33 por delta (no reemplazo): REMOTE_VIEW/LOCAL_VIEW/BASELINE_HEAD en apertura, lectura por capas, comprobacion consciente antes de reabrir decisiones cerradas, PERSIST_BEFORE_DELEGATE, handoff remoto minimo (5 campos), grilling proporcional, contrato Outcome-First (ASSIGNMENT/OUTCOME/DONE_BAR/NON_GOALS/AUTONOMY/HOUSE_RULES/VERIFY_PLAN/STOP_LOSS/CLOSE_MODE), niveles A0-A3, stop-loss R0-R3 + SIMPLIFY_REPLAN, reglas MR-011/MR-012 (git read-only != commit/push, memoria asistiva no autoritativa, trackers solo si cambia el estado), CHECK de MR-008 instalado como bloque gestionado `LAFABRICA:BEGIN/END MR008_UPDATE_CHECK` (read-only), y ORCA EXECUTION SURFACE (contrato LOCAL: worktree=outcome, un solo modificador, `main` canonico, gate `READY_TO_ARCHIVE_IN_ORCA`).
+- **AGENTS.md** — cold-start por capas, preflight PATTERN-16 REPOSITORY_GROUNDED_PREFLIGHT (IMPACT/BASELINE_HEAD/NORMATIVE_STATE con CONFLICTS->STOP_FOR_OWNER_DECISION), ASSIGNMENT+DECISIONS_ALREADY_CLOSED, referencia a niveles A0-A3/R0-R3, frontera de escrituras externas PATTERN-14+MR-012.6 (`risk_live: YES` sin autorizar runtime nuevo), recuperacion del Ledger por disparador antes de busqueda amplia (MR-014.1), solucion suficiente, context delta only, reglas Orca outcome-owned, reemplazo de la linea legacy "New Worktree solo para trabajo paralelo..." por el modelo outcome-owned, y checklist explicito de guardrails preservados (PABLO_VISUAL_OK, TEST B, UI_DESIGN_GATE, guardia Woo por estado, STOP_AND_MODEL_DOMAIN, freeze storefront).
+- **CLAUDE.md** — creado (23 lineas, <=30): adaptador minimo que apunta a PROJECT_BOOTSTRAP.md -> AGENTS.md -> routing, sin duplicar metodologia.
+- **docs/meta/AGENT_EXPERIENCE_LEDGER.md** — nueva capa de recuperacion por disparador en lenguaje natural (MR-014.1 RETRIEVABLE_EXPERIENCE) con definicion estricta de `CONFIRMED_BY_REUSE`; sin aprendizaje historico borrado.
+- **docs/meta/SESSION_LEARNING_TRANSFER_QUEUE.md** — +SLT-013 `ORCA_OUTCOME_OWNED_WORKTREE_LIFECYCLE` y +SLT-014 `LAYERED_COLD_START_IN_LEGACY_REPO`, ambas `CANDIDATE`, sin evidencia cruzada Radar/Bijuymoda fabricada (se declaro explicitamente su ausencia).
+- **docs/meta/LAFABRICA_ADOPTION.md** — reemplazada la declaracion completa: `lafabrica_release_base`/`lafabrica_release_current_seen` = MR-014, `pending_critical: none` (se elimino el falso pendiente de PATTERN-08 heredado del bootstrap MR-003 — el gate ya existia en AGENTS.md desde 2026-06-24), cobertura canonica completa de **53 change_id** MR-004..MR-014 (mas reclasificacion PATTERN-07/08/09 de MR-002) con disposicion explicita cada uno (ADOPTED / ALREADY_EQUIVALENT / DONE_WITH_PROJECT_SPECIFIC_IMPLEMENTATION / NOT_YET_NEEDED / NOT_APPLICABLE / DEFER_WITH_GATE — ninguno PENDING). PATTERN-14 y MR-012.6 declarados `risk_live: YES` (Studio tiene escritura real hacia Woo bajo `SHADOW_FIRST`) sin autorizar ninguna escritura nueva. MR-013.1 en `DEFER_WITH_GATE`: no se crea `ACTIVE_DECISION_STATE.md` en esta migracion (decision de owner ya cerrada); trigger = primer `REJECTED` durable real que necesite `reopen_if`.
+
+**Que se valido:** `git status --short` (solo el scope aprobado modificado); `git diff --check` PASS; `PROJECT_BOOTSTRAP.md`/`DESIGN.md`/`DECISIONS.md` byte-identicos al baseline (sin diff); marcadores `LAFABRICA:BEGIN`/`LAFABRICA:END` unicos y balanceados; terminos criticos (`PABLO_VISUAL_OK`, `PRODUCTION_ONLY_VALIDATION`, `TEST B`, `SHADOW_FIRST`, `DOMAIN_PRODUCT_MODELING_GATE`, `STOP_AND_REPLAN`, `UI_DESIGN_GATE`, `BASELINE_HEAD`, `REMOTE_VIEW`, `DONE_BAR`, `STOP_LOSS`, `A0`, `A3`) sobreviven en ORCHESTRATOR.md/AGENTS.md; `docs/meta/ACTIVE_CONTEXT_PACK.md` y `docs/meta/ACTIVE_DECISION_STATE.md` confirmados ausentes; ningun otro archivo de la lista DO_NOT_CREATE existe.
+
+**Que NO se toco:** `studio/**`, `catenaccio-a0-child/**`, WordPress/WooCommerce runtime, Vercel, Supabase, hosting, DB, `.env*`, `DESIGN.md`, `DECISIONS.md`, `PROJECT_BOOTSTRAP.md`, `wip/s025a-readonly-console`, safety tags. Ninguna llamada API externa de escritura. Sin deploy. **Sin push.**
+
+**Siguiente:** revisar en la proxima reactivacion o cuando lafabrica publique una release posterior a MR-014 (ver §32 CHECK). Validar SLT-013/SLT-014 con una segunda sesion Orca real antes de proponer promocion a patron estable.
+
+**agent_events ref:** 2026-09-02T00:00:00Z (CATENACCIO_MR014_ADOPTION_APPLY)

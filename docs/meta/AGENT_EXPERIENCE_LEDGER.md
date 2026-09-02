@@ -199,9 +199,41 @@ Registro de caminos conocidos por tipo de tarea recurrente. No es el historial (
 
 ---
 
+## Capa de recuperación (MR-014.1 — RETRIEVABLE_EXPERIENCE, extensión de PATTERN-06)
+
+Antes de una búsqueda amplia sobre un bug, incidente o tarea recurrente, consultar esta tabla por
+el disparador en lenguaje natural más cercano a la tarea. Si hay match, recuperar la entrada
+correspondiente arriba en este archivo y reusarla como primer intento — no partir de cero.
+
+| Disparador en lenguaje natural | Qué recuperar |
+|---|---|
+| "editar/tocar el tema hijo de WordPress", "cambiar style.css/functions.php" | `CSS_THEME_CHILD` |
+| "subir cambios al servidor sin SSH", "sync de tema/plugin", "deploy sombra" | `SHADOW_RELEASE_WORDPRESS` |
+| "probar la API de WooCommerce", "primer acceso a WC REST" | `WC_API_READONLY_PROBE` |
+| "qué templates usan Elementor Pro", "auditar dependencias de Elementor antes de migrar" | `ELEMENTOR_DEPENDENCY_AUDIT` |
+| "email de confirmación de pedido", "activación de cuenta", "recuperación de contraseña" | `WC_EMAIL_FLOW` |
+| "hook de WooCommerce", "woocommerce_created_customer", "detectar si un pedido es de invitado" | `WOOCOMMERCE_HOOK_PATCH` |
+| "subir imágenes/archivos en Studio", "pipeline de fotos de producto" | `MEDIA_UPLOAD_BROWSER_TO_STORAGE_PATTERN` |
+| "¿esto ya está DONE si build/lint pasan?", "cerrar una feature con UI visible" | `VISUAL_UX_NOT_DONE_UNTIL_USER_FEELS_IT`, `STUDIO_MVP_FEATURE_DONE_GATE` |
+| "escribir hacia WooCommerce desde Studio bajo flag", "attach de imágenes al borrador Woo" | `SHADOW_FIRST_WOO_ATTACH_PATTERN` |
+| "¿necesito validación visual de Antigravity aquí?" | `ANTIGRAVITY_VISUAL_VALIDATION_GATE` |
+| "definir DONE para un flujo que integra con Woo/WP real" | `STUDIO_OPERATIVE_SCENARIO_DONE_BAR` |
+
+**CONFIRMED_BY_REUSE (estricto):** una entrada solo pasa de `PROVISIONAL` a `CONFIRMED_BY_REUSE`
+cuando se cumplen las tres condiciones en la misma tarea: (1) se recuperó del Ledger antes de
+buscar de otra forma, (2) se reusó el camino documentado como primer intento, (3) la tarea se
+completó con éxito siguiendo ese camino. "Parece que aplicó" no es suficiente — actualizar el
+campo `Estado` y `Actualizado` de la entrada solo tras verificar las tres condiciones.
+
+Este archivo sigue siendo un índice por tipo de tarea, no un historial de sesiones — no añadir
+entradas cronológicas aquí; eso vive en `HISTORIAL_SESIONES.md`.
+
+---
+
 ## Historial del Ledger
 
 | Fecha | Cambio |
 |-------|--------|
 | 2026-06-24 | Creado. Sesión 014 (meta-alineación). 4 entradas de tareas pasadas + 2 placeholders para flujos futuros de email y hooks WC. |
 | 2026-07-01 | Day-close S025/S026. +5 entradas: MEDIA_UPLOAD_BROWSER_TO_STORAGE_PATTERN, VISUAL_UX_NOT_DONE_UNTIL_USER_FEELS_IT, SHADOW_FIRST_WOO_ATTACH_PATTERN, ANTIGRAVITY_VISUAL_VALIDATION_GATE, STUDIO_MVP_FEATURE_DONE_GATE (todas PROVISIONAL). Incluye protocolo de prompt visual y objetivo de velocidad por bloque MVP. |
+| 2026-09-02 | MR-014 ADOPTION_APPLY. +Capa de recuperación por disparador (MR-014.1 RETRIEVABLE_EXPERIENCE) y definición estricta de `CONFIRMED_BY_REUSE`. Sin entradas de sesión nuevas. |

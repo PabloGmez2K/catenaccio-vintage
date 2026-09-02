@@ -460,6 +460,234 @@ Guardrails del dominio.
 
 ---
 
+## §22 — REMOTE_VIEW / LOCAL_VIEW / BASELINE_HEAD en apertura de sesión
+
+Toda sesión operativa (no `CHAT_CLOSE`, no consulta simple) abre con:
+
+```
+REMOTE_VIEW:
+  status: VERIFIED | PARTIAL | UNAVAILABLE
+  remote_head: <hash verificado o UNKNOWN>
+
+LOCAL_VIEW:
+  local_head: <hash>
+  worktree: CLEAN | DIRTY
+  relation_to_remote_view: SAME | LOCAL_AHEAD | LOCAL_BEHIND | DIVERGED | UNKNOWN
+
+BASELINE_HEAD: <local_head congelado — la baseline aprobada de esta sesión>
+```
+
+`BASELINE_HEAD` nunca es el HEAD que avanza con los propios commits de la sesión: se congela al
+abrir y sirve de referencia para el diff final. Sin `remote_head` verificado, la relación es
+`UNKNOWN` — no se asume `SAME`. Ver `PROJECT_BOOTSTRAP.md` para el handshake mínimo completo.
+
+---
+
+## §23 — Lectura por capas (no CONTEXTO/HISTORIAL completo por defecto)
+
+La lectura mínima de §1 sigue vigente (`CONTEXTO.md`, `BACKLOG.md`, últimas 2-3 entradas de
+`HISTORIAL_SESIONES.md`). Regla adicional: nunca leer `HISTORIAL_SESIONES.md` completo ni
+`CONTEXTO.md` completo por defecto. Si una tarea necesita contexto anterior específico, buscarlo
+por trigger en `docs/meta/AGENT_EXPERIENCE_LEDGER.md` (ver capa de recuperación, §L1) antes de
+abrir un archivo grande completo. Leer más allá de lo proporcional requiere justificación explícita
+en el prompt.
+
+---
+
+## §24 — Comprobación consciente antes de reabrir una decisión cerrada
+
+Antes de reabrir una línea que el repo marca como cerrada (DECISIONS.md, notas de cierre en
+CONTEXTO.md, disposición ya asignada en `docs/meta/LAFABRICA_ADOPTION.md`), comprobar
+explícitamente si existe una decisión ya tomada sobre eso. Si existe, no volver a preguntarla:
+aplicarla y, si hace falta, declarar por qué este bloque la reabre. Esto no crea un registro nuevo
+de estado decisorio — ver §31 sobre `MR-013.1`/`LOCAL_OVERRIDE_APPROVED`.
+
+---
+
+## §25 — PERSIST_BEFORE_DELEGATE
+
+Antes de delegar una tarea a un agente distinto o a una sesión remota, persistir en el repo lo que
+ese agente necesita para no depender de memoria transmitida: estado relevante en `CONTEXTO.md`
+(append), alcance exacto y cualquier decisión ya cerrada. Delegar sin persistir primero obliga al
+agente delegado a reconstruir contexto por transmisión conversacional, que es más caro y más frágil
+que leerlo del repo.
+
+---
+
+## §26 — Handoff remoto mínimo
+
+Cuando una sesión debe entregarse a otra (otro agente, otra ventana, otro día), el handoff se limita
+a cinco campos:
+
+```
+LOCAL_VIEW: <estado git actual>
+EXACT_SCOPE: <qué se tocó, nada más>
+SEMANTIC_DELTA: <qué cambió de verdad, no una lista de archivos>
+VALIDATION: <qué se verificó y qué no>
+RECOMMENDATION: <siguiente paso concreto>
+```
+
+No repetir contexto que ya vive en el repo. Si el receptor necesita más, debe leerlo del repo, no
+recibirlo pegado en el handoff.
+
+---
+
+## §27 — Grilling proporcional
+
+Los hechos se investigan (leer repo, código, logs); las decisiones se preguntan al operador. No
+mezclar ambas categorías en una sola pregunta. Cuando hace falta preguntar, una pregunta a la vez —
+no acumular una lista de preguntas para una sola respuesta del operador. Esto reduce la carga
+cognitiva de decidir varias cosas a la vez y hace explícito qué es hecho verificable y qué es
+decisión de negocio.
+
+---
+
+## §28 — Outcome-First contract
+
+Todo prompt de agente con riesgo medio/alto sigue esta estructura, adaptada de forma proporcional
+para bloques `LITE`:
+
+```
+ASSIGNMENT      — qué se pide, en una línea
+OUTCOME         — qué cambia en el mundo si esto sale bien
+DONE_BAR        — criterio binario de cierre
+NON_GOALS       — qué NO se va a hacer en este bloque
+AUTONOMY        — nivel A0-A3 concedido (ver §29)
+HOUSE_RULES     — guardrails del proyecto que aplican a esta tarea
+VERIFY_PLAN     — cómo se comprueba antes de cerrar
+STOP_LOSS       — cuándo parar aunque no esté completo (ver §30)
+CLOSE_MODE      — LITE / NORMAL / FULL (§4)
+```
+
+`DECISIONS_ALREADY_CLOSED` se incluye cuando aplica: decisiones del operador que no deben
+reabrirse durante la ejecución de este prompt (ver §24).
+
+Builder / Verifier / Closer son **responsabilidades**, no sesiones obligatorias separadas: pueden
+recaer en el mismo agente/sesión salvo que el riesgo, la autorización, el entregable o una petición
+explícita exijan separarlas. La evidencia de cierre es proporcional al `DONE_BAR` declarado — no se
+exige más verificación de la que el bloque pide. Solución suficiente: cerrar al pasar el `DONE_BAR`,
+no seguir puliendo más allá de lo pedido.
+
+---
+
+## §29 — Niveles de autonomía A0-A3
+
+| Nivel | Significado |
+|---|---|
+| `A0` | Solo lectura / diagnóstico. No modifica nada. |
+| `A1` | Modifica archivos locales del hijo. No toca superficies externas (WordPress/Woo/hosting). |
+| `A2` | `A1` + puede crear commits locales. No push, no deploy, no escritura externa. |
+| `A3` | `A2` + autorización explícita para push, deploy o escritura en sistemas externos (Woo/WP/hosting) — requiere nombrar la superficie exacta en el prompt. |
+
+`A3` nunca es el default. Cada prompt declara el nivel concedido explícitamente.
+
+---
+
+## §30 — Stop-loss R0-R3
+
+| Nivel | Significado |
+|---|---|
+| `R0` | Sin incidencia. Progreso normal. |
+| `R1` | Incidencia técnica normal dentro del bloque — se resuelve sin cambiar el alcance ni pedir autorización nueva. |
+| `R2` | El approach falla dos veces sin avance verificable — cambiar de método o superficie antes de un tercer intento equivalente (ver PATTERN-07/`STOP_AND_REPLAN` en AGENTS.md). |
+| `R3` | Bloqueante que requiere decisión del operador — parar y reportar, no seguir intentando. |
+
+`SIMPLIFY_REPLAN`: si la sesión deriva sin progreso (código más complejo con cada intento, mismo
+síntoma repetido), simplificar el approach al discriminador más estable disponible antes de seguir
+añadiendo lógica.
+
+---
+
+## §31 — Reglas operativas heredadas de MR-011/MR-012
+
+- **Git read-only ≠ autorización de commit/push.** Leer el repo (`git status`, `git log`, `git
+  diff`) nunca implica permiso para commitear o pushear. Cada uno se autoriza por separado según el
+  nivel de autonomía (§29).
+- **Memoria asistiva nunca autoritativa.** Cualquier memoria de sesión anterior (engram, notas,
+  recuerdos del agente) es asistiva: orienta dónde mirar, pero el repo y el remoto verificado son
+  la evidencia. Ante conflicto, gana el repo.
+- **Trackers solo cambian si su estado cambió realmente.** No tocar `BACKLOG.md`,
+  `HISTORIAL_SESIONES.md` ni `docs/meta/LAFABRICA_ADOPTION.md` como acto reflejo de cierre — solo
+  si algo en ellos dejó de ser cierto.
+- **Solución suficiente.** Cerrar un bloque al pasar su `DONE_BAR`, no seguir puliendo. No microfix
+  recursivo: una incidencia que no cambia la frontera del bloque se resuelve dentro del bloque, no
+  abre uno nuevo.
+- **Context-delta-only en continuaciones vivas.** Al continuar una sesión ya abierta, transmitir
+  solo lo que cambió desde el último mensaje — no repetir contexto ya establecido.
+
+Sobre `MR-013.1` (estado decisorio activo / `ACTIVE_DECISION_STATE.md`): Catenaccio sí incorpora
+consciencia decisoria en este documento; lo que **no se crea** es el archivo dedicado
+`ACTIVE_DECISION_STATE.md`. Disposición: `LOCAL_OVERRIDE_APPROVED` (Owner Decision A) — es una
+variante local aprobada, no `DEFERRED`, y no queda adopción pendiente. El archivo dedicado se crea
+únicamente cuando exista el primer `REJECTED` durable real que necesite `reopen_if`. Hasta entonces,
+la comprobación consciente de decisiones (§24) cubre el mismo espíritu sin el registro dedicado.
+
+---
+
+## §32 — CHECK de actualización metodológica (MR-008, read-only)
+
+<!-- LAFABRICA:BEGIN MR008_UPDATE_CHECK MR-014 -->
+
+Capa canónica `CHECK -> NOTIFY -> REVIEW -> INSTALL -> VERIFY` de
+`LAFABRICA_UPDATE_NOTIFICATION_PROTOCOL.md`, cableada en modo read-only:
+
+- Como máximo un `CHECK` por sesión operativa o de reactivación. No obligatorio en `CHAT_CLOSE` ni
+  en consultas simples.
+- `CHECK` compara `lafabrica_release_base` (declarado en `docs/meta/LAFABRICA_ADOPTION.md`) contra
+  la release actual del Release Ledger de lafabrica (`LAFABRICA_RELEASE_PROTOCOL.md` §11).
+- Resultado de `CHECK` (`tracking_status`, `delta_status`, `primary_notification`,
+  `release_current_observed`, `risk_live`, `activation_prerequisite`, `blocking_scope`) es
+  **efímero**: se calcula en la sesión y no se persiste automáticamente. Persistirlo requiere un
+  `APPLY` autorizado que actualice explícitamente los campos durables de
+  `docs/meta/LAFABRICA_ADOPTION.md`.
+- `CHECK` **nunca concede** `A2`/`A3` por sí mismo. Es puramente informativo.
+- Si `CHECK` detecta un cambio `CRITICAL` con `risk_live: true` no adoptado, se notifica al
+  operador; no se ejecuta ninguna acción sin autorización explícita (ver §29, §10 de
+  `LAFABRICA_RELEASE_PROTOCOL.md`).
+
+<!-- LAFABRICA:END MR008_UPDATE_CHECK -->
+
+---
+
+## §33 — ORCA EXECUTION SURFACE (contrato LOCAL — no metodología canónica de lafabrica)
+
+Este contrato regula cómo se usan worktrees/branches de Orca en Catenaccio. Es local: no forma
+parte de ninguna release `MR-NNN` de lafabrica, y no debe copiarse a otros proyectos como si lo
+fuera.
+
+- **Un outcome coherente = un worktree.** El worktree pertenece al outcome (el resultado que se
+  persigue), no al agente que lo abrió.
+- **Agentes secuenciales pueden compartir un worktree** mientras `OUTCOME`, `RISK` y `AUTONOMY`
+  (nivel A0-A3, §29) no cambien entre ellos. Si cualquiera de los tres cambia, es un outcome nuevo
+  y requiere su propio worktree o una re-apertura explícita.
+- **Un solo modificador a la vez** sobre un worktree — nunca dos agentes escribiendo en paralelo
+  sobre el mismo árbol de trabajo.
+- **`main` es canónico.** El flujo normal es: implementación → Verifier → promoción controlada →
+  lectura de vuelta del remoto (`remote read-back`) → sync a `main` → cleanup/archive del worktree.
+- **`REMOTE_VIEW` ≠ upstream local.** El tracking branch local no prueba el estado del remoto —
+  solo un `git ls-remote`/`fetch` verificado lo hace (ver §22).
+- **Nunca eliminar** un worktree o branch que tenga trabajo exclusivo sin promover primero.
+- **Evitar `git stash` desnudo** — el stash es compartido entre todos los worktrees del repo y otra
+  sesión puede estar usándolo. Preferir un commit `WIP` cuando haga falta apartar trabajo.
+- **El agente no elimina su propio worktree.** El cleanup es una decisión separada del cierre de la
+  tarea.
+
+### READY_TO_ARCHIVE_IN_ORCA (gate de limpieza)
+
+Un worktree solo se marca listo para archivar cuando **todas** estas condiciones se cumplen:
+
+```
+[ ] CLEAN — sin cambios sin commitear
+[ ] remote read-back PASS — el remoto refleja lo promovido
+[ ] main contiene el trabajo promovido
+[ ] no hay commits exclusivos del worktree sin promover
+[ ] no hay untracked relevante
+```
+
+Si falta cualquiera, el worktree permanece activo — no se archiva ni se elimina.
+
+---
+
 ## Historial de cambios de este documento
 
 | Fecha | Cambio | Quién |
@@ -469,3 +697,4 @@ Guardrails del dominio.
 | 2026-06-24 | §19 — reglas RULE-01 a RULE-05, DEC-PABLO-01 a DEC-PABLO-03 absorbidas del Operating Brain; patrones PATTERN-05 a 09 de lafabrica; equivalencias PrestaShop→WooCommerce; referencia al AGENT_EXPERIENCE_LEDGER | Claude Code (Sonnet) |
 | 2026-06-28 | §20 — DOMAIN_PRODUCT_MODELING_GATE para formularios/product UI tras aprendizaje S022A | Codex |
 | 2026-07-03 | §21 — UI_DESIGN_GATE: leer DESIGN.md antes de cualquier tarea de UI; detalle en AGENTS.md | Claude Code (Sonnet) |
+| 2026-09-02 | §22-§33 — Adopción MR-014 (delta desde MR-003): REMOTE_VIEW/LOCAL_VIEW/BASELINE_HEAD, lectura por capas, comprobación de decisiones cerradas, PERSIST_BEFORE_DELEGATE, handoff remoto mínimo, grilling proporcional, contrato Outcome-First, A0-A3/R0-R3, reglas MR-011/MR-012, CHECK de MR-008 (managed block read-only), ORCA EXECUTION SURFACE local. Ver `docs/meta/LAFABRICA_ADOPTION.md` para cobertura completa de change_id. | Claude Code (Sonnet) |

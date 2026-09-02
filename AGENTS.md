@@ -29,6 +29,20 @@ El prompt específico para cada superficie está en `prompts/`. Para Antigravity
 
 ---
 
+## Cold-start por capas
+
+Al abrir una sesión de agente, cargar en este orden y no más:
+
+```
+PROJECT_BOOTSTRAP.md -> AGENTS.md -> routing activado (superficie elegida en la tabla de arriba) -> documentos de la tarea concreta
+```
+
+No leer documentos de otra superficie ni metodología completa de lafabrica "por si acaso". Si la
+tarea necesita más contexto del que el prompt trae, parar y pedir al orquestador que lo reformule
+(regla ya existente abajo, "Lectura mínima al inicio de sesión").
+
+---
+
 ## Lectura mínima al inicio de sesión
 
 Leer en este orden. No leer más de lo necesario:
@@ -192,7 +206,7 @@ Al usar la superficie Antigravity para integraciones web o manipulación de UI, 
 - **Project + Local:** Usa el mismo Project de origen y tu entorno local para trabajo secuencial.
 - **Bloque cerrado:** Inicia una nueva conversación solo por cada bloque operativo cerrado.
 - **Iteración:** Usa la misma conversación para corrección, validación y cierre de ese bloque. No abras sesiones nuevas para microcorrecciones.
-- **New Worktree:** Usa directorios paralelos (New Worktree) solo para trabajo paralelo o ramas experimentales.
+- **Worktree por outcome:** un worktree pertenece al outcome que persigue, no a la superficie de agente que lo abrió. Usalo para cualquier outcome coherente que necesite su propio árbol de trabajo — no solo para "trabajo paralelo o ramas experimentales". Agentes secuenciales (Antigravity, Sonnet, Codex) pueden compartir el mismo worktree mientras trabajen sobre el mismo outcome, con el mismo riesgo y el mismo nivel de autonomía (ver ORCHESTRATOR.md §33). Si alguno de los tres cambia, abrí un worktree nuevo en vez de reusar el actual.
 - **Implementación y validación:** Utiliza el IDE para la implementación local, el terminal para scripts, y la UI del navegador para validaciones visuales obligatorias.
 
 ---
@@ -235,6 +249,138 @@ Los archivos brutos de la Controlled Intake Folder no se copian directamente al 
 
 **Ramas `wip/*-rejected` para experimentos fallidos si procede.**
 Si se inicia una línea de implementación que no funciona y no vale la pena continuar, crear una rama `wip/<descripción>-rejected` con el trabajo experimental antes de descartarla. Esto evita perder el contexto del intento fallido si se quiere revisar más tarde.
+
+---
+
+## Preflight fundamentado en repo — PATTERN-16 REPOSITORY_GROUNDED_PREFLIGHT
+
+Antes de escribir, el agente deriva su estado de partida del propio repositorio — no de lo que
+recuerda de sesiones anteriores. Tres sujetos exactos:
+
+**IMPACT** — qué superficies reales toca esta tarea (archivos, sistemas externos, runtime).
+Determinado leyendo el repo, no asumido desde el prompt.
+
+**BASELINE / BASELINE_HEAD** — el estado aprobado desde el que se parte. `BASELINE_HEAD` es el
+`local_head` congelado al abrir sesión (ver ORCHESTRATOR.md §22). Restaurar algo "a un estado que
+se recuerda bueno" sin comprobar `BASELINE_HEAD` puede borrar en silencio capacidades aprobadas
+después de ese estado.
+
+**NORMATIVE_STATE** — cómo se relaciona esta tarea con la norma vigente del repo:
+
+- `EXTENDS` — añade sin contradecir ninguna regla existente.
+- `SUPERSEDES` — reemplaza una regla anterior explícitamente (debe declararse cuál).
+- `CONFLICTS` — contradice una regla vigente sin resolverla → **`STOP_FOR_OWNER_DECISION`**. No se
+  resuelve por iniciativa del agente.
+
+No se mantienen registros manuales aparte de owners, capacidades aprobadas o normas — el repo es la
+única fuente; un registro paralelo llevado a mano queda prohibido por este mismo patrón.
+
+---
+
+## ASSIGNMENT + DECISIONS_ALREADY_CLOSED
+
+Todo prompt de tarea trae como mínimo un `ASSIGNMENT` (qué se pide, en una línea) y, cuando
+aplica, un bloque `DECISIONS_ALREADY_CLOSED` con las decisiones del operador que no se deben
+reabrir durante la ejecución (ver ORCHESTRATOR.md §24, §28). El agente no vuelve a preguntar algo
+que ya está en `DECISIONS_ALREADY_CLOSED`.
+
+---
+
+## Niveles de autonomía y de riesgo
+
+Ver ORCHESTRATOR.md §29 (`A0`-`A3`) y §30 (`R0`-`R3`). Resumen operativo para el agente:
+
+- Nunca asumir un nivel de autonomía mayor al declarado explícitamente en el prompt.
+- `git status`/`git log`/`git diff` (lectura) no requieren ningún nivel — son siempre permitidos.
+  Commitear ya requiere `A2`; pushear o escribir en un sistema externo requiere `A3` con la
+  superficie nombrada explícitamente.
+- Ante `R2` (mismo síntoma, dos intentos sin avance), cambiar de método o superficie antes de un
+  tercer intento — no seguir insistiendo con el mismo approach.
+
+---
+
+## Frontera de escrituras externas — PATTERN-14 + MR-012.6
+
+Catenaccio tiene superficies reales de escritura externa activa en Studio (integración WooCommerce
+— ver `SHADOW_FIRST_WOO_ATTACH_PATTERN` y `WOO_WRITE_SYNC_FOUNDATION_WITH_FABLE_ULTRACODE` en
+`docs/meta/AGENT_EXPERIENCE_LEDGER.md`). **`risk_live: YES`.** Esto no autoriza ninguna escritura
+nueva ni cambia el runtime — es una declaración de que el riesgo ya existe y debe respetarse:
+
+- Cualquier escritura hacia Woo, Vercel o Supabase necesita autoridad explícita en el prompt (nivel
+  `A3` + superficie nombrada), sin excepción, incluso si la tarea "solo" toca código adyacente.
+- Toda capa de escritura externa sigue la disciplina ya operativa en Studio: módulo único de
+  escritura con whitelist reconstruida campo a campo (nunca passthrough del payload), relectura
+  fresca antes de escribir, distinción entre fallo de lectura previa y fallo de escritura real, y
+  log de evento por cada acción.
+- Ante `STOP_LOSS` (ORCHESTRATOR.md §30) durante una tarea que ya inició una escritura externa,
+  retorno inmediato — no seguir intentando variantes de la misma escritura sin nueva autorización.
+- Validar cualquier propuesta de patch sobre la frontera causal real (qué estado externo cambia),
+  no sobre la intención declarada del patch.
+
+No confundir esto con permiso de lectura: `AUDIT`/discovery read-only sobre Woo (WP Admin, WC
+Status, WC REST API en modo lectura) sigue sin requerir `A3`.
+
+---
+
+## Recuperación del AGENT_EXPERIENCE_LEDGER antes de búsqueda amplia — MR-014.1 RETRIEVABLE_EXPERIENCE
+
+Antes de abrir una búsqueda amplia sobre un bug, incidente o tarea recurrente, consultar primero
+`docs/meta/AGENT_EXPERIENCE_LEDGER.md` por el disparador en lenguaje natural que mejor describe la
+tarea (ver la capa de recuperación al final de ese archivo). Si hay una entrada aplicable:
+
+1. Recuperar el camino conocido documentado.
+2. Reusarlo como primer intento.
+3. Si funciona, marcar la entrada como `CONFIRMED_BY_REUSE` al cerrar (no basta con "parece que
+   aplicó" — el criterio es recuperar → reusar → completar con éxito).
+
+Un aprendizaje escrito en el Ledger pero nunca recuperado en una tarea real no cuenta como adopción
+válida del patrón — la cosecha es proporcional al cierre real, no automática.
+
+---
+
+## Solución suficiente — no microfix recursivo
+
+Cerrar una tarea al pasar su `DONE_BAR`, no seguir puliendo más allá de lo pedido. Si aparece una
+incidencia menor que no cambia la frontera del bloque (mismo archivo, mismo alcance, sin nueva
+superficie tocada), resolverla dentro del bloque actual. Si cambia la frontera (nuevo archivo fuera
+de scope, nueva superficie externa, nueva decisión de producto), no resolverla por iniciativa
+propia — reportar y pedir alcance nuevo.
+
+---
+
+## Context delta only
+
+Al continuar una sesión ya abierta con el mismo agente, transmitir solo lo que cambió desde el
+último mensaje — no repetir el estado completo del repo, del prompt original ni de decisiones ya
+confirmadas.
+
+---
+
+## Reglas Orca outcome-owned
+
+Ver ORCHESTRATOR.md §33 (ORCA EXECUTION SURFACE) para el contrato completo. Resumen para el agente
+implementador:
+
+- El worktree en el que trabajás pertenece al outcome de la tarea, no a vos como agente. Si el
+  outcome, el riesgo o el nivel de autonomía cambian, es una tarea nueva — no sigas escribiendo en
+  el mismo worktree sin confirmar que sigue aplicando.
+- No sos el único posible modificador de ese worktree — no asumas que nadie más lo va a tocar en
+  paralelo.
+- No elimines tu propio worktree ni tu propia branch al cerrar, aunque el trabajo esté promovido.
+  El cleanup es una decisión separada (ver `READY_TO_ARCHIVE_IN_ORCA` en ORCHESTRATOR.md §33).
+- Si necesitás apartar trabajo temporalmente, preferí un commit `WIP` a un `git stash` desnudo — el
+  stash es compartido entre worktrees y otra sesión puede estar usándolo.
+
+---
+
+## Guardrails preservados sin cambio (verificación explícita, MR-014)
+
+Este delta no modifica ni debilita: `PABLO_VISUAL_OK` (RULE-02, ORCHESTRATOR.md §19), `TEST B`
+(DEC-PABLO-02), `UI_DESIGN_GATE` (ver "Guardrails del dominio" arriba), el guardia de estado
+WooCommerce por objeto (PATTERN-09, "WooCommerce hooks — usar estado del objeto"),
+`STOP_AND_MODEL_DOMAIN` / `DOMAIN_PRODUCT_MODELING_GATE` ("Catenaccio Studio — formularios/product
+UI"), ni el freeze del storefront (`catenaccio-a0-child/` congelado/diferido salvo instrucción
+explícita, "UI DESIGN GATE").
 
 ---
 

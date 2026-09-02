@@ -320,3 +320,81 @@ precios, pedidos, proveedores sensibles). Solo señales saneadas. Ver `DATA_AND_
 - Estado: IMPORTED_TO_BOTH
 - Traza: 2026-07-11 → Brain + lafabrica como señal INTERNAL_ONLY de DONE operativo y paridad con sistema real.
 - Siguiente accion: Reusar y validar antes de promoción estable.
+
+---
+
+### SLT-013 — ORCA_OUTCOME_OWNED_WORKTREE_LIFECYCLE
+
+- Fecha: 2026-09-02
+- Proyecto: catenaccio-vintage
+- Sesión/bloque: CATENACCIO_MR014_ADOPTION_APPLY
+- project_value: Formaliza como contrato local (ORCHESTRATOR.md §33) el ciclo de vida de worktrees
+  Orca ya en uso en este repo (`lafabrica-orca-reactivation` como worktree activo, `main` en
+  `C:/Projects/catenaccio-vintage`, `wip/s025a-readonly-console` como worktree exclusivo intacto):
+  el worktree pertenece al outcome, no al agente; agentes secuenciales pueden compartirlo mientras
+  OUTCOME/RISK/AUTONOMY no cambien; un solo modificador a la vez; nunca eliminar worktree/branch con
+  trabajo exclusivo; preferir commit WIP sobre stash desnudo (el stash es compartido entre
+  worktrees); gate `READY_TO_ARCHIVE_IN_ORCA` antes de archivar.
+- lafabrica: Patrón candidato para cualquier hijo que use múltiples worktrees Orca en paralelo —
+  generaliza el criterio de "cuándo compartir un worktree entre agentes" vs. "cuándo abrir uno
+  nuevo" y el gate de limpieza antes de archivar/eliminar.
+- brain:
+  - evidence: Handshake explícito verificado en esta sesión (remote main == local main == worktree
+    HEAD == BASELINE_HEAD, worktree CLEAN, branch correcto) antes de escribir, con inventario de
+    todos los worktrees/branches del repo (incluyendo uno ajeno intacto) antes de tocar nada.
+  - skills: Gobernanza de árboles de trabajo git concurrentes en un repo con múltiples sesiones de
+    agente activas simultáneamente.
+  - service_angle: No aplica.
+  - content_angle: "Un worktree por outcome, no por agente: cómo evitar que dos sesiones de Claude
+    Code pisen el mismo árbol de trabajo".
+  - portfolio_asset: No aplica.
+- future_product: No aplica.
+- no_copy: Rutas locales reales del filesystem del operador, nombres de branches de trabajo en
+  curso no relacionados con este bloque.
+- privacy_level: INTERNAL_ONLY
+- Estado: CANDIDATE
+- Siguiente acción: Validar en una segunda sesión Orca real de Catenaccio (o de otro hijo, si
+  aplica) antes de proponer promoción a patrón estable en lafabrica. Nota de reuso: no se encontró
+  evidencia directa de este patrón ya validado en Radar o Bijuymoda en los documentos locales de
+  este repo — el único precedente cruzado disponible localmente es la promoción de PATTERN-11 (GSC
+  connector) validada en Bijuymoda Suite S102 (ver SLT-002), que es un patrón distinto. No fabricar
+  evidencia cruzada adicional; verificar directamente en esos repos si se decide promoverlo.
+
+---
+
+### SLT-014 — LAYERED_COLD_START_IN_LEGACY_REPO
+
+- Fecha: 2026-09-02
+- Proyecto: catenaccio-vintage
+- Sesión/bloque: CATENACCIO_MR014_ADOPTION_APPLY
+- project_value: Confirma en un repo legacy (bootstrap MR-003, sin bloques gestionados hasta esta
+  sesión) que el cold-start por capas —`PROJECT_BOOTSTRAP.md -> AGENTS.md -> routing -> documentos
+  de tarea`— evita releer `CONTEXTO.md`/`HISTORIAL_SESIONES.md` completos y en su lugar dirige la
+  recuperación de contexto vía disparadores de `AGENT_EXPERIENCE_LEDGER.md` (capa MR-014.1) y el
+  Change Index de lafabrica en vez de memoria del agente.
+- lafabrica: Patrón candidato: en una migración de adopción sobre un hijo legacy sin bloques
+  gestionados, el primer bloque de lectura debe ser exactamente PROJECT_BOOTSTRAP → AGENTS →
+  routing/documentos de la tarea — nunca ORCHESTRATOR/AGENTS completos de memoria ni HISTORIAL
+  completo — y la reconciliación de `change_id` debe copiarse literalmente del Change Index
+  (`MR-014.3`), nunca reinterpretarse desde una versión recordada de una release anterior.
+- brain:
+  - evidence: Migración de una declaración de adopción MR-003 (2026-06-26) a MR-014 (2026-09-02)
+    con cobertura canónica completa de 53 change_id, sin releer los ~470 líneas de ORCHESTRATOR.md
+    ni los ~250 de AGENTS.md más de lo necesario para el diff, y sin asumir contenido de releases
+    intermedias (MR-004..MR-013) sin verificarlas contra el repo fuente en el SHA exacto.
+  - skills: Reconciliación de metodología versionada contra un repo legacy sin registro previo de
+    bloques gestionados; lectura proporcional en repos con historial largo.
+  - service_angle: No aplica.
+  - content_angle: "Migrar 11 releases metodológicas de una sola vez sin leer el historial
+    completo: cold-start por capas en un repo legacy".
+  - portfolio_asset: No aplica.
+- future_product: No aplica.
+- no_copy: Contenido literal de ORCHESTRATOR.md/AGENTS.md de Catenaccio (son locales, no
+  generalizables sin sanear), cualquier dato comercial o de dominio E-commerce específico.
+- privacy_level: INTERNAL_ONLY
+- Estado: CANDIDATE
+- Siguiente acción: Validar en la próxima migración de adopción de un hijo legacy con gap de
+  releases similar (varias MR-NNN de diferencia) antes de proponer promoción a patrón estable. Nota
+  de reuso: sin evidencia cruzada de Radar/Bijuymoda disponible en los documentos locales de este
+  repo para este patrón específico (distinto del caso GSC de SLT-002); no fabricar una referencia
+  que no está documentada aquí.
